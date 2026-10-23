@@ -199,7 +199,7 @@
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Status
                             <select id="task-filter-status" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium"></select>
                         </label>
-                        <button onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Beri penugasan baru</button>
+                        <button id="btn-add-task" onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Beri penugasan baru</button>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -222,7 +222,7 @@
                         <button onclick="importLastWeek()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-file-arrow-down"></i> Isi proker minggu lalu</button>
                         <button onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-calendar-plus"></i> Tambah proker minggu depan</button>
                         <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah proker</button>
-                        <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-paper-plane"></i> Lapor Musyrif</button>
+                        <div id="proker-lapor-container"></div>
                     </div>
                 </div>
 
@@ -257,7 +257,7 @@
                         <h3 class="text-lg font-bold">Master program kepanitiaan</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat dan rencana induk kegiatan kepanitiaan.</p>
                     </div>
-                    <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Buat agenda kegiatan baru</button>
+                    <button id="btn-add-panitia" onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Buat agenda kegiatan baru</button>
                 </div>
                 <div id="panitia-cards-container" class="grid grid-cols-1 gap-6"></div>
             </section>
@@ -470,8 +470,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const today = () => new Date().toLocaleDateString('sv-SE');
 const userName = () => currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Pengguna';
-const userRole = () => currentUser?.user_metadata?.role || 'member';
+const userRole = () => (currentUser?.user_metadata?.role || 'member').toLowerCase();
+const isAdmin = () => userRole() === 'admin';
 const isMusyrifOrAdmin = () => ['musyrif', 'admin'].includes(userRole());
+
 const list = col => [...store[col]].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 const emptyRow = (cols, text) => `<tr><td colspan="${cols}" class="p-4 text-center text-xs text-gray-400">${text}</td></tr>`;
 const bagianOptions = (withAll, allLabel = 'Semua bagian') =>
@@ -639,7 +641,7 @@ async function handleLogout() { await sb.auth.signOut(); }
 
 function renderSidebarUserInfo() {
     const name = userName();
-    const role = userRole().toLowerCase();
+    const role = userRole();
     $('sidebar-username').textContent = name;
     $('sidebar-useremail').textContent = currentUser?.email || '';
     $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
@@ -801,6 +803,9 @@ function initCountdown() {
 
 /* ---------- 2. PENUGASAN ---------- */
 function renderPenugasanPage() {
+    const canManage = isMusyrifOrAdmin();
+    $('btn-add-task').style.display = canManage ? 'inline-flex' : 'none';
+
     const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
     const rows = list('tasks').filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
     $('tasks-table-body').innerHTML = rows.length ? rows.map(t => `
@@ -812,12 +817,17 @@ function renderPenugasanPage() {
             <td class="p-4"><select onchange="setTaskStatus('${t.id}', this.value)" aria-label="Status tugas" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
-            <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>`).join('') : emptyRow(7, 'Belum ada penugasan. Klik “Beri penugasan baru” untuk memulai.');
+            <td class="p-4 text-right">${canManage ? `<button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '-'}</td>
+        </tr>`).join('') : emptyRow(7, 'Belum ada penugasan.');
 }
-function openTaskModal() { $('task-input-bagian').innerHTML = bagianOptions(false); openModal('modal-task'); }
+function openTaskModal() {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat memberi penugasan.', 'err');
+    $('task-input-bagian').innerHTML = bagianOptions(false);
+    openModal('modal-task');
+}
 async function saveTask(e) {
     e.preventDefault();
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const t = {
         id: uid('t'), title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
         bagian: $('task-input-bagian').value, deadline: $('task-input-deadline').value,
@@ -837,7 +847,10 @@ function showTaskLog(id) {
     $('modal-log-list').innerHTML = (t.history || []).map(h => `<li class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-xs">${esc(h)}</li>`).join('') || '<li class="text-xs text-gray-400">Belum ada riwayat.</li>';
     openModal('modal-log');
 }
-async function deleteTask(id) { if (confirm('Hapus penugasan ini?')) await remove('tasks', id); }
+async function deleteTask(id) {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus tugas.', 'err');
+    if (confirm('Hapus penugasan ini?')) await remove('tasks', id);
+}
 
 /* ---------- 3. PROGRAM KERJA ---------- */
 let textCallback = null;
@@ -858,6 +871,22 @@ function renderProkerPage() {
     const current = items.filter(p => !p.isFutureOnly);
     const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
     const canAcc = isMusyrifOrAdmin();
+
+    // Notifikasi & Tombol Lapor
+    const unreportedCount = store.proker.filter(p => p.bagian === bag && !p.reported && !p.isFutureOnly).length;
+    const pendingAccCount = store.proker.filter(p => p.bagian === bag && p.reported && !p.accMusyrif).length;
+
+    let laporHtml = '';
+    if (isMusyrifOrAdmin()) {
+        laporHtml = `<div class="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-amber-300 dark:border-amber-700">
+            <i class="fa-solid fa-bell text-amber-600"></i> ${pendingAccCount} Laporan Menunggu ACC
+        </div>`;
+    } else {
+        laporHtml = `<button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif (${unreportedCount})
+        </button>`;
+    }
+    $('proker-lapor-container').innerHTML = laporHtml;
 
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
         <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
@@ -948,6 +977,9 @@ async function importLastWeek() {
 
 /* ---------- 4. KEPANITIAAN ---------- */
 function renderPanitiaPage() {
+    const canManage = isMusyrifOrAdmin();
+    $('btn-add-panitia').style.display = canManage ? 'inline-flex' : 'none';
+
     const events = list('panitia').sort((a, b) => a.tanggal.localeCompare(b.tanggal));
     $('panitia-cards-container').innerHTML = events.length ? events.map(k => {
         const jobs = k.joblists || [];
@@ -957,32 +989,43 @@ function renderPanitiaPage() {
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0"><h4 class="font-bold text-lg">${esc(k.nama)}</h4><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
                 <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div></div>
-                <button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                ${canManage ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <div class="flex items-center justify-between mb-2"><h5 class="text-sm font-semibold">Pembagian tugas (${jobs.filter(j => j.done).length}/${jobs.length} selesai)</h5>
-                <button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline"><i class="fa-solid fa-plus"></i> Tambah tugas</button></div>
+                ${canManage ? `<button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline"><i class="fa-solid fa-plus"></i> Tambah tugas</button>` : ''}</div>
                 <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
                     <li class="flex items-center gap-2 text-xs">
-                        <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600">
+                        <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600 cursor-pointer">
                         <span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-semibold">${esc(j.bagian)}</span>
                         <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
-                        <button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+                        ${canManage ? `<button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                     </li>`).join('') : '<li class="text-xs text-gray-400">Belum ada pembagian tugas.</li>'}</ul>
             </div></div>`;
-    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda. Klik “Buat agenda kegiatan baru”.</div>';
+    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda.</div>';
 }
-function openPanitiaModal() { openModal('modal-panitia'); }
+function openPanitiaModal() {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menambah agenda.', 'err');
+    openModal('modal-panitia');
+}
 async function savePanitia(e) {
     e.preventDefault();
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const k = { id: uid('k'), nama: $('panitia-input-nama').value.trim(), deskripsi: $('panitia-input-deskripsi').value.trim(), tanggal: $('panitia-input-tanggal').value, joblists: [], createdAt: Date.now() };
     closeModal('modal-panitia'); e.target.reset();
     await save('panitia', k);
 }
-async function deletePanitia(id) { if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id); }
-function openJobModal(kid) { $('job-panitia-id').value = kid; $('job-input-bagian').innerHTML = bagianOptions(false); openModal('modal-job'); }
+async function deletePanitia(id) {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus agenda.', 'err');
+    if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id);
+}
+function openJobModal(kid) {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menambah pembagian tugas.', 'err');
+    $('job-panitia-id').value = kid; $('job-input-bagian').innerHTML = bagianOptions(false); openModal('modal-job');
+}
 async function saveJob(e) {
     e.preventDefault();
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const k = store.panitia.find(x => x.id === $('job-panitia-id').value); if (!k) return;
     const job = { id: uid('j'), bagian: $('job-input-bagian').value, task: $('job-input-task').value.trim(), done: false };
     closeModal('modal-job'); e.target.reset();
@@ -993,6 +1036,7 @@ async function toggleJob(kid, jid) {
     await save('panitia', { ...k, joblists: k.joblists.map(j => j.id === jid ? { ...j, done: !j.done } : j) });
 }
 async function deleteJob(kid, jid) {
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const k = store.panitia.find(x => x.id === kid); if (!k) return;
     await save('panitia', { ...k, joblists: k.joblists.filter(j => j.id !== jid) });
 }
@@ -1048,7 +1092,7 @@ function renderNotulensiFileList() {
 async function deleteNotulensi(id) {
     const f = store.notulensi.find(x => x.id === id); if (!f || !confirm(`Hapus file “${f.name}”?`)) return;
     const archived = store.reports.some(r => (r.notulensiFiles || []).some(x => x.path === f.path));
-    if (!archived && f.path) await sb.storage.from(BUCKET).remove([f.path]); // file yang sudah diarsipkan tetap disimpan
+    if (!archived && f.path) await sb.storage.from(BUCKET).remove([f.path]);
     await remove('notulensi', id);
 }
 
@@ -1080,6 +1124,7 @@ function downloadRekapExcel() {
 
 /* ---------- 7. LAPORAN ---------- */
 function renderLaporanPage() {
+    const canDelete = isAdmin();
     const reports = [...list('reports')].reverse();
     $('laporan-container').innerHTML = reports.length ? reports.map(r => {
         const rows = (r.prokerData || []).map(p => `<tr><td class="p-2 font-bold">${esc(p.bagian)}</td><td class="p-2">${esc(p.title)}</td>
@@ -1090,7 +1135,7 @@ function renderLaporanPage() {
         return `<details class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <summary class="cursor-pointer flex items-center justify-between gap-3">
                 <span><span class="font-bold text-lg">${esc(r.title)}</span><span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span></span>
-                <button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                ${canDelete ? `<button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
             </summary>
             <div class="mt-4 space-y-3">
                 <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[700px]">
@@ -1100,7 +1145,10 @@ function renderLaporanPage() {
             </div></details>`;
     }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada arsip. Simpan hasil rapat dari menu Rapat Mingguan.</div>';
 }
-async function deleteReport(id) { if (confirm('Hapus arsip laporan ini?')) await remove('reports', id); }
+async function deleteReport(id) {
+    if (!isAdmin()) return toast('Hanya Admin yang dapat menghapus arsip laporan.', 'err');
+    if (confirm('Hapus arsip laporan ini?')) await remove('reports', id);
+}
 
 /* =====================================================================
    IMPOR DATA LAMA (localStorage -> server), sekali jalan
