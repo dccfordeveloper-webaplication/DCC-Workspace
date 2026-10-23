@@ -289,7 +289,7 @@
                     </div>
                 </section>
 
-                <!-- 3. PROGRAM KERJA (Symmetric Layout & Auto Evaluasi to Proker Mendatang Sync) -->
+                <!-- 3. PROGRAM KERJA (Fixed Evaluasi Auto Sync to Proker Mendatang) -->
                 <section id="page-proker" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
@@ -372,7 +372,7 @@
                     </div>
                 </section>
 
-                <!-- 5. RAPAT MINGGUAN (Perfect Synchronized with Proker Logic Rules) -->
+                <!-- 5. RAPAT MINGGUAN -->
                 <section id="page-rapat" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -450,7 +450,7 @@
                     </div>
                 </section>
 
-                <!-- 7. LAPORAN (Scroll Container & Edit / Delete Archive Features) -->
+                <!-- 7. LAPORAN (No Review Button & Real File Download Function) -->
                 <section id="page-laporan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -461,7 +461,7 @@
                     <div id="laporan-container" class="space-y-6 max-h-[75vh] overflow-y-auto pr-1"></div>
                 </section>
 
-                <!-- 8. ROOMCHAT (With Edit, Copy, Reply, Delete, Attachments & Varied Emoji Features) -->
+                <!-- 8. ROOMCHAT -->
                 <section id="page-roomchat" class="page-content h-[calc(100vh-6rem)] hidden flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
@@ -476,7 +476,6 @@
                     <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]">
                     </div>
 
-                    <!-- Reply & Attachment Indicator Banner -->
                     <div id="chat-reply-banner" class="hidden px-4 py-2 bg-blue-50 dark:bg-blue-950/60 border-t border-blue-200 dark:border-blue-800 flex items-center justify-between text-xs">
                         <div class="flex items-center space-x-2 truncate">
                             <i class="fa-solid fa-reply text-blue-600"></i>
@@ -495,7 +494,6 @@
                         <button onclick="cancelAttachmentChat()" class="text-gray-400 hover:text-red-500 font-bold ml-2">×</button>
                     </div>
 
-                    <!-- Varied Emoji Picker -->
                     <div id="emoji-picker" class="hidden p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 grid grid-cols-10 gap-2 text-xl max-h-40 overflow-y-auto shadow-inner">
                         <button onclick="addEmoji('😊')">😊</button><button onclick="addEmoji('😂')">😂</button><button onclick="addEmoji('👍')">👍</button><button onclick="addEmoji('❤️')">❤️</button><button onclick="addEmoji('🙏')">🙏</button><button onclick="addEmoji('🔥')">🔥</button><button onclick="addEmoji('🎉')">🎉</button><button onclick="addEmoji('✅')">✅</button><button onclick="addEmoji('🙌')">🙌</button><button onclick="addEmoji('👏')">👏</button>
                         <button onclick="addEmoji('💡')">💡</button><button onclick="addEmoji('🚀')">🚀</button><button onclick="addEmoji('📌')">📌</button><button onclick="addEmoji('⚠️')">⚠️</button><button onclick="addEmoji('💪')">💪</button><button onclick="addEmoji('😎')">😎</button><button onclick="addEmoji('🤔')">🤔</button><button onclick="addEmoji('🤝')">🤝</button><button onclick="addEmoji('📝')">📝</button><button onclick="addEmoji('✨')">✨</button>
@@ -543,28 +541,6 @@
     </div>
 
     <!-- MODALS -->
-    <!-- Modal Preview PDF Notulensi -->
-    <div id="modal-preview-pdf" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl p-5 space-y-4 flex flex-col h-[85vh]">
-            <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
-                <h3 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-file-pdf text-rose-500 text-lg"></i> Preview Document Notulensi (PDF Viewer)
-                </h3>
-                <button onclick="closeModal('modal-preview-pdf')" class="text-gray-400 hover:text-rose-500 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="flex-1 bg-gray-100 dark:bg-gray-900 rounded-lg p-4 flex flex-col items-center justify-center border text-center space-y-3">
-                <i class="fa-solid fa-file-pdf text-5xl text-rose-500 animate-pulse"></i>
-                <div>
-                    <p id="pdf-preview-filename" class="font-bold text-sm text-gray-800 dark:text-gray-200">Dokumen_Notulensi.pdf</p>
-                    <p class="text-xs text-gray-400 mt-1">Pratinjau mode PDF viewer siap ditampilkan secara interaktif.</p>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 border-t pt-3 dark:border-gray-700">
-                <button onclick="closeModal('modal-preview-pdf')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Tutup</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beri Penugasan Baru</h3>
@@ -661,11 +637,7 @@
             }
         ];
 
-        let chatMessages = JSON.parse(localStorage.getItem('dcc_chat_messages')) || [
-            { id: 'c1', senderId: 'u1', senderName: 'Admin Utama', text: 'Halo tim DCC, mari koordinasikan agenda minggu ini!', file: null, replyTo: null, timestamp: '10:00' },
-            { id: 'c2', senderId: 'u3', senderName: 'Ahmad Member', text: 'Siap min, persiapan modul IoT D-Tech sedang berjalan.', file: null, replyTo: null, timestamp: '10:05' }
-        ];
-
+        let chatMessages = JSON.parse(localStorage.getItem('dcc_chat_messages')) || [];
         let reportsArchive = JSON.parse(localStorage.getItem('dcc_reports')) || [];
         let notulensiFiles = JSON.parse(localStorage.getItem('dcc_notulensi')) || [];
 
@@ -935,7 +907,7 @@
             if (confirm('Hapus tugas ini?')) { tasks = tasks.filter(t => t.id !== taskId); saveData(); renderPenugasanPage(); }
         }
 
-        // --- 3. PROGRAM KERJA (Sync Evaluasi -> Proker Mendatang & Layout Simetris) ---
+        // --- 3. PROGRAM KERJA (Fixed Evaluasi Auto-Sync to Proker Mendatang) ---
         function renderProkerPage() {
             const filterSelect = document.getElementById('proker-bagian-filter');
             const currentBagian = filterSelect ? filterSelect.value : BAGIAN_LIST[0];
@@ -989,7 +961,7 @@
                 });
             }
 
-            // Table 2: Hasil Usaha (Di-ACC)
+            // Table 2: Hasil Usaha (Di-ACC & Terceklist)
             const t2 = document.getElementById('proker-table-2');
             if (t2) {
                 t2.innerHTML = '';
@@ -1005,11 +977,12 @@
                 });
             }
 
-            // Table 3: Evaluasi (Proker yang Belum Terceklist/Selesai)
+            // Table 3: Evaluasi (Semua proker yang belum terceklist selesai)
+            const evalItems = bagProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly);
             const t3 = document.getElementById('proker-table-3');
             if (t3) {
                 t3.innerHTML = '';
-                bagProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).forEach(p => {
+                evalItems.forEach(p => {
                     t3.innerHTML += `
                         <tr>
                             <td class="p-3 font-semibold text-rose-600">${p.title}</td>
@@ -1024,7 +997,7 @@
             const t4 = document.getElementById('proker-table-4');
             if (t4) {
                 t4.innerHTML = '';
-                bagProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).forEach(p => {
+                evalItems.forEach(p => {
                     t4.innerHTML += `
                         <tr>
                             <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">${p.title}</td>
@@ -1035,13 +1008,11 @@
                 });
             }
 
-            // Table 5: Program Kerja Yang Akan Datang (AUTOMATIS DARI EVALUASI & PROKER MINGGU DEPAN)
+            // Table 5: Program Kerja Yang Akan Datang (SEMUA DARI EVALUASI + PROKER MINGGU DEPAN)
             const t5 = document.getElementById('proker-table-5');
             if (t5) {
                 t5.innerHTML = '';
-                // Rule 1: Semua proker yang masuk evaluasi otomatis masuk ke sini
-                // Rule 2: Proker yang khusus ditambahkan untuk minggu depan (isFutureOnly)
-                const futureItems = bagProker.filter(p => p.isFutureOnly || (!p.isHasilDone && !p.accMusyrif));
+                const futureItems = bagProker.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif));
                 
                 if (futureItems.length === 0) {
                     t5.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-xs text-gray-400">Belum ada program kerja mendatang.</td></tr>`;
@@ -1217,12 +1188,12 @@
             if (k) { k.joblists = k.joblists.filter(y => y.id !== jId); saveData(); renderPanitiaPage(); }
         }
 
-        // --- 5. RAPAT MINGGUAN (Exact Synchronized Rules as Requested) ---
+        // --- 5. RAPAT MINGGUAN ---
         function renderRapatPage() {
             const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
             let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
 
-            // 1. Program Kerja Minggu Lalu = Semua Proker Minggu Ini di laman Proker (tidak termasuk future only)
+            // 1. Program Kerja Minggu Lalu
             const t1 = document.getElementById('rapat-table-1');
             if (t1) {
                 t1.innerHTML = '';
@@ -1233,7 +1204,7 @@
                 });
             }
 
-            // 2. Hasil Usaha Rapat = Hanya proker yang SUDAH terceklist (Selesai/Di-ACC)
+            // 2. Hasil Usaha Rapat
             const t2 = document.getElementById('rapat-table-2');
             if (t2) {
                 t2.innerHTML = '';
@@ -1244,7 +1215,7 @@
                 });
             }
 
-            // 3. Evaluasi = Hanya menampilkan data proker yang BELUM terceklist di tabel Evaluasi pada laman Proker
+            // 3. Evaluasi
             const t3 = document.getElementById('rapat-table-3');
             if (t3) {
                 t3.innerHTML = '';
@@ -1255,7 +1226,7 @@
                 });
             }
 
-            // 4. Solusi = Hanya menampilkan rumusan solusi untuk data yang masih di Evaluasi
+            // 4. Solusi
             const t4 = document.getElementById('rapat-table-4');
             if (t4) {
                 t4.innerHTML = '';
@@ -1266,11 +1237,11 @@
                 });
             }
 
-            // 5. Program Kerja Yang Akan Datang = Sesuai dengan tabel Proker Yang Akan Datang di laman Proker
+            // 5. Program Kerja Yang Akan Datang (Auto Sync Evaluasi)
             const t5 = document.getElementById('rapat-table-5');
             if (t5) {
                 t5.innerHTML = '';
-                const items5 = filteredProker.filter(p => p.isFutureOnly || (!p.isHasilDone && !p.accMusyrif));
+                const items5 = filteredProker.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif));
                 if (items5.length === 0) t5.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Tidak ada proker mendatang.</td></tr>`;
                 items5.forEach(p => {
                     t5.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.solusi || p.desc || 'Rencana Periode Mendatang'}</td></tr>`;
@@ -1300,13 +1271,26 @@
             }
         }
 
+        // Real File Upload with FileReader (Data URL)
         function uploadNotulensiFile() {
             const input = document.getElementById('notulensi-file-input');
             if (input && input.files[0]) {
                 const file = input.files[0];
-                notulensiFiles.push({ name: file.name, date: newDateString() });
-                saveData(); renderNotulensiFileList(); alert(`File '${file.name}' berhasil diunggah!`);
-                input.value = '';
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    notulensiFiles.push({
+                        id: 'f' + Date.now(),
+                        name: file.name,
+                        dataUrl: e.target.result,
+                        date: newDateString()
+                    });
+                    saveData();
+                    renderNotulensiFileList();
+                    alert(`File '${file.name}' berhasil diunggah!`);
+                    input.value = '';
+                };
+                reader.readAsDataURL(file);
             } else {
                 alert('Pilih file terlebih dahulu!');
             }
@@ -1325,7 +1309,7 @@
                     <div class="bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-200 flex items-center gap-2 shadow-sm">
                         <i class="fa-solid fa-file-lines"></i>
                         <span>${f.name}</span>
-                        <button onclick="previewNotulensiPDF('${f.name}')" class="text-xs font-semibold text-blue-600 hover:underline ml-1" title="Review PDF"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="downloadRealFile('${f.id}')" class="text-xs font-semibold text-emerald-600 hover:underline ml-1" title="Download Real File"><i class="fa-solid fa-download"></i></button>
                         <button onclick="deleteNotulensi(${idx})" class="text-rose-500 ml-2 hover:font-bold">×</button>
                     </div>
                 `;
@@ -1376,7 +1360,7 @@
             }
         }
 
-        // --- 7. LAPORAN (Scroll Container + Edit Title & Delete Report Archive) ---
+        // --- 7. LAPORAN (Removed Review Button & Real File Download Function) ---
         function renderLaporanPage() {
             const container = document.getElementById('laporan-container');
             if (!container) return;
@@ -1393,7 +1377,7 @@
 
                 const totalHasil = prokers.filter(p => p.accMusyrif && p.isHasilDone).length;
                 const totalEval = prokers.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).length;
-                const totalMendatang = prokers.filter(p => p.isFutureOnly || (!p.isHasilDone && !p.accMusyrif)).length;
+                const totalMendatang = prokers.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif)).length;
 
                 let filesHTML = '';
                 if (files && files.length > 0) {
@@ -1401,15 +1385,12 @@
                         filesHTML += `
                             <div class="bg-gray-100 dark:bg-gray-700 p-2.5 rounded-lg flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-2 truncate">
-                                    <i class="fa-solid fa-file-pdf text-rose-500 text-base"></i>
+                                    <i class="fa-solid fa-file-lines text-purple-600 text-base"></i>
                                     <span class="font-medium truncate">${f.name}</span>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
-                                    <button onclick="previewNotulensiPDF('${f.name}')" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded hover:bg-blue-700 font-semibold flex items-center gap-1">
-                                        <i class="fa-solid fa-eye"></i> Review PDF
-                                    </button>
-                                    <button onclick="downloadNotulensiFile('${f.name}')" class="bg-emerald-600 text-white text-[11px] px-2.5 py-1 rounded hover:bg-emerald-700 font-semibold flex items-center gap-1">
-                                        <i class="fa-solid fa-download"></i> Download
+                                    <button onclick="downloadRealFile('${f.id}')" class="bg-emerald-600 text-white text-[11px] px-3 py-1.5 rounded hover:bg-emerald-700 font-semibold flex items-center gap-1 shadow-sm">
+                                        <i class="fa-solid fa-download"></i> Download File
                                     </button>
                                 </div>
                             </div>
@@ -1432,7 +1413,6 @@
                             </div>
                         </div>
 
-                        <!-- Summary Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                             <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg border border-emerald-200">
                                 <div class="font-bold text-emerald-700 dark:text-emerald-300 mb-1">Hasil Usaha Selesai</div>
@@ -1457,6 +1437,21 @@
             });
         }
 
+        // Real File Download Handler
+        function downloadRealFile(fileId) {
+            const fileObj = notulensiFiles.find(f => f.id === fileId);
+            if (fileObj && fileObj.dataUrl) {
+                const link = document.createElement('a');
+                link.href = fileObj.dataUrl;
+                link.download = fileObj.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("File dokumen asli tidak ditemukan atau perlu diunggah ulang.");
+            }
+        }
+
         function editReportTitle(rId) {
             const rep = reportsArchive.find(x => x.id === rId);
             if (rep) {
@@ -1472,15 +1467,6 @@
             }
         }
 
-        function previewNotulensiPDF(fileName) {
-            document.getElementById('pdf-preview-filename').innerText = fileName;
-            document.getElementById('modal-preview-pdf').classList.remove('hidden');
-        }
-
-        function downloadNotulensiFile(fileName) {
-            alert(`Mengunduh file notulensi: ${fileName}`);
-        }
-
         function renderUsersPage() {
             const tbody = document.getElementById('users-table-body');
             if (!tbody) return;
@@ -1488,7 +1474,7 @@
             users.forEach(u => { tbody.innerHTML += `<tr><td class="p-4 font-bold">${u.name}</td><td class="p-4 uppercase text-xs">${u.role}</td><td class="p-4">${u.bagian}</td></tr>`; });
         }
 
-        // --- 8. ROOMCHAT (Full Features: Edit, Copy, Reply, Delete, Attachments, Varied Emojis) ---
+        // --- 8. ROOMCHAT ---
         function renderRoomchatPage() {
             const container = document.getElementById('chat-messages-container');
             if (!container) return;
@@ -1531,7 +1517,6 @@
                                 ${attachmentHTML}
                             </div>
 
-                            <!-- Chat Actions Overlay -->
                             <div class="absolute top-0 ${isMe ? '-left-28' : '-right-28'} hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 p-1 rounded-lg border shadow-sm text-xs z-10">
                                 <button onclick="replyChat('${msg.id}')" title="Balas" class="p-1 text-blue-600 hover:bg-blue-50 rounded"><i class="fa-solid fa-reply"></i></button>
                                 <button onclick="copyChatText('${msg.id}')" title="Salin" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i class="fa-solid fa-copy"></i></button>
