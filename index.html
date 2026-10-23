@@ -73,7 +73,7 @@
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Alamat Email</label>
-                    <input type="email5" id="auth-email" required placeholder="nama@email.com" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    <input type="email" id="auth-email" required placeholder="nama@email.com" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Kata Sandi (Password)</label>
@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER (HIDDEN UNTIL AUTHENTICATED) -->
+    <!-- MAIN APP WRAPPER -->
     <div id="app" class="flex flex-1 h-screen overflow-hidden hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-30 shrink-0">
@@ -559,12 +559,12 @@
 
     <!-- JS Logic Application & Supabase Auth Integration -->
     <script>
-        // INISIALISASI SUPABASE CLIENT (Ganti URL & Anon Key dengan kredensial proyek Supabase Anda)
-        const SUPABASE_URL = 'https://YOUR-SUPABASE-PROJECT.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR-SUPABASE-ANON-KEY';
+        // SUPABASE CREDENTIALS TERPASANG
+        const SUPABASE_URL = 'https://xmfmlmognktzhkhphjub.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtZm1sbW9nbmt0emhraHBoanViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NzYzMjIsImV4cCI6MjEwODI1MjMyMn0.QT3wGcLC5Z-8trJVeCfWfDZJs5PCEe3FQxVd_xqH_uY';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentAuthMode = 'login'; // 'login' or 'register'
+        let currentAuthMode = 'login';
         let currentUserSession = null;
 
         const BAGIAN_LIST = ["Ketua", "Sekretaris", "Bendahara", "Gigabyte", "D-Tech", "Perkap"];
@@ -677,7 +677,6 @@
             switchTab('beranda');
         }
 
-        // Check active session on load
         window.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session && session.user) {
@@ -708,8 +707,6 @@
         let countdownRotationIndex = 0;
         let countdownTimerInterval = null;
         let countdownRotationTimer = null;
-        let activeChatReply = null;
-        let activeChatAttachment = null;
 
         function renderCurrentPage() {
             if (activeTab === 'beranda') renderBerandaPage();
