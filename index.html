@@ -2,993 +2,1066 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Manajemen Kerja DCC - Supabase Full Realtime Sync</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCC Workspace</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class' };
+        // Terapkan tema tersimpan sebelum halaman tampil (hindari kedipan)
+        try { if (localStorage.getItem('dcc_ws_theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
     </script>
-    <!-- Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
+        body { font-family: 'Inter', system-ui, sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 4px; }
-        .dark ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
-        
-        .custom-scrollbar-y { max-height: 380px; overflow-y: auto; }
-        .slide-banner-enter { animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 768px) {
-            #sidebar {
-                position: fixed;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                z-index: 50;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-            #sidebar.open {
-                transform: translateX(0);
-            }
-        }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,.05); border-radius: 4px; }
+        .dark ::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(156,163,175,.5); border-radius: 4px; }
+        .scroll-y { max-height: 380px; overflow-y: auto; }
+        .hidden { display: none !important; }
+        input, select, textarea { color: inherit; }
+        .dark select option { background: #1f2937; }
+        #toast-box > div { animation: toastIn .25s ease-out; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { #toast-box > div { animation: none; } }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased min-h-screen">
 
-    <!-- AUTHENTICATION SCREEN -->
-    <div id="auth-screen" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 space-y-6 border border-gray-200 dark:border-gray-700">
-            <div class="text-center space-y-2">
-                <img src="https://raw.githubusercontent.com/dccfordeveloper-webaplication/DCC-Workspace/main/logo%20store.png" alt="DCC Logo" class="w-14 h-14 mx-auto object-contain drop-shadow-md">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">DCC Workspace</h2>
-                <p id="auth-subtitle" class="text-xs text-gray-500 dark:text-gray-400">Masuk menggunakan akun email Supabase Anda</p>
-            </div>
-
-            <!-- Tab Switcher -->
-            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1 text-xs font-semibold">
-                <button type="button" onclick="switchAuthMode('login')" id="tab-login" class="flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition">Masuk (Login)</button>
-                <button type="button" onclick="switchAuthMode('register')" id="tab-register" class="flex-1 py-2 rounded-md text-gray-500 transition">Daftar (Register)</button>
-            </div>
-
-            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs sm:text-sm">
-                <div id="register-name-field" class="hidden">
-                    <label class="block font-medium mb-1">Nama Lengkap</label>
-                    <input type="text" id="auth-name" placeholder="Nama Anda" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                </div>
-                <div>
-                    <label class="block font-medium mb-1">Alamat Email</label>
-                    <input type="email" id="auth-email" required placeholder="nama@email.com" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                </div>
-                <div>
-                    <label class="block font-medium mb-1">Kata Sandi (Password)</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                </div>
-
-                <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition">
-                    Masuk ke Workspace
-                </button>
-            </form>
-
-            <div class="border-t pt-4 dark:border-gray-700 text-center">
-                <p class="text-[11px] text-gray-400">Terhubung Realtime dengan Supabase Cloud Database</p>
-            </div>
+<!-- ============ LOGIN ============ -->
+<div id="auth-screen" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+        <div class="text-center space-y-2">
+            <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl mx-auto shadow-lg">DCC</div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">DCC Workspace</h2>
+            <p id="auth-subtitle" class="text-xs text-gray-500 dark:text-gray-400">Masuk dengan akun email Anda</p>
         </div>
+        <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1 text-xs font-semibold">
+            <button type="button" onclick="switchAuthMode('login')" id="tab-login" class="flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition">Masuk</button>
+            <button type="button" onclick="switchAuthMode('register')" id="tab-register" class="flex-1 py-2 rounded-md text-gray-500 transition">Daftar</button>
+        </div>
+        <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs sm:text-sm">
+            <div id="register-name-field" class="hidden">
+                <label class="block font-medium mb-1" for="auth-name">Nama lengkap</label>
+                <input type="text" id="auth-name" placeholder="Nama Anda" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block font-medium mb-1" for="auth-email">Email</label>
+                <input type="email" id="auth-email" required placeholder="nama@email.com" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block font-medium mb-1" for="auth-password">Kata sandi</label>
+                <input type="password" id="auth-password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg shadow transition">Masuk</button>
+        </form>
     </div>
+</div>
 
-    <!-- MAIN APP WRAPPER -->
-    <div id="app" class="flex flex-1 h-screen overflow-hidden hidden">
-        <div id="sidebar-overlay" onclick="closeSidebarMobile()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
-
-        <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 shrink-0">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <img src="https://raw.githubusercontent.com/dccfordeveloper-webaplication/DCC-Workspace/main/logo%20store.png" alt="DCC Logo" class="w-9 h-9 object-contain shrink-0">
-                    <div class="sidebar-text">
-                        <h1 class="font-bold text-gray-900 dark:text-white leading-tight">DCC Workspace</h1>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Task & Workflow</span>
-                    </div>
+<!-- ============ APLIKASI ============ -->
+<div id="app" class="flex h-screen overflow-hidden hidden">
+    <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-200 z-30 shrink-0">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">DCC</div>
+                <div class="sidebar-text min-w-0">
+                    <h1 class="font-bold text-gray-900 dark:text-white leading-tight truncate">DCC Workspace</h1>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Tugas &amp; alur kerja</span>
                 </div>
-                <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white p-1 rounded-lg">
-                    <i class="fa-solid fa-xmark md:fa-bars"></i>
+            </div>
+            <button id="toggle-sidebar" onclick="toggleSidebar()" aria-label="Ciutkan menu" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white p-1 rounded-lg"><i class="fa-solid fa-bars"></i></button>
+        </div>
+
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-950/30">
+            <a href="https://dcc-gontor.vercel.app/" class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 rounded-lg transition">
+                <i class="fa-solid fa-arrow-left"></i><span class="sidebar-text">Kembali ke DCC Monitor</span>
+            </a>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="nav-list">
+            <button onclick="switchTab('beranda')"     id="nav-beranda"     class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-chart-line w-5 text-center text-blue-500"></i><span class="sidebar-text">Beranda</span></button>
+            <button onclick="switchTab('penugasan')"   id="nav-penugasan"   class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-list-check w-5 text-center text-indigo-500"></i><span class="sidebar-text">Penugasan</span></button>
+            <button onclick="switchTab('proker')"      id="nav-proker"      class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-bars-progress w-5 text-center text-emerald-500"></i><span class="sidebar-text">Program Kerja</span></button>
+            <button onclick="switchTab('kepanitiaan')" id="nav-kepanitiaan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-users-gear w-5 text-center text-amber-500"></i><span class="sidebar-text">Kepanitiaan</span></button>
+            <button onclick="switchTab('rapat')"       id="nav-rapat"       class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-comments w-5 text-center text-purple-500"></i><span class="sidebar-text">Rapat Mingguan</span></button>
+            <button onclick="switchTab('rekap')"       id="nav-rekap"       class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-table w-5 text-center text-teal-500"></i><span class="sidebar-text">Rekap</span></button>
+            <button onclick="switchTab('laporan')"     id="nav-laporan"     class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-file-invoice w-5 text-center text-rose-500"></i><span class="sidebar-text">Laporan</span></button>
+        </nav>
+
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 space-y-2">
+            <div class="flex items-center space-x-3">
+                <img id="sidebar-avatar" src="" alt="" class="w-9 h-9 rounded-full object-cover shrink-0">
+                <div class="sidebar-text min-w-0 flex-1">
+                    <p id="sidebar-username" class="text-sm font-semibold truncate">-</p>
+                    <p id="sidebar-useremail" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">-</p>
+                </div>
+            </div>
+            <button onclick="handleLogout()" class="w-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-right-from-bracket"></i><span class="sidebar-text">Keluar</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 flex items-center justify-between z-20 shrink-0">
+            <h2 id="page-title" class="text-xl font-bold text-gray-800 dark:text-white">Beranda</h2>
+            <div class="flex items-center gap-3">
+                <span id="sync-pill" class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                    <span id="sync-dot" class="w-2 h-2 rounded-full bg-gray-400"></span><span id="sync-label">Menghubungkan…</span>
+                </span>
+                <button onclick="toggleTheme()" aria-label="Ganti tema" class="p-2 w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg bg-gray-100 dark:bg-gray-700">
+                    <i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
                 </button>
             </div>
+        </header>
 
-            <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-950/30">
-                <a href="https://dcc-gontor.vercel.app/" 
-                   class="flex items-center justify-between px-3 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 rounded-lg transition">
-                    <span class="flex items-center gap-2 sidebar-text">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        <span>Kembali ke DCC Monitor</span>
-                    </span>
-                </a>
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+
+            <!-- Banner: tabel belum dibuat -->
+            <div id="setup-banner" class="hidden mb-4 p-4 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/40 dark:border-rose-800 text-sm text-rose-800 dark:text-rose-200">
+                <b>Database belum siap.</b> Jalankan file <code class="font-mono">supabase_setup.sql</code> di Supabase (SQL Editor), lalu muat ulang halaman ini.
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-                <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-chart-line w-5 text-center text-blue-500"></i>
-                    <span class="sidebar-text">Beranda</span>
-                </button>
-                <button onclick="switchTab('penugasan')" id="nav-penugasan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-list-check w-5 text-center text-indigo-500"></i>
-                    <span class="sidebar-text">Penugasan</span>
-                </button>
-                <button onclick="switchTab('proker')" id="nav-proker" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-bars-progress w-5 text-center text-emerald-500"></i>
-                    <span class="sidebar-text">Program Kerja</span>
-                </button>
-                <button onclick="switchTab('kepanitiaan')" id="nav-kepanitiaan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-users-gear w-5 text-center text-amber-500"></i>
-                    <span class="sidebar-text">Kepanitiaan</span>
-                </button>
-                <button onclick="switchTab('rapat')" id="nav-rapat" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-comments text-center w-5 text-purple-500"></i>
-                    <span class="sidebar-text">Rapat Mingguan</span>
-                </button>
-                <button onclick="switchTab('rekap')" id="nav-rekap" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-table w-5 text-center text-teal-500"></i>
-                    <span class="sidebar-text">Rekap</span>
-                </button>
-                <button onclick="switchTab('laporan')" id="nav-laporan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fa-solid fa-file-invoice w-5 text-center text-rose-500"></i>
-                    <span class="sidebar-text">Laporan</span>
-                </button>
-            </nav>
-
-            <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 space-y-2">
-                <div class="flex items-center space-x-3">
-                    <img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=User+DCC&background=0284c7&color=fff" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
-                    <div class="sidebar-text min-w-0 flex-1">
-                        <p id="sidebar-username" class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">User DCC</p>
-                        <p id="sidebar-useremail" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">email@dcc.com</p>
-                    </div>
-                </div>
-                <button onclick="handleLogout()" class="w-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
-                    <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
-                </button>
+            <!-- Banner: impor data lama dari localStorage -->
+            <div id="import-banner" class="hidden mb-4 p-4 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <span class="text-blue-900 dark:text-blue-100">Ada data lama di browser ini (localStorage). Kirim ke server agar bisa dilihat semua pengguna.</span>
+                <span class="flex gap-2 shrink-0">
+                    <button onclick="importLegacy()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg">Impor data lama</button>
+                    <button onclick="dismissImport()" class="border border-blue-300 dark:border-blue-700 text-xs font-semibold px-3 py-2 rounded-lg">Abaikan</button>
+                </span>
             </div>
-        </aside>
 
-        <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col h-full overflow-hidden w-full">
-            <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 flex items-center justify-between z-20 shrink-0">
-                <div class="flex items-center space-x-3">
-                    <button onclick="openSidebarMobile()" class="md:hidden text-gray-600 dark:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="fa-solid fa-bars text-lg"></i>
-                    </button>
-                    <h2 id="page-title" class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white capitalize truncate">Beranda</h2>
+            <!-- 1. BERANDA -->
+            <section id="page-beranda" class="page-content space-y-6">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="bg-blue-400/30 text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full">Kegiatan terdekat</span>
+                                <span id="countdown-indicator" class="text-[11px] text-blue-200 italic"></span>
+                            </div>
+                            <h3 id="event-title-display" class="text-2xl font-bold mt-2 truncate">Belum ada kegiatan</h3>
+                            <p id="event-date-display" class="text-blue-100 text-sm mt-1"><i class="fa-regular fa-calendar-check mr-1"></i> Tambahkan agenda di menu Kepanitiaan</p>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 md:min-w-[280px]">
+                            <div class="bg-white/10 p-2 rounded-lg"><div id="cd-days" class="text-2xl font-black">00</div><div class="text-[10px] text-blue-200 font-bold">Hari</div></div>
+                            <div class="bg-white/10 p-2 rounded-lg"><div id="cd-hours" class="text-2xl font-black">00</div><div class="text-[10px] text-blue-200 font-bold">Jam</div></div>
+                            <div class="bg-white/10 p-2 rounded-lg"><div id="cd-minutes" class="text-2xl font-black">00</div><div class="text-[10px] text-blue-200 font-bold">Menit</div></div>
+                            <div class="bg-white/10 p-2 rounded-lg"><div id="cd-seconds" class="text-2xl font-black text-amber-300">00</div><div class="text-[10px] text-blue-200 font-bold">Detik</div></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg bg-gray-100 dark:bg-gray-700">
-                        <i class="fa-solid fa-moon dark:hidden"></i>
-                        <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
-                    </button>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Status pelaporan proker per bagian</h4>
+                        <span class="text-xs text-gray-500">Indikator: sudah di-ACC Musyrif/Admin</span>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Bagian</th><th class="p-3 text-center">Total proker</th><th class="p-3 text-center">Belum ACC</th><th class="p-3 text-center">Status</th></tr></thead>
+                        <tbody id="home-unreported-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                    </table></div>
                 </div>
-            </header>
 
-            <main class="flex-1 overflow-y-auto p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 relative">
-
-                <!-- 1. BERANDA -->
-                <section id="page-beranda" class="page-content space-y-6">
-                    <div id="countdown-banner-box" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg transition-all duration-500">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="bg-blue-400/30 text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">KEGIATAN TERDEKAT</span>
-                                    <span id="countdown-indicator" class="text-[11px] text-blue-200 italic font-medium"></span>
-                                </div>
-                                <h3 id="event-title-display" class="text-2xl font-bold mt-2 truncate">Memuat Kegiatan...</h3>
-                                <p id="event-date-display" class="text-blue-100 text-sm mt-1"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: -</p>
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 text-center bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 min-w-[280px]">
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-days" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Hari</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-hours" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Jam</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-minutes" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Menit</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-seconds" class="text-2xl font-black text-amber-300">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Detik</div></div>
-                            </div>
-                        </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-list-check text-indigo-500"></i> Penugasan yang sedang berjalan</h4>
+                        <button onclick="switchTab('penugasan')" class="text-xs text-blue-600 hover:underline">Lihat semua</button>
                     </div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Tugas</th><th class="p-3">PJ / Bagian</th><th class="p-3">Deadline</th><th class="p-3">Status</th></tr></thead>
+                        <tbody id="home-tasks-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                    </table></div>
+                </div>
+            </section>
 
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
-                                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Status Pelaporan Proker Perbagian
-                            </h4>
-                            <span class="text-xs text-gray-500">Indikasi: Di-ACC Musyrif/Admin</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left min-w-[500px]">
-                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
-                                    <tr><th class="p-3">Bagian</th><th class="p-3 text-center">Total Proker</th><th class="p-3 text-center">Belum Lapor / ACC</th><th class="p-3 text-center">Status</th></tr>
-                                </thead>
-                                <tbody id="home-unreported-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
-                            </table>
-                        </div>
+            <!-- 2. PENUGASAN -->
+            <section id="page-penugasan" class="page-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-lg font-bold">Penugasan individual</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Kelola dan pantau progres tugas anggota.</p>
                     </div>
-
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
-                                <i class="fa-solid fa-list-check text-indigo-500"></i> Rekapan Penugasan Sedang Berjalan
-                            </h4>
-                            <button onclick="switchTab('penugasan')" class="text-xs text-blue-600 hover:underline">Lihat Semua</button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left min-w-[500px]">
-                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
-                                    <tr><th class="p-3">Tugas</th><th class="p-3">PJ / Bagian</th><th class="p-3">Deadline</th><th class="p-3">Status</th></tr>
-                                </thead>
-                                <tbody id="home-tasks-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
-                            </table>
-                        </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Bagian
+                            <select id="task-filter-bagian" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium"></select>
+                        </label>
+                        <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Status
+                            <select id="task-filter-status" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium"></select>
+                        </label>
+                        <button onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Beri penugasan baru</button>
                     </div>
-                </section>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left min-w-[760px]">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr>
+                            <th class="p-4">Tugas</th><th class="p-4">Penanggung jawab</th><th class="p-4">Bagian</th><th class="p-4">Deadline</th><th class="p-4">Status</th><th class="p-4 text-center">Riwayat</th><th class="p-4 text-right">Aksi</th>
+                        </tr></thead>
+                        <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                    </table></div>
+                </div>
+            </section>
 
-                <!-- 2. PENUGASAN -->
-                <section id="page-penugasan" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-lg font-bold">Penugasan Individual</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Kelola dan pantau progres tugas khusus anggota.</p>
-                        </div>
-                        
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="flex items-center gap-1.5 text-xs">
-                                <label class="font-semibold text-gray-600 dark:text-gray-300">Bagian:</label>
-                                <select id="task-filter-bagian" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium">
-                                    <option value="ALL">Semua Bagian</option>
-                                    <option value="Ketua">Ketua</option>
-                                    <option value="Sekretaris">Sekretaris</option>
-                                    <option value="Bendahara">Bendahara</option>
-                                    <option value="Gigabyte">Gigabyte</option>
-                                    <option value="D-Tech">D-Tech</option>
-                                    <option value="Perkap">Perkap</option>
-                                </select>
-                            </div>
-
-                            <div class="flex items-center gap-1.5 text-xs">
-                                <label class="font-semibold text-gray-600 dark:text-gray-300">Status:</label>
-                                <select id="task-filter-status" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium">
-                                    <option value="ALL">Semua Status</option>
-                                    <option value="Baru Dikerjakan">Baru Dikerjakan</option>
-                                    <option value="Hampir Selesai">Hampir Selesai</option>
-                                    <option value="Sudah Selesai">Sudah Selesai</option>
-                                </select>
-                            </div>
-
-                            <button onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition">
-                                <i class="fa-solid fa-plus"></i> Beri Penugasan Baru
-                            </button>
-                        </div>
+            <!-- 3. PROGRAM KERJA -->
+            <section id="page-proker" class="page-content space-y-6 hidden">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <label class="flex items-center gap-3 text-sm font-semibold">Pilih bagian
+                        <select id="proker-bagian-filter" onchange="renderProkerPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm rounded-lg p-2 font-medium"></select>
+                    </label>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="importLastWeek()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-file-arrow-down"></i> Isi proker minggu lalu</button>
+                        <button onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-calendar-plus"></i> Tambah proker minggu depan</button>
+                        <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah proker</button>
+                        <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-paper-plane"></i> Lapor Musyrif</button>
                     </div>
+                </div>
 
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left min-w-[650px]">
-                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 uppercase tracking-wider">
-                                    <tr>
-                                        <th class="p-4">Tugas & Deskripsi</th>
-                                        <th class="p-4">Penanggung Jawab (PJ)</th>
-                                        <th class="p-4">Bagian</th>
-                                        <th class="p-4">Deadline</th>
-                                        <th class="p-4">Progres Status</th>
-                                        <th class="p-4 text-center">Track Record</th>
-                                        <th class="p-4 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                            </table>
-                        </div>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 1. Program kerja (minggu ini)</h4>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-14 text-center">ACC</th><th class="p-3">Nama program kerja</th><th class="p-3">Target / deskripsi</th><th class="p-3 w-28 text-center">Status lapor</th><th class="p-3 w-16 text-right">Aksi</th></tr></thead><tbody id="proker-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-                </section>
-
-                <!-- 3. PROGRAM KERJA -->
-                <section id="page-proker" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-3">
-                            <label class="text-sm font-semibold">Pilih Bagian:</label>
-                            <select id="proker-bagian-filter" onchange="renderProkerPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm rounded-lg p-2 font-medium">
-                                <option value="Ketua">Ketua</option>
-                                <option value="Sekretaris">Sekretaris</option>
-                                <option value="Bendahara">Bendahara</option>
-                                <option value="Gigabyte">Gigabyte</option>
-                                <option value="D-Tech">D-Tech</option>
-                                <option value="Perkap">Perkap</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-plus"></i> Tambah Proker
-                            </button>
-                            <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
-                            </button>
-                        </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 2. Hasil usaha (proker yang di-ACC)</h4>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-20 text-center">Selesai</th><th class="p-3">Program kerja</th><th class="p-3">Capaian hasil usaha</th><th class="p-3 w-32 text-center">Tanggal lapor</th></tr></thead><tbody id="proker-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                            <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 1. Program Kerja (Minggu Ini)</h4></div>
-                            <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-12 text-center">ACC</th><th class="p-3 w-1/3">Nama Program Kerja</th><th class="p-3 w-5/12">Target / Deskripsi</th><th class="p-3 w-28 text-center">Status Lapor</th><th class="p-3 w-20 text-right">Aksi</th></tr></thead><tbody id="proker-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                            <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 2. Hasil Usaha (Proker yang Di-ACC)</h4></div>
-                            <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-16 text-center">Selesai</th><th class="p-3 w-1/3">Program Kerja</th><th class="p-3 w-5/12">Capaian Hasil Usaha</th><th class="p-3 w-32 text-center">Tanggal Lapor</th></tr></thead><tbody id="proker-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                            <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 3. Evaluasi</h4></div>
-                            <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Program / Hal Evaluasi</th><th class="p-3 w-1/2">Penyebab / Kendala</th><th class="p-3 w-36 text-right">Aksi Input / Edit</th></tr></thead><tbody id="proker-table-3" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                            <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> 4. Solusi</h4></div>
-                            <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Evaluasi Target</th><th class="p-3 w-1/2">Rumusan Solusi</th><th class="p-3 w-36 text-right">Aksi Input / Edit</th></tr></thead><tbody id="proker-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                            <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> 5. Program Kerja Yang Akan Datang</h4></div>
-                            <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Program Kerja Mendatang</th><th class="p-3 w-1/4">Sumber</th><th class="p-3 w-5/12">Rencana Eksekusi</th></tr></thead><tbody id="proker-table-5" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 3. Evaluasi</h4>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Program / hal evaluasi</th><th class="p-3">Penyebab / kendala</th><th class="p-3 w-36 text-right">Aksi</th></tr></thead><tbody id="proker-table-3" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-                </section>
-
-                <!-- 4. KEPANITIAAN -->
-                <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-lg font-bold">Master Program Kepanitiaan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan kegiatan kepanitiaan.</p>
-                        </div>
-                        <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-plus"></i> Buat Agenda Kegiatan Baru
-                        </button>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> 4. Solusi</h4>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Evaluasi target</th><th class="p-3">Rumusan solusi</th><th class="p-3 w-36 text-right">Aksi</th></tr></thead><tbody id="proker-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-
-                    <div id="panitia-cards-container" class="grid grid-cols-1 gap-6"></div>
-                </section>
-
-                <!-- 5. RAPAT MINGGUAN -->
-                <section id="page-rapat" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-lg font-bold">Platform Utama Rapat Mingguan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Agregasi otomatis dari data Program Kerja per bagian secara simetris.</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <select id="rapat-bagian-filter" onchange="renderRapatPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs font-bold rounded-lg p-2">
-                                <option value="Ketua" selected>Ketua (Default)</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Gigabyte">Gigabyte</option><option value="D-Tech">D-Tech</option><option value="Perkap">Perkap</option><option value="ALL">Semua Bagian</option>
-                            </select>
-                            <button onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
-                                <i class="fa-solid fa-floppy-disk"></i> Simpan Hasil Rapat (Arsip)
-                            </button>
-                        </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> 5. Program kerja yang akan datang</h4>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Program kerja mendatang</th><th class="p-3">Sumber</th><th class="p-3">Rencana eksekusi</th></tr></thead><tbody id="proker-table-5" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
+                </div>
+            </section>
 
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
-                        <h4 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-paperclip text-purple-500"></i> Upload File Notulensi Rapat</h4>
-                        <div class="flex flex-col sm:flex-row items-center gap-3">
-                            <input type="file" id="notulensi-file-input" accept=".doc,.docx,.xls,.xlsx,.pdf" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700">
-                            <button onclick="uploadNotulensiFile()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white text-xs px-4 py-2 rounded-lg font-medium whitespace-nowrap">Upload File</button>
-                        </div>
-                        <div id="notulensi-file-list" class="flex flex-wrap gap-2 pt-2"></div>
+            <!-- 4. KEPANITIAAN -->
+            <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-lg font-bold">Master program kepanitiaan</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat dan rencana induk kegiatan kepanitiaan.</p>
                     </div>
+                    <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Buat agenda kegiatan baru</button>
+                </div>
+                <div id="panitia-cards-container" class="grid grid-cols-1 gap-6"></div>
+            </section>
 
-                    <div class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h4 class="font-bold text-sm mb-3 text-blue-600">1. Program Kerja Minggu Lalu</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse table-fixed min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA</th><th class="p-3 w-2/5">DESKRIPSI / TARGET</th></tr></thead><tbody id="rapat-table-1" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h4 class="font-bold text-sm mb-3 text-emerald-600">2. Hasil Usaha Rapat</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse table-fixed min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA</th><th class="p-3 w-2/5">CAPAIAN HASIL USAHA</th></tr></thead><tbody id="rapat-table-2" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h4 class="font-bold text-sm mb-3 text-rose-600">3. Evaluasi</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse table-fixed min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">HAL EVALUASI</th><th class="p-3 w-2/5">PENYEBAB / KENDALA</th></tr></thead><tbody id="rapat-table-3" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h4 class="font-bold text-sm mb-3 text-amber-600">4. Solusi</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse table-fixed min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">EVALUASI TARGET</th><th class="p-3 w-2/5">RUMUSAN SOLUSI</th></tr></thead><tbody id="rapat-table-4" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <h4 class="font-bold text-sm mb-3 text-indigo-600">5. Program Kerja Yang Akan Datang</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse table-fixed min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA MENDATANG</th><th class="p-3 w-2/5">RENCANA / SUMBER</th></tr></thead><tbody id="rapat-table-5" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
-                        </div>
+            <!-- 5. RAPAT MINGGUAN -->
+            <section id="page-rapat" class="page-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-lg font-bold">Rapat mingguan</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Dikumpulkan otomatis dari data program kerja tiap bagian.</p>
                     </div>
-                </section>
+                    <div class="flex items-center gap-3">
+                        <select id="rapat-bagian-filter" onchange="renderRapatPage()" aria-label="Filter bagian" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs font-bold rounded-lg p-2"></select>
+                        <button onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-floppy-disk"></i> Simpan hasil rapat (arsip)</button>
+                    </div>
+                </div>
 
-                <!-- 6. REKAP -->
-                <section id="page-rekap" class="page-content space-y-6 hidden">
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div>
-                                <label class="text-xs text-gray-500 block">Filter Bagian:</label>
-                                <select id="rekap-filter-bagian" onchange="renderRekapPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs rounded-lg p-2 font-medium">
-                                    <option value="ALL">Semua Bagian</option><option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Gigabyte">Gigabyte</option><option value="D-Tech">D-Tech</option><option value="Perkap">Perkap</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button onclick="downloadRekapExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-file-excel text-sm"></i> Download Excel (.xlsx)
-                        </button>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                    <h4 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-paperclip text-purple-500"></i> Unggah file notulensi rapat</h4>
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <input type="file" id="notulensi-file-input" accept=".doc,.docx,.xls,.xlsx,.pdf" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700">
+                        <button id="btn-upload-notulensi" onclick="uploadNotulensiFile()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-xs px-4 py-2 rounded-lg font-medium whitespace-nowrap">Unggah file</button>
                     </div>
+                    <div id="notulensi-file-list" class="flex flex-wrap gap-2 pt-2"></div>
+                </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-list-check text-blue-500"></i> Rekap Program Kerja</h4>
-                            <div class="custom-scrollbar-y flex-1"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Program Kerja</th><th class="p-2.5">Status</th></tr></thead><tbody id="rekap-table-proker" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
-                            <h4 class="font-bold text-gray-800 dark:text-white mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Rekap Hasil Usaha</h4>
-                            <div class="custom-scrollbar-y flex-1"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Hasil Usaha / Capaian</th><th class="p-2.5">Tgl Dilaporkan</th></tr></thead><tbody id="rekap-table-hasil" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
-                        </div>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <h4 class="font-bold text-sm mb-3 text-blue-600">1. Program kerja minggu lalu</h4>
+                        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program kerja</th><th class="p-3 w-2/5">Deskripsi / target</th></tr></thead><tbody id="rapat-table-1" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                     </div>
-                </section>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <h4 class="font-bold text-sm mb-3 text-emerald-600">2. Hasil usaha</h4>
+                        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program kerja</th><th class="p-3 w-2/5">Capaian hasil usaha</th></tr></thead><tbody id="rapat-table-2" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <h4 class="font-bold text-sm mb-3 text-rose-600">3. Evaluasi</h4>
+                        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Hal evaluasi</th><th class="p-3 w-2/5">Penyebab / kendala</th></tr></thead><tbody id="rapat-table-3" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <h4 class="font-bold text-sm mb-3 text-amber-600">4. Solusi</h4>
+                        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Evaluasi target</th><th class="p-3 w-2/5">Rumusan solusi</th></tr></thead><tbody id="rapat-table-4" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <h4 class="font-bold text-sm mb-3 text-indigo-600">5. Program kerja yang akan datang</h4>
+                        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[650px]"><thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program kerja mendatang</th><th class="p-3 w-2/5">Rencana / sumber</th></tr></thead><tbody id="rapat-table-5" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                    </div>
+                </div>
+            </section>
 
-                <!-- 7. LAPORAN -->
-                <section id="page-laporan" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-lg font-bold">Arsip Laporan Rapat Mingguan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Seluruh data riwayat rapat yang telah diarsipkan lengkap dengan lampiran notulensi.</p>
-                        </div>
+            <!-- 6. REKAP -->
+            <section id="page-rekap" class="page-content space-y-6 hidden">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                    <label class="text-xs text-gray-500 block">Filter bagian
+                        <select id="rekap-filter-bagian" onchange="renderRekapPage()" class="block mt-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs rounded-lg p-2 font-medium text-gray-800 dark:text-gray-100"></select>
+                    </label>
+                    <button onclick="downloadRekapExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm"><i class="fa-solid fa-file-excel text-sm"></i> Unduh Excel (.xlsx)</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <h4 class="font-bold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-list-check text-blue-500"></i> Rekap program kerja</h4>
+                        <div class="scroll-y"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Program kerja</th><th class="p-2.5">Status</th></tr></thead><tbody id="rekap-table-proker" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
-                    <div id="laporan-container" class="space-y-6 max-h-[75vh] overflow-y-auto pr-1"></div>
-                </section>
-            </main>
-        </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <h4 class="font-bold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Rekap hasil usaha</h4>
+                        <div class="scroll-y"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Hasil usaha / capaian</th><th class="p-2.5">Tgl dilaporkan</th></tr></thead><tbody id="rekap-table-hasil" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. LAPORAN -->
+            <section id="page-laporan" class="page-content space-y-6 hidden">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-bold">Arsip laporan rapat mingguan</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Riwayat rapat yang sudah diarsipkan, lengkap dengan lampiran notulensi.</p>
+                </div>
+                <div id="laporan-container" class="space-y-4"></div>
+            </section>
+        </main>
     </div>
+</div>
 
-    <!-- MODALS -->
-    <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beri Penugasan Baru</h3>
-            <form id="form-task" onsubmit="saveTask(event)" class="space-y-3 text-xs sm:text-sm">
-                <div><label class="block font-medium mb-1">Judul Task / Tugas</label><input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div><label class="block font-medium mb-1">Penanggung Jawab (PJ)</label><input type="text" id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div><label class="block font-medium mb-1">Bagian</label><input type="text" id="task-input-bagian" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div><label class="block font-medium mb-1">Deadline</label><input type="date" id="task-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan Penugasan</button></div>
-            </form>
-        </div>
+<!-- ============ MODAL ============ -->
+<div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 class="font-bold text-lg">Beri penugasan baru</h3>
+        <form onsubmit="saveTask(event)" class="space-y-3 text-xs sm:text-sm">
+            <div><label class="block font-medium mb-1" for="task-input-title">Judul tugas</label><input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div><label class="block font-medium mb-1" for="task-input-pj">Penanggung jawab (PJ)</label><input type="text" id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div><label class="block font-medium mb-1" for="task-input-bagian">Bagian</label><select id="task-input-bagian" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select></div>
+            <div><label class="block font-medium mb-1" for="task-input-deadline">Deadline</label><input type="date" id="task-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan penugasan</button></div>
+        </form>
     </div>
+</div>
 
-    <div id="modal-proker" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 id="modal-proker-title" class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
-            <form id="form-proker" onsubmit="saveProker(event)" class="space-y-3 text-xs sm:text-sm">
-                <input type="hidden" id="proker-target-type" value="minggu_ini">
-                <div><label class="block font-medium mb-1">Nama Program Kerja</label><input type="text" id="proker-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div><label class="block font-medium mb-1">Deskripsi / Target</label><textarea id="proker-input-desc" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" rows="3"></textarea></div>
-                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-proker')" class="px-4 py-2 border rounded-lg">Batal</button><button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg">Simpan Proker</button></div>
-            </form>
-        </div>
+<div id="modal-proker" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 id="modal-proker-title" class="font-bold text-lg">Tambah program kerja</h3>
+        <form onsubmit="saveProker(event)" class="space-y-3 text-xs sm:text-sm">
+            <input type="hidden" id="proker-target-type" value="minggu_ini">
+            <div><label class="block font-medium mb-1" for="proker-input-title">Nama program kerja</label><input type="text" id="proker-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div><label class="block font-medium mb-1" for="proker-input-desc">Deskripsi / target</label><textarea id="proker-input-desc" required rows="3" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-proker')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg">Simpan proker</button></div>
+        </form>
     </div>
+</div>
 
-    <div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Buat Agenda Kepanitiaan Baru</h3>
-            <form id="form-panitia" onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
-                <div><label class="block font-medium mb-1">Nama Kegiatan / Event</label><input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div><label class="block font-medium mb-1">Deskripsi Kegiatan</label><textarea id="panitia-input-deskripsi" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" rows="2"></textarea></div>
-                <div><label class="block font-medium mb-1">Hari & Tanggal Pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan Agenda</button></div>
-            </form>
-        </div>
+<div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 class="font-bold text-lg">Buat agenda kepanitiaan baru</h3>
+        <form onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
+            <div><label class="block font-medium mb-1" for="panitia-input-nama">Nama kegiatan</label><input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div><label class="block font-medium mb-1" for="panitia-input-deskripsi">Deskripsi kegiatan</label><textarea id="panitia-input-deskripsi" required rows="2" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea></div>
+            <div><label class="block font-medium mb-1" for="panitia-input-tanggal">Tanggal pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan agenda</button></div>
+        </form>
     </div>
+</div>
 
-    <!-- JS Logic Application & Supabase Full Realtime Integration -->
-    <script>
-        const SUPABASE_URL = 'https://rdwgtohoizmgzcmarybj.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkd2d0b2hvaXptZ3pjbWFyeWJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzYzNTYsImV4cCI6MjEwNzkxMjM1Nn0._uxw-rNIysobQATHIOTha5Zhfk0HtYNwq4wQiejhlW8';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<div id="modal-job" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 class="font-bold text-lg">Tambah pembagian tugas</h3>
+        <form onsubmit="saveJob(event)" class="space-y-3 text-xs sm:text-sm">
+            <input type="hidden" id="job-panitia-id">
+            <div><label class="block font-medium mb-1" for="job-input-bagian">Bagian</label><select id="job-input-bagian" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select></div>
+            <div><label class="block font-medium mb-1" for="job-input-task">Tugas</label><input type="text" id="job-input-task" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-job')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg">Tambah</button></div>
+        </form>
+    </div>
+</div>
 
-        let currentAuthMode = 'login';
-        let currentUserSession = null;
-        let globalRealtimeChannel = null;
+<div id="modal-text" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 id="modal-text-title" class="font-bold text-lg"></h3>
+        <form onsubmit="submitText(event)" class="space-y-3 text-sm">
+            <textarea id="modal-text-input" rows="4" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" aria-labelledby="modal-text-title"></textarea>
+            <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('modal-text')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan</button></div>
+        </form>
+    </div>
+</div>
 
-        const BAGIAN_LIST = ["Ketua", "Sekretaris", "Bendahara", "Gigabyte", "D-Tech", "Perkap"];
+<div id="modal-log" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 id="modal-log-title" class="font-bold text-lg">Riwayat tugas</h3>
+        <ul id="modal-log-list" class="text-sm space-y-2 max-h-72 overflow-y-auto"></ul>
+        <div class="flex justify-end"><button onclick="closeModal('modal-log')" class="px-4 py-2 border rounded-lg dark:border-gray-600 text-sm">Tutup</button></div>
+    </div>
+</div>
 
-        let tasks = [];
-        let prokerList = [];
-        let panitiaList = [];
-        let reportsArchive = [];
-        let notulensiFiles = [];
+<div id="toast-box" class="fixed bottom-4 right-4 z-[60] space-y-2 max-w-xs"></div>
 
-        // SIDEBAR MOBILE MANAGEMENT
-        function openSidebarMobile() {
-            document.getElementById('sidebar').classList.add('open');
-            document.getElementById('sidebar-overlay').classList.remove('hidden');
-        }
-        function closeSidebarMobile() {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('sidebar-overlay').classList.add('hidden');
-        }
-        function toggleSidebar() {
-            if (window.innerWidth < 768) {
-                closeSidebarMobile();
-            } else {
-                document.getElementById('sidebar').classList.toggle('w-64');
-                document.getElementById('sidebar').classList.toggle('w-16');
-                document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden'));
+<script>
+/* =====================================================================
+   KONFIGURASI SUPABASE
+   Tabel "dcc_ws_records" dan bucket "dcc-notulensi" dibuat oleh
+   supabase_setup.sql (awalan dcc_ws_ agar tidak bentrok dengan aplikasi lain).
+   ===================================================================== */
+const SUPABASE_URL = 'https://rdwgtohoizmgzcmarybj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkd2d0b2hvaXptZ3pjbWFyeWJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzYzNTYsImV4cCI6MjEwNzkxMjM1Nn0._uxw-rNIysobQATHIOTha5Zhfk0HtYNwq4wQiejhlW8';
+const TABLE = 'dcc_ws_records';
+const BUCKET = 'dcc-notulensi';
+const MAX_FILE_MB = 10;
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dcc-ws-auth' }
+});
+
+const BAGIAN_LIST = ['Ketua', 'Sekretaris', 'Bendahara', 'Gigabyte', 'D-Tech', 'Perkap'];
+const STATUS_LIST = ['Baru Dikerjakan', 'Hampir Selesai', 'Sudah Selesai'];
+const COLLECTIONS = ['tasks', 'proker', 'panitia', 'reports', 'notulensi'];
+const TITLES = { beranda: 'Beranda', penugasan: 'Penugasan', proker: 'Program Kerja', kepanitiaan: 'Kepanitiaan', rapat: 'Rapat Mingguan', rekap: 'Rekap', laporan: 'Laporan' };
+
+let store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+let currentUser = null;
+let activeTab = 'beranda';
+let channel = null;
+let pollTimer = null;
+let authMode = 'login';
+
+/* ---------- Util ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const today = () => new Date().toLocaleDateString('sv-SE');
+const userName = () => currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Pengguna';
+const list = col => [...store[col]].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+const emptyRow = (cols, text) => `<tr><td colspan="${cols}" class="p-4 text-center text-xs text-gray-400">${text}</td></tr>`;
+const bagianOptions = (withAll, allLabel = 'Semua bagian') =>
+    (withAll ? `<option value="ALL">${allLabel}</option>` : '') + BAGIAN_LIST.map(b => `<option value="${b}">${b}</option>`).join('');
+
+function toast(msg, type = 'ok') {
+    const el = document.createElement('div');
+    el.className = 'px-4 py-3 rounded-lg shadow-lg text-sm text-white ' + (type === 'err' ? 'bg-rose-600' : 'bg-gray-900 dark:bg-gray-700');
+    el.textContent = msg;
+    $('toast-box').appendChild(el);
+    setTimeout(() => el.remove(), type === 'err' ? 6000 : 3000);
+}
+function openModal(id) { const m = $(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+function closeModal(id) { const m = $(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+function toggleTheme() {
+    const dark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('dcc_ws_theme', dark ? 'dark' : 'light'); } catch (e) {}
+}
+function toggleSidebar(force) {
+    const sb_ = $('sidebar');
+    const collapse = typeof force === 'boolean' ? force : sb_.classList.contains('w-64');
+    sb_.classList.toggle('w-64', !collapse);
+    sb_.classList.toggle('w-16', collapse);
+    document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden', collapse));
+}
+
+/* ---------- Status sinkronisasi ---------- */
+function setSync(state) {
+    const map = {
+        online: ['Tersinkron', 'bg-emerald-100 text-emerald-700', 'bg-emerald-500'],
+        syncing: ['Menyimpan…', 'bg-amber-100 text-amber-700', 'bg-amber-500'],
+        offline: ['Tidak terhubung', 'bg-rose-100 text-rose-700', 'bg-rose-500'],
+        connecting: ['Menghubungkan…', 'bg-gray-100 text-gray-500', 'bg-gray-400']
+    };
+    const [label, pill, dot] = map[state] || map.connecting;
+    $('sync-label').textContent = label;
+    $('sync-pill').className = 'hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ' + pill;
+    $('sync-dot').className = 'w-2 h-2 rounded-full ' + dot;
+}
+
+/* =====================================================================
+   LAPISAN DATA (Supabase)
+   ===================================================================== */
+function cacheKey() { return 'dcc_ws_cache_' + (currentUser?.id || 'x'); }
+function writeCache() { try { localStorage.setItem(cacheKey(), JSON.stringify(store)); } catch (e) {} }
+function readCache() {
+    try { const c = JSON.parse(localStorage.getItem(cacheKey())); if (c) COLLECTIONS.forEach(k => { store[k] = c[k] || []; }); } catch (e) {}
+}
+function putLocal(col, obj) {
+    const arr = store[col], i = arr.findIndex(x => x.id === obj.id);
+    if (i >= 0) arr[i] = obj; else arr.push(obj);
+}
+
+async function loadAll() {
+    const { data, error } = await sb.from(TABLE).select('collection,id,data').limit(5000);
+    if (error) {
+        const missing = error.code === '42P01' || /relation|does not exist|schema cache/i.test(error.message || '');
+        $('setup-banner').classList.toggle('hidden', !missing);
+        setSync('offline');
+        if (!missing) toast('Gagal memuat data: ' + error.message, 'err');
+        return false;
+    }
+    $('setup-banner').classList.add('hidden');
+    const fresh = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+    data.forEach(r => { if (fresh[r.collection]) fresh[r.collection].push(r.data); });
+    store = fresh;
+    writeCache();
+    setSync('online');
+    renderCurrentPage();
+    return true;
+}
+
+async function save(col, obj) {
+    if (!obj.createdAt) obj.createdAt = Date.now();
+    putLocal(col, obj); writeCache(); renderCurrentPage(); setSync('syncing');
+    const { error } = await sb.from(TABLE).upsert({
+        collection: col, id: obj.id, data: obj, updated_by: userName(), updated_at: new Date().toISOString()
+    });
+    if (error) { toast('Gagal menyimpan: ' + error.message, 'err'); await loadAll(); return false; }
+    setSync('online');
+    return true;
+}
+
+async function remove(col, id) {
+    store[col] = store[col].filter(x => x.id !== id); writeCache(); renderCurrentPage(); setSync('syncing');
+    const { error } = await sb.from(TABLE).delete().eq('collection', col).eq('id', id);
+    if (error) { toast('Gagal menghapus: ' + error.message, 'err'); await loadAll(); return false; }
+    setSync('online');
+    return true;
+}
+
+function subscribeRealtime() {
+    if (channel) sb.removeChannel(channel);
+    channel = sb.channel('dcc-ws-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, p => {
+            if (p.eventType === 'DELETE') {
+                const o = p.old || {};
+                if (store[o.collection]) store[o.collection] = store[o.collection].filter(x => x.id !== o.id);
+            } else if (p.new && store[p.new.collection]) {
+                putLocal(p.new.collection, p.new.data);
             }
-        }
-
-        // --- AUTH LOGIC (SUPABASE) ---
-        function switchAuthMode(mode) {
-            currentAuthMode = mode;
-            document.getElementById('tab-login').className = mode === 'login' ? "flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition" : "flex-1 py-2 rounded-md text-gray-500 transition";
-            document.getElementById('tab-register').className = mode === 'register' ? "flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition" : "flex-1 py-2 rounded-md text-gray-500 transition";
-            document.getElementById('register-name-field').classList.toggle('hidden', mode === 'login');
-            document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "Masuk ke Workspace" : "Daftar Akun Baru";
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value;
-
-            try {
-                if (currentAuthMode === 'register') {
-                    const { error } = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: { data: { full_name: name || 'Anggota DCC' } }
-                    });
-                    if (error) throw error;
-                    alert('Registrasi berhasil! Silakan masuk.');
-                    switchAuthMode('login');
-                } else {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-                    if (error) throw error;
-                    currentUserSession = data.user;
-                    initAppSession(currentUserSession);
-                }
-            } catch (err) {
-                alert('Autentikasi Gagal: ' + err.message);
-            }
-        }
-
-        async function handleLogout() {
-            if (globalRealtimeChannel) supabaseClient.removeChannel(globalRealtimeChannel);
-            await supabaseClient.auth.signOut();
-            currentUserSession = null;
-            document.getElementById('app').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-        }
-
-        function initAppSession(user) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-
-            const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
-            document.getElementById('sidebar-username').innerText = fullName;
-            document.getElementById('sidebar-useremail').innerText = user.email;
-            document.getElementById('sidebar-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0284c7&color=fff`;
-
-            setupGlobalRealtimeSubscription();
-            switchTab('beranda');
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user) {
-                currentUserSession = session.user;
-                initAppSession(currentUserSession);
-            }
+            writeCache(); renderCurrentPage();
+        })
+        .subscribe(status => {
+            if (status === 'SUBSCRIBED') { setSync('online'); loadAll(); }
+            else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setSync('offline');
         });
+    // Jaring pengaman: ambil ulang berkala bila realtime terputus
+    clearInterval(pollTimer);
+    pollTimer = setInterval(() => { if (currentUser && !document.hidden) loadAll(); }, 60000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && currentUser) loadAll(); });
+window.addEventListener('online', () => { if (currentUser) loadAll(); });
+window.addEventListener('offline', () => setSync('offline'));
 
-        // --- REALTIME SUBSCRIPTION (SINKRONISASI SUPABASE AUTOMATIS) ---
-        function setupGlobalRealtimeSubscription() {
-            fetchAllCloudData();
+/* ---------- File notulensi (Supabase Storage) ---------- */
+async function downloadFile(path, name) {
+    if (!path) { toast('File ini tidak punya salinan di server.', 'err'); return; }
+    const { data, error } = await sb.storage.from(BUCKET).download(path);
+    if (error) { toast('Gagal mengunduh: ' + error.message, 'err'); return; }
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+document.addEventListener('click', e => {
+    const b = e.target.closest('[data-dl]');
+    if (b) downloadFile(b.dataset.dl, b.dataset.name);
+});
 
-            if (!globalRealtimeChannel) {
-                globalRealtimeChannel = supabaseClient
-                    .channel('public-db-realtime-sync')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => fetchTasks())
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'proker' }, () => fetchProker())
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'panitia' }, () => fetchPanitia())
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => fetchReports())
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'notulensi' }, () => fetchNotulensi())
-                    .subscribe();
-            }
+/* =====================================================================
+   AUTENTIKASI
+   ===================================================================== */
+function switchAuthMode(mode) {
+    authMode = mode;
+    const login = mode === 'login';
+    $('tab-login').className = 'flex-1 py-2 rounded-md transition ' + (login ? 'bg-white dark:bg-gray-800 shadow-sm text-blue-600' : 'text-gray-500');
+    $('tab-register').className = 'flex-1 py-2 rounded-md transition ' + (login ? 'text-gray-500' : 'bg-white dark:bg-gray-800 shadow-sm text-blue-600');
+    $('register-name-field').classList.toggle('hidden', login);
+    $('auth-submit-btn').textContent = login ? 'Masuk' : 'Buat akun';
+    $('auth-subtitle').textContent = login ? 'Masuk dengan akun email Anda' : 'Buat akun baru untuk DCC Workspace';
+}
+
+async function handleAuthSubmit(e) {
+    e.preventDefault();
+    const email = $('auth-email').value.trim(), password = $('auth-password').value, name = $('auth-name').value.trim();
+    const btn = $('auth-submit-btn'); btn.disabled = true;
+    try {
+        if (authMode === 'register') {
+            const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name || email.split('@')[0] } } });
+            if (error) throw error;
+            if (!data.session) { toast('Akun dibuat. Cek email untuk konfirmasi, lalu masuk.'); switchAuthMode('login'); }
+        } else {
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) throw error;
         }
+    } catch (err) {
+        toast('Autentikasi gagal: ' + err.message, 'err');
+    } finally { btn.disabled = false; }
+}
 
-        async function fetchAllCloudData() {
-            await Promise.all([fetchTasks(), fetchProker(), fetchPanitia(), fetchReports(), fetchNotulensi()]);
-            renderCurrentPage();
+async function handleLogout() { await sb.auth.signOut(); }
+
+function startSession(user) {
+    if (currentUser && currentUser.id === user.id) return;
+    currentUser = user;
+    $('auth-screen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    const name = userName();
+    $('sidebar-username').textContent = name;
+    $('sidebar-useremail').textContent = user.email || '';
+    $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
+    readCache();
+    setSync('connecting');
+    switchTab('beranda');
+    subscribeRealtime();
+    checkLegacy();
+}
+
+function endSession() {
+    currentUser = null;
+    if (channel) { sb.removeChannel(channel); channel = null; }
+    clearInterval(pollTimer);
+    store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+    $('app').classList.add('hidden');
+    $('auth-screen').classList.remove('hidden');
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+    // Hindari panggilan Supabase langsung di dalam callback ini
+    setTimeout(() => { session?.user ? startSession(session.user) : (currentUser && endSession()); }, 0);
+});
+
+/* =====================================================================
+   NAVIGASI & RENDER
+   ===================================================================== */
+function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+    $('page-' + tab)?.classList.remove('hidden');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold'));
+    $('nav-' + tab)?.classList.add('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold');
+    $('page-title').textContent = TITLES[tab] || tab;
+    renderCurrentPage();
+}
+
+function renderCurrentPage() {
+    ({
+        beranda: renderBerandaPage, penugasan: renderPenugasanPage, proker: renderProkerPage,
+        kepanitiaan: renderPanitiaPage, rapat: renderRapatPage, rekap: renderRekapPage, laporan: renderLaporanPage
+    }[activeTab] || (() => {}))();
+}
+
+/* ---------- 1. BERANDA ---------- */
+let cdTimer = null, cdRotate = null, cdIndex = 0;
+
+function renderBerandaPage() {
+    const proker = list('proker');
+    $('home-unreported-table').innerHTML = BAGIAN_LIST.map(bag => {
+        const items = proker.filter(p => p.bagian === bag);
+        const unapproved = items.filter(p => !p.accMusyrif).length;
+        const badge = unapproved === 0 && items.length > 0
+            ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>'
+            : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
+        return `<tr><td class="p-3 font-semibold">${bag}</td><td class="p-3 text-center">${items.length}</td><td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td><td class="p-3 text-center">${badge}</td></tr>`;
+    }).join('');
+
+    const running = list('tasks').filter(t => t.status !== 'Sudah Selesai').slice(0, 5);
+    $('home-tasks-table').innerHTML = running.length ? running.map(t =>
+        `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
+    ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
+
+    initCountdown();
+}
+
+function initCountdown() {
+    clearInterval(cdTimer); clearInterval(cdRotate);
+    const events = list('panitia').filter(k => k.tanggal >= today()).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    if (!events.length) {
+        $('event-title-display').textContent = 'Belum ada kegiatan mendatang';
+        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Tambahkan agenda di menu Kepanitiaan';
+        $('countdown-indicator').textContent = '';
+        ['days', 'hours', 'minutes', 'seconds'].forEach(u => { $('cd-' + u).textContent = '00'; });
+        return;
+    }
+    if (cdIndex >= events.length) cdIndex = 0;
+    const show = () => {
+        const ev = events[cdIndex];
+        $('event-title-display').textContent = ev.nama;
+        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ' + esc(ev.tanggal);
+        $('countdown-indicator').textContent = events.length > 1 ? `${cdIndex + 1} dari ${events.length} kegiatan` : '';
+    };
+    const tick = () => {
+        const ev = events[cdIndex]; if (!ev) return;
+        const diff = Math.max(0, new Date(ev.tanggal + 'T08:00:00').getTime() - Date.now());
+        const p = n => String(n).padStart(2, '0');
+        $('cd-days').textContent = p(Math.floor(diff / 864e5));
+        $('cd-hours').textContent = p(Math.floor(diff % 864e5 / 36e5));
+        $('cd-minutes').textContent = p(Math.floor(diff % 36e5 / 6e4));
+        $('cd-seconds').textContent = p(Math.floor(diff % 6e4 / 1e3));
+    };
+    show(); tick();
+    cdTimer = setInterval(tick, 1000);
+    if (events.length > 1) cdRotate = setInterval(() => { cdIndex = (cdIndex + 1) % events.length; show(); tick(); }, 8000);
+}
+
+/* ---------- 2. PENUGASAN ---------- */
+function renderPenugasanPage() {
+    const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
+    const rows = list('tasks').filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
+    $('tasks-table-body').innerHTML = rows.length ? rows.map(t => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <td class="p-4 font-semibold">${esc(t.title)}</td>
+            <td class="p-4 text-xs font-bold">${esc(t.pj)}</td>
+            <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${esc(t.bagian)}</span></td>
+            <td class="p-4 text-xs text-rose-500 font-bold">${esc(t.deadline)}</td>
+            <td class="p-4"><select onchange="setTaskStatus('${t.id}', this.value)" aria-label="Status tugas" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+            <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
+            <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>`).join('') : emptyRow(7, 'Belum ada penugasan. Klik “Beri penugasan baru” untuk memulai.');
+}
+function openTaskModal() { $('task-input-bagian').innerHTML = bagianOptions(false); openModal('modal-task'); }
+async function saveTask(e) {
+    e.preventDefault();
+    const t = {
+        id: uid('t'), title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
+        bagian: $('task-input-bagian').value, deadline: $('task-input-deadline').value,
+        status: STATUS_LIST[0], history: [`${today()} - Dibuat oleh ${userName()}`], createdAt: Date.now()
+    };
+    closeModal('modal-task'); e.target.reset();
+    await save('tasks', t);
+}
+async function setTaskStatus(id, status) {
+    const t = store.tasks.find(x => x.id === id); if (!t || t.status === status) return;
+    const upd = { ...t, status, history: [...(t.history || []), `${today()} - Status menjadi “${status}” oleh ${userName()}`] };
+    await save('tasks', upd);
+}
+function showTaskLog(id) {
+    const t = store.tasks.find(x => x.id === id); if (!t) return;
+    $('modal-log-title').textContent = t.title;
+    $('modal-log-list').innerHTML = (t.history || []).map(h => `<li class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-xs">${esc(h)}</li>`).join('') || '<li class="text-xs text-gray-400">Belum ada riwayat.</li>';
+    openModal('modal-log');
+}
+async function deleteTask(id) { if (confirm('Hapus penugasan ini?')) await remove('tasks', id); }
+
+/* ---------- 3. PROGRAM KERJA ---------- */
+let textCallback = null;
+function askText(title, value, cb) {
+    $('modal-text-title').textContent = title; $('modal-text-input').value = value || '';
+    textCallback = cb; openModal('modal-text'); $('modal-text-input').focus();
+}
+function submitText(e) {
+    e.preventDefault();
+    const v = $('modal-text-input').value.trim(), cb = textCallback;
+    closeModal('modal-text'); textCallback = null;
+    if (cb) cb(v);
+}
+
+function renderProkerPage() {
+    const bag = $('proker-bagian-filter').value || BAGIAN_LIST[0];
+    const items = list('proker').filter(p => p.bagian === bag);
+    const current = items.filter(p => !p.isFutureOnly);
+    const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
+
+    $('proker-table-1').innerHTML = current.length ? current.map(p => `
+        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600"></td>
+        <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
+        <td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
+        <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
+        : emptyRow(5, 'Belum ada program kerja untuk bagian ini.');
+
+    const acc = current.filter(p => p.accMusyrif);
+    $('proker-table-2').innerHTML = acc.length ? acc.map(p => `
+        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="Selesai" ${p.isHasilDone ? 'checked' : ''} onchange="toggleHasilDone('${p.id}')" class="w-4 h-4 accent-blue-600"></td>
+        <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-emerald-600 font-medium">${esc(p.hasilUsaha) || 'Belum diisi'}</td>
+        <td class="p-3 text-xs text-center text-gray-400">${esc(p.dateReported) || '-'}</td></tr>`).join('')
+        : emptyRow(4, 'Belum ada proker yang di-ACC.');
+
+    $('proker-table-3').innerHTML = open.length ? open.map(p => `
+        <tr><td class="p-3 font-semibold text-rose-600">${esc(p.title)}</td><td class="p-3 text-xs text-rose-700 dark:text-rose-300">${esc(p.evaluasi) || 'Belum ada kendala'}</td>
+        <td class="p-3 text-right"><button onclick="editField('${p.id}','evaluasi')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded">Edit kendala</button></td></tr>`).join('')
+        : emptyRow(3, 'Tidak ada yang perlu dievaluasi.');
+
+    $('proker-table-4').innerHTML = open.length ? open.map(p => `
+        <tr><td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-amber-700 dark:text-amber-300">${esc(p.solusi) || 'Belum ada solusi'}</td>
+        <td class="p-3 text-right"><button onclick="editField('${p.id}','solusi')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded">Edit solusi</button></td></tr>`).join('')
+        : emptyRow(3, 'Tidak ada solusi yang perlu dirumuskan.');
+
+    const future = items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
+    $('proker-table-5').innerHTML = future.length ? future.map(p => `
+        <tr class="bg-indigo-50/30 dark:bg-indigo-950/10"><td class="p-3 font-semibold text-indigo-600">${esc(p.title)}</td>
+        <td class="p-3 text-xs">${p.isFutureOnly ? 'Rencana minggu depan' : 'Otomatis dari evaluasi'}</td><td class="p-3 text-xs">${esc(p.solusi || p.desc) || '-'}</td></tr>`).join('')
+        : emptyRow(3, 'Belum ada rencana mendatang.');
+}
+
+function openProkerModal(type) {
+    $('proker-target-type').value = type;
+    $('modal-proker-title').textContent = type === 'minggu_depan' ? 'Tambah proker minggu depan' : 'Tambah program kerja';
+    openModal('modal-proker');
+}
+async function saveProker(e) {
+    e.preventDefault();
+    const type = $('proker-target-type').value;
+    const p = {
+        id: uid('p'), bagian: $('proker-bagian-filter').value, title: $('proker-input-title').value.trim(),
+        desc: $('proker-input-desc').value.trim(), reported: false, accMusyrif: false, isHasilDone: false,
+        hasilUsaha: '', evaluasi: '', solusi: '', dateReported: '', isFutureOnly: type === 'minggu_depan', createdAt: Date.now()
+    };
+    closeModal('modal-proker'); e.target.reset();
+    await save('proker', p);
+}
+const getProker = id => store.proker.find(x => x.id === id);
+async function toggleAccProker(id) { const p = getProker(id); if (p) await save('proker', { ...p, accMusyrif: !p.accMusyrif }); }
+function toggleHasilDone(id) {
+    const p = getProker(id); if (!p) return;
+    if (p.isHasilDone) return void save('proker', { ...p, isHasilDone: false });
+    askText('Capaian hasil usaha: ' + p.title, p.hasilUsaha, v => save('proker', { ...p, isHasilDone: true, hasilUsaha: v || 'Selesai' }));
+    renderProkerPage(); // kembalikan centang bila dibatalkan
+}
+async function deleteProker(id) { if (confirm('Hapus program kerja ini?')) await remove('proker', id); }
+function editField(id, field) {
+    const p = getProker(id); if (!p) return;
+    askText(field === 'evaluasi' ? 'Kendala: ' + p.title : 'Solusi: ' + p.title, p[field], v => save('proker', { ...p, [field]: v }));
+}
+async function laporMusyrif() {
+    const bag = $('proker-bagian-filter').value;
+    const drafts = store.proker.filter(p => p.bagian === bag && !p.reported && !p.isFutureOnly);
+    if (!drafts.length) return toast('Tidak ada proker berstatus draft untuk dilaporkan.');
+    if (!confirm(`Laporkan ${drafts.length} proker bagian ${bag} ke Musyrif?`)) return;
+    for (const p of drafts) await save('proker', { ...p, reported: true, dateReported: today() });
+    toast('Laporan terkirim. Musyrif/Admin dapat memberi ACC sekarang.');
+}
+async function importLastWeek() {
+    const bag = $('proker-bagian-filter').value;
+    const last = [...list('reports')].pop();
+    if (!last) return toast('Belum ada arsip rapat untuk dijadikan acuan.');
+    const exist = new Set(store.proker.filter(p => p.bagian === bag && !p.isFutureOnly).map(p => p.title.toLowerCase()));
+    const src = (last.prokerData || []).filter(p => p.bagian === bag && (p.isFutureOnly || !p.isHasilDone || !p.accMusyrif) && !exist.has(p.title.toLowerCase()));
+    if (!src.length) return toast('Tidak ada proker belum selesai dari arsip terakhir untuk bagian ini.');
+    if (!confirm(`Salin ${src.length} proker belum selesai dari arsip “${last.title}” ke minggu ini?`)) return;
+    for (const p of src) await save('proker', { ...p, id: uid('p'), reported: false, accMusyrif: false, isHasilDone: false, hasilUsaha: '', dateReported: '', isFutureOnly: false, createdAt: Date.now() });
+    toast('Proker minggu lalu berhasil disalin.');
+}
+
+/* ---------- 4. KEPANITIAAN ---------- */
+function renderPanitiaPage() {
+    const events = list('panitia').sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    $('panitia-cards-container').innerHTML = events.length ? events.map(k => {
+        const jobs = k.joblists || [];
+        const daysLeft = Math.ceil((new Date(k.tanggal + 'T08:00:00') - Date.now()) / 864e5);
+        const when = daysLeft > 0 ? `${daysLeft} hari lagi` : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
+        return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0"><h4 class="font-bold text-lg">${esc(k.nama)}</h4><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
+                <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div></div>
+                <button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <div class="flex items-center justify-between mb-2"><h5 class="text-sm font-semibold">Pembagian tugas (${jobs.filter(j => j.done).length}/${jobs.length} selesai)</h5>
+                <button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline"><i class="fa-solid fa-plus"></i> Tambah tugas</button></div>
+                <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
+                    <li class="flex items-center gap-2 text-xs">
+                        <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600">
+                        <span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-semibold">${esc(j.bagian)}</span>
+                        <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
+                        <button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+                    </li>`).join('') : '<li class="text-xs text-gray-400">Belum ada pembagian tugas.</li>'}</ul>
+            </div></div>`;
+    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda. Klik “Buat agenda kegiatan baru”.</div>';
+}
+function openPanitiaModal() { openModal('modal-panitia'); }
+async function savePanitia(e) {
+    e.preventDefault();
+    const k = { id: uid('k'), nama: $('panitia-input-nama').value.trim(), deskripsi: $('panitia-input-deskripsi').value.trim(), tanggal: $('panitia-input-tanggal').value, joblists: [], createdAt: Date.now() };
+    closeModal('modal-panitia'); e.target.reset();
+    await save('panitia', k);
+}
+async function deletePanitia(id) { if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id); }
+function openJobModal(kid) { $('job-panitia-id').value = kid; $('job-input-bagian').innerHTML = bagianOptions(false); openModal('modal-job'); }
+async function saveJob(e) {
+    e.preventDefault();
+    const k = store.panitia.find(x => x.id === $('job-panitia-id').value); if (!k) return;
+    const job = { id: uid('j'), bagian: $('job-input-bagian').value, task: $('job-input-task').value.trim(), done: false };
+    closeModal('modal-job'); e.target.reset();
+    await save('panitia', { ...k, joblists: [...(k.joblists || []), job] });
+}
+async function toggleJob(kid, jid) {
+    const k = store.panitia.find(x => x.id === kid); if (!k) return;
+    await save('panitia', { ...k, joblists: k.joblists.map(j => j.id === jid ? { ...j, done: !j.done } : j) });
+}
+async function deleteJob(kid, jid) {
+    const k = store.panitia.find(x => x.id === kid); if (!k) return;
+    await save('panitia', { ...k, joblists: k.joblists.filter(j => j.id !== jid) });
+}
+
+/* ---------- 5. RAPAT MINGGUAN ---------- */
+function renderRapatPage() {
+    const fb = $('rapat-bagian-filter').value || 'Ketua';
+    const items = list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
+    const current = items.filter(p => !p.isFutureOnly);
+    const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
+    const fill = (id, rows, cols, html) => { $(id).innerHTML = rows.length ? rows.map(html).join('') : emptyRow(cols, 'Belum ada data.'); };
+
+    fill('rapat-table-1', current, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3">${esc(p.desc)}</td></tr>`);
+    fill('rapat-table-2', current.filter(p => p.accMusyrif && p.isHasilDone), 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-emerald-600">${esc(p.hasilUsaha)}</td></tr>`);
+    fill('rapat-table-3', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-rose-500">${esc(p.evaluasi) || '-'}</td></tr>`);
+    fill('rapat-table-4', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-amber-600">${esc(p.solusi) || '-'}</td></tr>`);
+    fill('rapat-table-5', items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif), 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3">${esc(p.solusi || p.desc) || '-'}</td></tr>`);
+    renderNotulensiFileList();
+}
+
+function simpanHasilRapat() {
+    askText('Judul arsip rapat', `Rapat Mingguan - ${today()}`, async title => {
+        if (!title) return;
+        const r = {
+            id: uid('r'), title, date: today(), by: userName(), createdAt: Date.now(),
+            prokerData: JSON.parse(JSON.stringify(list('proker'))),
+            notulensiFiles: list('notulensi').map(f => ({ name: f.name, path: f.path }))
+        };
+        if (await save('reports', r)) toast('Hasil rapat berhasil diarsipkan.');
+    });
+}
+
+async function uploadNotulensiFile() {
+    const input = $('notulensi-file-input'), file = input.files[0];
+    if (!file) return toast('Pilih file notulensi terlebih dahulu.', 'err');
+    if (file.size > MAX_FILE_MB * 1048576) return toast(`Ukuran file maksimal ${MAX_FILE_MB} MB.`, 'err');
+    const btn = $('btn-upload-notulensi'); btn.disabled = true; btn.textContent = 'Mengunggah…';
+    const path = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, '_')}`;
+    const { error } = await sb.storage.from(BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' });
+    if (error) toast('Gagal mengunggah: ' + error.message, 'err');
+    else if (await save('notulensi', { id: uid('f'), name: file.name, path, date: today(), by: userName(), createdAt: Date.now() })) { input.value = ''; toast('File berhasil diunggah.'); }
+    btn.disabled = false; btn.textContent = 'Unggah file';
+}
+function renderNotulensiFileList() {
+    const files = list('notulensi');
+    $('notulensi-file-list').innerHTML = files.length ? files.map(f => `
+        <div class="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded border border-purple-200 dark:border-purple-800 flex items-center gap-2">
+            <span>${esc(f.name)}</span><span class="text-[10px] text-purple-400">${esc(f.date)}</span>
+            <button data-dl="${esc(f.path)}" data-name="${esc(f.name)}" aria-label="Unduh" class="text-emerald-600 font-bold"><i class="fa-solid fa-download"></i></button>
+            <button onclick="deleteNotulensi('${f.id}')" aria-label="Hapus file" class="text-rose-500 font-bold">×</button>
+        </div>`).join('') : '<span class="text-xs text-gray-400">Belum ada file notulensi.</span>';
+}
+async function deleteNotulensi(id) {
+    const f = store.notulensi.find(x => x.id === id); if (!f || !confirm(`Hapus file “${f.name}”?`)) return;
+    const archived = store.reports.some(r => (r.notulensiFiles || []).some(x => x.path === f.path));
+    if (!archived && f.path) await sb.storage.from(BUCKET).remove([f.path]); // file yang sudah diarsipkan tetap disimpan
+    await remove('notulensi', id);
+}
+
+/* ---------- 6. REKAP ---------- */
+function rekapItems() {
+    const fb = $('rekap-filter-bagian').value || 'ALL';
+    return list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
+}
+function renderRekapPage() {
+    const items = rekapItems();
+    $('rekap-table-proker').innerHTML = items.length ? items.map(p => `<tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.title)}</td><td class="p-2.5">${p.accMusyrif ? 'Di-ACC' : (p.reported ? 'Dilaporkan' : 'Draft')}</td></tr>`).join('') : emptyRow(3, 'Belum ada data.');
+    const acc = items.filter(p => p.accMusyrif);
+    $('rekap-table-hasil').innerHTML = acc.length ? acc.map(p => `<tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.hasilUsaha || p.title)}</td><td class="p-2.5">${esc(p.dateReported) || '-'}</td></tr>`).join('') : emptyRow(3, 'Belum ada hasil usaha.');
+}
+function downloadRekapExcel() {
+    const fb = $('rekap-filter-bagian').value || 'ALL';
+    const items = rekapItems();
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(items.map(p => ({
+        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, 'Status Lapor': p.reported ? 'Dilaporkan' : 'Draft',
+        'ACC Musyrif': p.accMusyrif ? 'Ya' : 'Belum', Selesai: p.isHasilDone ? 'Ya' : 'Belum', 'Hasil Usaha': p.hasilUsaha,
+        Kendala: p.evaluasi, Solusi: p.solusi, 'Tanggal Lapor': p.dateReported, 'Rencana Minggu Depan': p.isFutureOnly ? 'Ya' : ''
+    }))), 'Program Kerja');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list('tasks').filter(t => fb === 'ALL' || t.bagian === fb).map(t => ({
+        Tugas: t.title, PJ: t.pj, Bagian: t.bagian, Deadline: t.deadline, Status: t.status
+    }))), 'Penugasan');
+    XLSX.writeFile(wb, `Rekap_DCC_${today()}.xlsx`);
+}
+
+/* ---------- 7. LAPORAN ---------- */
+function renderLaporanPage() {
+    const reports = [...list('reports')].reverse();
+    $('laporan-container').innerHTML = reports.length ? reports.map(r => {
+        const rows = (r.prokerData || []).map(p => `<tr><td class="p-2 font-bold">${esc(p.bagian)}</td><td class="p-2">${esc(p.title)}</td>
+            <td class="p-2">${p.accMusyrif ? 'Di-ACC' : 'Belum ACC'}${p.isHasilDone ? ', selesai' : ''}</td><td class="p-2">${esc(p.hasilUsaha) || '-'}</td><td class="p-2">${esc(p.evaluasi) || '-'}</td><td class="p-2">${esc(p.solusi) || '-'}</td></tr>`).join('');
+        const files = (r.notulensiFiles || []).map(f => f.path
+            ? `<button data-dl="${esc(f.path)}" data-name="${esc(f.name)}" class="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded border border-purple-200 dark:border-purple-800"><i class="fa-solid fa-download mr-1"></i>${esc(f.name)}</button>`
+            : `<span class="text-xs text-gray-400 px-3 py-1.5">${esc(f.name)}</span>`).join('');
+        return `<details class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+            <summary class="cursor-pointer flex items-center justify-between gap-3">
+                <span><span class="font-bold text-lg">${esc(r.title)}</span><span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span></span>
+                <button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+            </summary>
+            <div class="mt-4 space-y-3">
+                <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[700px]">
+                    <thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-2">Bagian</th><th class="p-2">Program kerja</th><th class="p-2">Status</th><th class="p-2">Hasil usaha</th><th class="p-2">Kendala</th><th class="p-2">Solusi</th></tr></thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">${rows || emptyRow(6, 'Tidak ada data proker pada arsip ini.')}</tbody></table></div>
+                <div class="flex flex-wrap gap-2">${files || '<span class="text-xs text-gray-400">Tidak ada lampiran notulensi.</span>'}</div>
+            </div></details>`;
+    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada arsip. Simpan hasil rapat dari menu Rapat Mingguan.</div>';
+}
+async function deleteReport(id) { if (confirm('Hapus arsip laporan ini?')) await remove('reports', id); }
+
+/* =====================================================================
+   IMPOR DATA LAMA (localStorage -> server), sekali jalan
+   ===================================================================== */
+const LEGACY = { tasks: 'dcc_tasks', proker: 'dcc_proker', panitia: 'dcc_panitia', reports: 'dcc_reports', notulensi: 'dcc_notulensi' };
+function legacyData() {
+    const out = {};
+    for (const [col, key] of Object.entries(LEGACY)) {
+        try { const a = JSON.parse(localStorage.getItem(key)); out[col] = Array.isArray(a) ? a : []; } catch (e) { out[col] = []; }
+    }
+    return out;
+}
+function checkLegacy() {
+    const d = legacyData();
+    const has = Object.values(d).some(a => a.length);
+    $('import-banner').classList.toggle('hidden', !has || localStorage.getItem('dcc_ws_imported') === '1');
+}
+function dismissImport() { localStorage.setItem('dcc_ws_imported', '1'); $('import-banner').classList.add('hidden'); }
+
+async function importLegacy() {
+    const d = legacyData(), rows = [], uploaded = {};
+    setSync('syncing');
+    for (const f of d.notulensi) {
+        if (f.dataUrl) {
+            try {
+                const blob = await (await fetch(f.dataUrl)).blob();
+                const path = `${Date.now()}_${(f.name || 'file').replace(/[^\w.\-]+/g, '_')}`;
+                const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
+                if (!error) uploaded[f.id] = path;
+            } catch (e) { /* lewati file yang rusak */ }
         }
-
-        // --- TABS NAVIGATION ---
-        let activeTab = 'beranda';
-        function switchTab(tabId) {
-            activeTab = tabId;
-            closeSidebarMobile();
-            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold'));
-
-            const page = document.getElementById(`page-${tabId}`);
-            if (page) page.classList.remove('hidden');
-
-            const nav = document.getElementById(`nav-${tabId}`);
-            if (nav) nav.classList.add('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold');
-
-            document.getElementById('page-title').innerText = tabId.replace('-', ' ');
-            renderCurrentPage();
+    }
+    let n = 0;
+    for (const col of COLLECTIONS) {
+        for (const obj of d[col]) {
+            const o = { ...obj, createdAt: obj.createdAt || Date.now() + n++ };
+            o.id = o.id || uid(col[0]);
+            if (col === 'notulensi') { o.path = uploaded[o.id] || o.path; delete o.dataUrl; if (!o.path) continue; }
+            if (col === 'reports') o.notulensiFiles = (o.notulensiFiles || []).map(f => ({ name: f.name, path: uploaded[f.id] || f.path || null }));
+            rows.push({ collection: col, id: o.id, data: o, updated_by: userName(), updated_at: new Date().toISOString() });
         }
+    }
+    for (let i = 0; i < rows.length; i += 100) {
+        const { error } = await sb.from(TABLE).upsert(rows.slice(i, i + 100));
+        if (error) { toast('Impor gagal: ' + error.message, 'err'); setSync('offline'); return; }
+    }
+    localStorage.setItem('dcc_ws_imported', '1');
+    $('import-banner').classList.add('hidden');
+    toast(`${rows.length} data lama berhasil dikirim ke server.`);
+    await loadAll();
+}
 
-        function renderCurrentPage() {
-            if (activeTab === 'beranda') renderBerandaPage();
-            else if (activeTab === 'penugasan') renderPenugasanPage();
-            else if (activeTab === 'proker') renderProkerPage();
-            else if (activeTab === 'kepanitiaan') renderPanitiaPage();
-            else if (activeTab === 'rapat') renderRapatPage();
-            else if (activeTab === 'rekap') renderRekapPage();
-            else if (activeTab === 'laporan') renderLaporanPage();
-        }
-
-        // --- 1. BERANDA ---
-        function renderBerandaPage() {
-            const tbodyUnreported = document.getElementById('home-unreported-table');
-            tbodyUnreported.innerHTML = '';
-            BAGIAN_LIST.forEach(bag => {
-                const bagProkers = prokerList.filter(p => p.bagian === bag);
-                const total = bagProkers.length;
-                const unapproved = bagProkers.filter(p => !p.acc_musyrif).length;
-                const statusBadge = unapproved === 0 && total > 0 
-                    ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>`
-                    : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
-
-                tbodyUnreported.innerHTML += `<tr><td class="p-3 font-semibold">${bag}</td><td class="p-3 text-center">${total}</td><td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td><td class="p-3 text-center">${statusBadge}</td></tr>`;
-            });
-
-            const tbodyTasks = document.getElementById('home-tasks-table');
-            tbodyTasks.innerHTML = '';
-            tasks.slice(0, 5).forEach(t => {
-                tbodyTasks.innerHTML += `<tr><td class="p-3 font-medium">${t.title}</td><td class="p-3 text-xs">${t.pj} (${t.bagian})</td><td class="p-3 text-xs text-rose-500 font-semibold">${t.deadline}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${t.status || 'Baru Dikerjakan'}</span></td></tr>`;
-            });
-
-            if (panitiaList.length > 0) {
-                document.getElementById('event-title-display').innerText = panitiaList[0].nama;
-                document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${panitiaList[0].tanggal}`;
-            }
-        }
-
-        // --- 2. PENUGASAN ---
-        async function fetchTasks() {
-            const { data } = await supabaseClient.from('tasks').select('*').order('created_at', { ascending: false });
-            tasks = data || [];
-            if (activeTab === 'penugasan' || activeTab === 'beranda') renderCurrentPage();
-        }
-
-        function renderPenugasanPage() {
-            const filterBagian = document.getElementById('task-filter-bagian')?.value || 'ALL';
-            const filterStatus = document.getElementById('task-filter-status')?.value || 'ALL';
-
-            let filtered = tasks;
-            if (filterBagian !== 'ALL') filtered = filtered.filter(t => t.bagian === filterBagian);
-            if (filterStatus !== 'ALL') filtered = filtered.filter(t => t.status === filterStatus);
-
-            const tbody = document.getElementById('tasks-table-body');
-            tbody.innerHTML = '';
-            filtered.forEach(t => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
-                        <td class="p-4 font-semibold">${t.title}</td>
-                        <td class="p-4 text-xs font-bold">${t.pj}</td>
-                        <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${t.bagian}</span></td>
-                        <td class="p-4 text-xs text-rose-500 font-bold">${t.deadline}</td>
-                        <td class="p-4"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${t.status || 'Baru Dikerjakan'}</span></td>
-                        <td class="p-4 text-center"><button onclick="alert('Log:\\nDibuat pada ' + '${t.created_at || newDateString()}')" class="text-blue-600 text-xs">Lihat Log</button></td>
-                        <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
-        }
-
-        async function saveTask(e) {
-            e.preventDefault();
-            await supabaseClient.from('tasks').insert([{
-                title: document.getElementById('task-input-title').value,
-                pj: document.getElementById('task-input-pj').value,
-                bagian: document.getElementById('task-input-bagian').value,
-                deadline: document.getElementById('task-input-deadline').value,
-                status: 'Baru Dikerjakan'
-            }]);
-            closeModal('modal-task');
-        }
-
-        async function deleteTask(id) {
-            await supabaseClient.from('tasks').delete().eq('id', id);
-        }
-
-        // --- 3. PROGRAM KERJA ---
-        async function fetchProker() {
-            const { data } = await supabaseClient.from('proker').select('*').order('created_at', { ascending: false });
-            prokerList = data || [];
-            if (activeTab === 'proker' || activeTab === 'beranda' || activeTab === 'rapat' || activeTab === 'rekap') renderCurrentPage();
-        }
-
-        function renderProkerPage() {
-            const currentBagian = document.getElementById('proker-bagian-filter')?.value || 'Ketua';
-            const bagProker = prokerList.filter(p => p.bagian === currentBagian);
-
-            const t1 = document.getElementById('proker-table-1');
-            if (t1) {
-                t1.innerHTML = '';
-                bagProker.filter(p => !p.is_future_only).forEach(p => {
-                    t1.innerHTML += `<tr><td class="p-3 text-center"><input type="checkbox" ${p.acc_musyrif ? 'checked' : ''} onchange="toggleAccProker('${p.id}', ${!p.acc_musyrif})" class="w-4 h-4 text-emerald-600 rounded"></td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-gray-500">${p.desc_target || ''}</td><td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td><td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-                });
-            }
-
-            const t2 = document.getElementById('proker-table-2');
-            if (t2) {
-                t2.innerHTML = '';
-                bagProker.filter(p => p.acc_musyrif && !p.is_future_only).forEach(p => {
-                    t2.innerHTML += `<tr><td class="p-3 text-center"><input type="checkbox" ${p.is_hasil_done ? 'checked' : ''} onchange="toggleHasilDone('${p.id}', ${!p.is_hasil_done})" class="w-4 h-4 text-blue-600 rounded"></td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-emerald-600 font-medium">${p.hasil_usaha || 'Belum diisi'}</td><td class="p-3 text-xs text-center text-gray-400">${p.date_reported || '-'}</td></tr>`;
-                });
-            }
-
-            const evalItems = bagProker.filter(p => (!p.is_hasil_done || !p.acc_musyrif) && !p.is_future_only);
-            const t3 = document.getElementById('proker-table-3');
-            if (t3) {
-                t3.innerHTML = '';
-                evalItems.forEach(p => {
-                    t3.innerHTML += `<tr><td class="p-3 font-semibold text-rose-600">${p.title}</td><td class="p-3 text-xs text-rose-700">${p.evaluasi || 'Belum ada kendala'}</td><td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded">Edit Kendala</button></td></tr>`;
-                });
-            }
-
-            const t4 = document.getElementById('proker-table-4');
-            if (t4) {
-                t4.innerHTML = '';
-                evalItems.forEach(p => {
-                    t4.innerHTML += `<tr><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-amber-700">${p.solusi || 'Belum ada solusi'}</td><td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded">Edit Solusi</button></td></tr>`;
-                });
-            }
-
-            const t5 = document.getElementById('proker-table-5');
-            if (t5) {
-                t5.innerHTML = '';
-                const futureItems = bagProker.filter(p => p.is_future_only || (!p.is_hasil_done || !p.acc_musyrif));
-                futureItems.forEach(p => {
-                    t5.innerHTML += `<tr class="bg-indigo-50/30"><td class="p-3 font-semibold text-indigo-600">${p.title}</td><td class="p-3 text-xs">${p.is_future_only ? 'Rencana Minggu Depan' : 'Otomatis dari Evaluasi'}</td><td class="p-3 text-xs">${p.solusi || p.desc_target || '-'}</td></tr>`;
-                });
-            }
-        }
-
-        function openProkerModal(type) {
-            document.getElementById('proker-target-type').value = type;
-            document.getElementById('modal-proker').classList.remove('hidden');
-        }
-
-        async function saveProker(e) {
-            e.preventDefault();
-            const currentBagian = document.getElementById('proker-bagian-filter').value;
-            const type = document.getElementById('proker-target-type').value;
-
-            await supabaseClient.from('proker').insert([{
-                bagian: currentBagian,
-                title: document.getElementById('proker-input-title').value,
-                desc_target: document.getElementById('proker-input-desc').value,
-                reported: true,
-                acc_musyrif: false,
-                is_hasil_done: false,
-                date_reported: newDateString(),
-                is_future_only: type === 'minggu_depan'
-            }]);
-            closeModal('modal-proker');
-        }
-
-        async function toggleAccProker(id, newAcc) {
-            await supabaseClient.from('proker').update({ acc_musyrif: newAcc }).eq('id', id);
-        }
-
-        async function toggleHasilDone(id, newDone) {
-            let updateVal = { is_hasil_done: newDone };
-            if (newDone) {
-                const val = prompt('Masukkan capaian hasil usaha:') || 'Selesai';
-                updateVal.hasil_usaha = val;
-            }
-            await supabaseClient.from('proker').update(updateVal).eq('id', id);
-        }
-
-        async function editKendala(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) {
-                const val = prompt('Penyebab / Kendala:', p.evaluasi || '');
-                if (val !== null) await supabaseClient.from('proker').update({ evaluasi: val }).eq('id', id);
-            }
-        }
-
-        async function editSolusi(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) {
-                const val = prompt('Rumusan Solusi:', p.solusi || '');
-                if (val !== null) await supabaseClient.from('proker').update({ solusi: val }).eq('id', id);
-            }
-        }
-
-        async function deleteProker(id) {
-            await supabaseClient.from('proker').delete().eq('id', id);
-        }
-
-        function laporMusyrif() { alert('Laporan berhasil dikirim ke Musyrif!'); }
-
-        // --- 4. KEPANITIAAN ---
-        async function fetchPanitia() {
-            const { data } = await supabaseClient.from('panitia').select('*').order('tanggal', { ascending: true });
-            panitiaList = data || [];
-            if (activeTab === 'kepanitiaan' || activeTab === 'beranda') renderCurrentPage();
-        }
-
-        function renderPanitiaPage() {
-            const container = document.getElementById('panitia-cards-container');
-            if (!container) return;
-            container.innerHTML = '';
-            panitiaList.forEach(k => {
-                container.innerHTML += `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border"><h4 class="font-bold text-lg">${k.nama}</h4><p class="text-xs text-gray-500">${k.deskripsi}</p><div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${k.tanggal}</div></div>`;
-            });
-        }
-
-        async function savePanitia(e) {
-            e.preventDefault();
-            await supabaseClient.from('panitia').insert([{
-                nama: document.getElementById('panitia-input-nama').value,
-                deskripsi: document.getElementById('panitia-input-deskripsi').value,
-                tanggal: document.getElementById('panitia-input-tanggal').value
-            }]);
-            closeModal('modal-panitia');
-        }
-
-        // --- 5. RAPAT MINGGUAN ---
-        function renderRapatPage() {
-            const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
-            let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
-
-            const t1 = document.getElementById('rapat-table-1');
-            if (t1) { t1.innerHTML = ''; filteredProker.filter(p => !p.is_future_only).forEach(p => { t1.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3">${p.desc_target || '-'}</td></tr>`; }); }
-            
-            const t2 = document.getElementById('rapat-table-2');
-            if (t2) { t2.innerHTML = ''; filteredProker.filter(p => p.acc_musyrif && p.is_hasil_done && !p.is_future_only).forEach(p => { t2.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-emerald-600">${p.hasil_usaha || '-'}</td></tr>`; }); }
-
-            const t3 = document.getElementById('rapat-table-3');
-            if (t3) { t3.innerHTML = ''; filteredProker.filter(p => (!p.is_hasil_done || !p.acc_musyrif) && !p.is_future_only).forEach(p => { t3.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-rose-500">${p.evaluasi || '-'}</td></tr>`; }); }
-
-            const t4 = document.getElementById('rapat-table-4');
-            if (t4) { t4.innerHTML = ''; filteredProker.filter(p => (!p.is_hasil_done || !p.acc_musyrif) && !p.is_future_only).forEach(p => { t4.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-amber-600">${p.solusi || '-'}</td></tr>`; }); }
-
-            const t5 = document.getElementById('rapat-table-5');
-            if (t5) { t5.innerHTML = ''; filteredProker.filter(p => p.is_future_only || (!p.is_hasil_done || !p.acc_musyrif)).forEach(p => { t5.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3">${p.solusi || p.desc_target || '-'}</td></tr>`; }); }
-
-            renderNotulensiFileList();
-        }
-
-        async function simpanHasilRapat() {
-            const title = prompt('Judul Arsip Rapat:', `Rapat Mingguan - ${newDateString()}`);
-            if (title) {
-                await supabaseClient.from('reports').insert([{
-                    title: title,
-                    date: newDateString()
-                }]);
-                alert('Hasil rapat berhasil diarsipkan di Supabase Cloud!');
-            }
-        }
-
-        async function fetchReports() {
-            const { data } = await supabaseClient.from('reports').select('*').order('created_at', { ascending: false });
-            reportsArchive = data || [];
-            if (activeTab === 'laporan') renderLaporanPage();
-        }
-
-        async function fetchNotulensi() {
-            const { data } = await supabaseClient.from('notulensi').select('*').order('created_at', { ascending: false });
-            notulensiFiles = data || [];
-            if (activeTab === 'rapat') renderNotulensiFileList();
-        }
-
-        async function uploadNotulensiFile() {
-            const input = document.getElementById('notulensi-file-input');
-            if (input && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = async function (e) {
-                    await supabaseClient.from('notulensi').insert([{
-                        name: file.name,
-                        data_url: e.target.result,
-                        date: newDateString()
-                    }]);
-                    alert('File berhasil diunggah!');
-                    input.value = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function renderNotulensiFileList() {
-            const listContainer = document.getElementById('notulensi-file-list');
-            if (!listContainer) return;
-            listContainer.innerHTML = '';
-            notulensiFiles.forEach((f) => {
-                listContainer.innerHTML += `<div class="bg-purple-50 text-purple-700 text-xs px-3 py-1.5 rounded border flex items-center gap-2"><span>${f.name}</span><button onclick="downloadRealFile('${f.id}')" class="text-emerald-600 font-bold"><i class="fa-solid fa-download"></i></button><button onclick="deleteNotulensi('${f.id}')" class="text-rose-500 font-bold">×</button></div>`;
-            });
-        }
-
-        async function deleteNotulensi(id) {
-            await supabaseClient.from('notulensi').delete().eq('id', id);
-        }
-
-        // --- 6. REKAP ---
-        function renderRekapPage() {
-            const filterBag = document.getElementById('rekap-filter-bagian')?.value || 'ALL';
-            let list = filterBag !== 'ALL' ? prokerList.filter(p => p.bagian === filterBag) : prokerList;
-
-            const tProker = document.getElementById('rekap-table-proker');
-            if (tProker) { tProker.innerHTML = ''; list.forEach(p => { tProker.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.title}</td><td class="p-2.5">${p.acc_musyrif ? 'Di-ACC' : 'Proses'}</td></tr>`; }); }
-            
-            const tHasil = document.getElementById('rekap-table-hasil');
-            if (tHasil) { tHasil.innerHTML = ''; list.filter(p => p.acc_musyrif).forEach(p => { tHasil.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.hasil_usaha || p.title}</td><td class="p-2.5">${p.date_reported || '-'}</td></tr>`; }); }
-        }
-
-        function downloadRekapExcel() {
-            const worksheet = XLSX.utils.json_to_sheet(prokerList);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Proker");
-            XLSX.writeFile(workbook, "Rekap_DCC.xlsx");
-        }
-
-        // --- 7. LAPORAN ---
-        function renderLaporanPage() {
-            const container = document.getElementById('laporan-container');
-            if (!container) return;
-            container.innerHTML = '';
-            reportsArchive.forEach(r => {
-                container.innerHTML += `<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border space-y-2"><h4 class="font-bold text-lg">${r.title}</h4><p class="text-xs text-gray-500">Arsip: ${r.date}</p></div>`;
-            });
-        }
-
-        function downloadRealFile(fileId) {
-            const f = notulensiFiles.find(x => x.id === fileId);
-            if (f && f.data_url) {
-                const link = document.createElement('a');
-                link.href = f.data_url; link.download = f.name;
-                link.click();
-            }
-        }
-
-        // UTILS
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-        function newDateString() { return new Date().toISOString().split('T')[0]; }
-    </script>
+/* =====================================================================
+   INISIALISASI
+   ===================================================================== */
+(function init() {
+    $('task-filter-bagian').innerHTML = bagianOptions(true);
+    $('task-filter-status').innerHTML = '<option value="ALL">Semua status</option>' + STATUS_LIST.map(s => `<option>${s}</option>`).join('');
+    $('proker-bagian-filter').innerHTML = bagianOptions(false);
+    $('rapat-bagian-filter').innerHTML = bagianOptions(true);
+    $('rapat-bagian-filter').value = 'Ketua';
+    $('rekap-filter-bagian').innerHTML = bagianOptions(true);
+    if (window.innerWidth < 768) toggleSidebar(true);
+    sb.auth.getSession().then(({ data }) => { if (data.session?.user) startSession(data.session.user); });
+})();
+</script>
 </body>
 </html>
