@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCC Workspace</title>
-    <!-- Favicon Logo -->
+    <!-- Favicon Logo (Disesuaikan dengan nama file bermuatan spasi di GitHub) -->
     <link rel="icon" href="./logo%20store.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -803,8 +803,26 @@ function renderPenugasanPage() {
     const canManage = isMusyrifOrAdmin();
     $('btn-add-task').style.display = canManage ? 'inline-flex' : 'none';
 
+    // 1. Dapatkan seluruh tugas yang ada
+    const allTasks = list('tasks');
+    
+    // 2. Kumpulkan nama bagian unik dari daftar tugas (digabung dengan daftar baku)
+    const uniqueBagian = Array.from(new Set([
+        ...BAGIAN_LIST, 
+        ...allTasks.map(t => t.bagian).filter(Boolean)
+    ])).sort();
+
+    // 3. Simpan filter yang sedang dipilih
+    const currentSelectedFilter = $('task-filter-bagian').value || 'ALL';
+
+    // 4. Perbarui isi dropdown filter bagian secara dinamis
+    $('task-filter-bagian').innerHTML = '<option value="ALL">Semua bagian</option>' + 
+        uniqueBagian.map(b => `<option value="${esc(b)}"${b === currentSelectedFilter ? ' selected' : ''}>${esc(b)}</option>`).join('');
+
+    // 5. Filter baris tabel berdasarkan bagian dan status
     const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
-    const rows = list('tasks').filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
+    const rows = allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
+
     $('tasks-table-body').innerHTML = rows.length ? rows.map(t => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
             <td class="p-4 font-semibold">${esc(t.title)}</td>
@@ -817,6 +835,7 @@ function renderPenugasanPage() {
             <td class="p-4 text-right">${canManage ? `<button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '-'}</td>
         </tr>`).join('') : emptyRow(7, 'Belum ada penugasan.');
 }
+
 function openTaskModal() {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat memberi penugasan.', 'err');
     $('task-input-bagian').value = '';
@@ -1217,7 +1236,6 @@ async function importLegacy() {
    INISIALISASI
    ===================================================================== */
 (function init() {
-    $('task-filter-bagian').innerHTML = bagianOptions(true);
     $('task-filter-status').innerHTML = '<option value="ALL">Semua status</option>' + STATUS_LIST.map(s => `<option>${s}</option>`).join('');
     $('proker-bagian-filter').innerHTML = bagianOptions(false);
     $('rapat-bagian-filter').innerHTML = bagianOptions(true);
