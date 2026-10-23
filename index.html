@@ -10,7 +10,6 @@
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = { darkMode: 'class' };
-        // Terapkan tema tersimpan sebelum halaman tampil (hindari kedipan)
         try { if (localStorage.getItem('dcc_ws_theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -130,12 +129,10 @@
 
         <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
 
-            <!-- Banner: tabel belum dibuat -->
             <div id="setup-banner" class="hidden mb-4 p-4 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/40 dark:border-rose-800 text-sm text-rose-800 dark:text-rose-200">
                 <b>Database belum siap.</b> Jalankan file <code class="font-mono">supabase_setup.sql</code> di Supabase (SQL Editor), lalu muat ulang halaman ini.
             </div>
 
-            <!-- Banner: impor data lama dari localStorage -->
             <div id="import-banner" class="hidden mb-4 p-4 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span class="text-blue-900 dark:text-blue-100">Ada data lama di browser ini (localStorage). Kirim ke server agar bisa dilihat semua pengguna.</span>
                 <span class="flex gap-2 shrink-0">
@@ -344,7 +341,6 @@
 </div>
 
 <!-- ============ MODAL ============ -->
-<!-- Modal Ubah Akses Role -->
 <div id="modal-role" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Ubah Akses / Role Pengguna</h3>
@@ -370,13 +366,14 @@
     </div>
 </div>
 
+<!-- MODAL PENUGASAN (Bagian kini berbentuk Input Teks/Fleksibel) -->
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Beri penugasan baru</h3>
         <form onsubmit="saveTask(event)" class="space-y-3 text-xs sm:text-sm">
             <div><label class="block font-medium mb-1" for="task-input-title">Judul tugas</label><input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-pj">Penanggung jawab (PJ)</label><input type="text" id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
-            <div><label class="block font-medium mb-1" for="task-input-bagian">Bagian</label><select id="task-input-bagian" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select></div>
+            <div><label class="block font-medium mb-1" for="task-input-bagian">Bagian</label><input type="text" id="task-input-bagian" required placeholder="Ketik nama bagian/tim..." class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-deadline">Deadline</label><input type="date" id="task-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan penugasan</button></div>
         </form>
@@ -407,12 +404,13 @@
     </div>
 </div>
 
+<!-- MODAL PEMBAGIAN TUGAS (Bagian kini berbentuk Input Teks/Fleksibel) -->
 <div id="modal-job" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Tambah pembagian tugas</h3>
         <form onsubmit="saveJob(event)" class="space-y-3 text-xs sm:text-sm">
             <input type="hidden" id="job-panitia-id">
-            <div><label class="block font-medium mb-1" for="job-input-bagian">Bagian</label><select id="job-input-bagian" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select></div>
+            <div><label class="block font-medium mb-1" for="job-input-bagian">Bagian</label><input type="text" id="job-input-bagian" required placeholder="Ketik nama bagian/posisi..." class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="job-input-task">Tugas</label><input type="text" id="job-input-task" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-job')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg">Tambah</button></div>
         </form>
@@ -821,7 +819,7 @@ function renderPenugasanPage() {
 }
 function openTaskModal() {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat memberi penugasan.', 'err');
-    $('task-input-bagian').innerHTML = bagianOptions(false);
+    $('task-input-bagian').value = '';
     openModal('modal-task');
 }
 async function saveTask(e) {
@@ -829,7 +827,7 @@ async function saveTask(e) {
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const t = {
         id: uid('t'), title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
-        bagian: $('task-input-bagian').value, deadline: $('task-input-deadline').value,
+        bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value,
         status: STATUS_LIST[0], history: [`${today()} - Dibuat oleh ${userName()}`], createdAt: Date.now()
     };
     closeModal('modal-task'); e.target.reset();
@@ -1023,13 +1021,15 @@ async function deletePanitia(id) {
 }
 function openJobModal(kid) {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menambah pembagian tugas.', 'err');
-    $('job-panitia-id').value = kid; $('job-input-bagian').innerHTML = bagianOptions(false); openModal('modal-job');
+    $('job-panitia-id').value = kid;
+    $('job-input-bagian').value = '';
+    openModal('modal-job');
 }
 async function saveJob(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const k = store.panitia.find(x => x.id === $('job-panitia-id').value); if (!k) return;
-    const job = { id: uid('j'), bagian: $('job-input-bagian').value, task: $('job-input-task').value.trim(), done: false };
+    const job = { id: uid('j'), bagian: $('job-input-bagian').value.trim(), task: $('job-input-task').value.trim(), done: false };
     closeModal('modal-job'); e.target.reset();
     await save('panitia', { ...k, joblists: [...(k.joblists || []), job] });
 }
@@ -1063,20 +1063,15 @@ function simpanHasilRapat() {
     askText('Judul arsip rapat', `Rapat Mingguan - ${today()}`, async title => {
         if (!title) return;
         
-        // 1. Ambil data proker saat ini
         const currentProker = list('proker');
-        
-        // 2. Buat objek arsip laporan
         const r = {
             id: uid('r'), title, date: today(), by: userName(), createdAt: Date.now(),
             prokerData: JSON.parse(JSON.stringify(currentProker)),
             notulensiFiles: list('notulensi').map(f => ({ name: f.name, path: f.path }))
         };
         
-        // 3. Simpan arsip
         const saved = await save('reports', r);
         if (saved) {
-            // 4. OTOMATIS RESET PROKER: Hapus semua item proker dari database agar bersih kembali
             const prokerIds = currentProker.map(p => p.id);
             for (const id of prokerIds) {
                 await remove('proker', id);
