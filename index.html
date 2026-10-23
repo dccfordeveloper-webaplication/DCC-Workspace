@@ -57,6 +57,15 @@
             max-height: 380px;
             overflow-y: auto;
         }
+
+        /* Smooth Slide Animation for Beranda Banner Countdown */
+        .slide-banner-enter {
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 antialiased min-h-screen flex flex-col">
@@ -64,7 +73,6 @@
     <div id="app" class="flex flex-1 h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-30 shrink-0">
-            <!-- App Logo / Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -80,7 +88,6 @@
                 </button>
             </div>
 
-            <!-- External Link back to DCC Monitor -->
             <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-950/30">
                 <a href="https://dcc-gontor.vercel.app/" target="_blank" rel="noopener noreferrer" 
                    class="flex items-center justify-between px-3 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 rounded-lg transition">
@@ -136,7 +143,6 @@
                 </div>
             </nav>
 
-            <!-- Current User Info Footer -->
             <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                 <div class="flex items-center space-x-3">
                     <img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=Admin+DCC&background=0284c7&color=fff" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
@@ -150,7 +156,6 @@
 
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col h-full overflow-hidden">
-            <!-- Header -->
             <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 flex items-center justify-between z-20 shrink-0">
                 <div class="flex items-center space-x-4">
                     <h2 id="page-title" class="text-xl font-bold text-gray-800 dark:text-white capitalize">Beranda</h2>
@@ -169,26 +174,25 @@
                 </div>
             </header>
 
-            <!-- Dynamic Body Pages Container -->
             <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
 
-                <!-- 1. BERANDA -->
+                <!-- 1. BERANDA (With Real Moving Smooth Banner Countdown) -->
                 <section id="page-beranda" class="page-content space-y-6">
-                    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg transition-all duration-500">
+                    <div id="countdown-banner-box" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg transition-all duration-500">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
+                            <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="bg-blue-400/30 text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Kegiatan Terdekat</span>
-                                    <span id="countdown-indicator" class="text-[11px] text-blue-200 italic"></span>
+                                    <span class="bg-blue-400/30 text-blue-100 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">KEGIATAN TERDEKAT</span>
+                                    <span id="countdown-indicator" class="text-[11px] text-blue-200 italic font-medium"></span>
                                 </div>
-                                <h3 id="event-title-display" class="text-2xl font-bold mt-2">Memuat Kegiatan...</h3>
+                                <h3 id="event-title-display" class="text-2xl font-bold mt-2 truncate">Memuat Kegiatan...</h3>
                                 <p id="event-date-display" class="text-blue-100 text-sm mt-1"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: -</p>
                             </div>
                             <div class="grid grid-cols-4 gap-2 text-center bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 min-w-[280px]">
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-days" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200">Hari</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-hours" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200">Jam</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-minutes" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200">Menit</div></div>
-                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-seconds" class="text-2xl font-black text-amber-300">00</div><div class="text-[10px] uppercase text-blue-200">Detik</div></div>
+                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-days" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Hari</div></div>
+                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-hours" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Jam</div></div>
+                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-minutes" class="text-2xl font-black">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Menit</div></div>
+                                <div class="bg-white/10 p-2 rounded-lg"><div id="cd-seconds" class="text-2xl font-black text-amber-300">00</div><div class="text-[10px] uppercase text-blue-200 font-bold">Detik</div></div>
                             </div>
                         </div>
                     </div>
@@ -286,7 +290,7 @@
                     </div>
                 </section>
 
-                <!-- 3. PROGRAM KERJA (Diperbaiki & Dioptimalkan) -->
+                <!-- 3. PROGRAM KERJA (With Active Conditional Proker Minggu Depan Button) -->
                 <section id="page-proker" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
@@ -304,6 +308,12 @@
                             <button onclick="openImportLastWeekModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition">
                                 <i class="fa-solid fa-file-arrow-down"></i> Isi Proker Minggu Lalu
                             </button>
+                            
+                            <!-- Dynamic Conditional Button for Proker Minggu Depan -->
+                            <button id="btn-next-week-proker" onclick="openProkerModal('minggu_depan')" disabled class="bg-gray-400 cursor-not-allowed text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+                                <i class="fa-solid fa-calendar-plus"></i> Tambah Proker Minggu Depan
+                            </button>
+
                             <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Tambah Proker
                             </button>
@@ -343,7 +353,7 @@
                     </div>
                 </section>
 
-                <!-- 4. KEPANITIAAN (Diperbaiki Tombol Tambah/Hapus Agenda & Jobdesk) -->
+                <!-- 4. KEPANITIAAN -->
                 <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -359,7 +369,7 @@
                     </div>
                 </section>
 
-                <!-- 5. RAPAT MINGGUAN (Diperbaiki Simpan Hasil & Upload File Notulensi) -->
+                <!-- 5. RAPAT MINGGUAN (Fully Synchronized with Proker Page Data) -->
                 <section id="page-rapat" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -388,28 +398,28 @@
                     <div class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
                             <h4 class="font-bold text-sm mb-3 text-blue-600">1. Program Kerja Minggu Lalu</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program Kerja</th><th class="p-3 w-2/5">Deskripsi / Target</th></tr></thead><tbody id="rapat-table-1" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA</th><th class="p-3 w-2/5">DESKRIPSI / TARGET</th></tr></thead><tbody id="rapat-table-1" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
                             <h4 class="font-bold text-sm mb-3 text-emerald-600">2. Hasil Usaha Rapat</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program Kerja</th><th class="p-3 w-2/5">Capaian Hasil Usaha</th></tr></thead><tbody id="rapat-table-2" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA</th><th class="p-3 w-2/5">CAPAIAN HASIL USAHA</th></tr></thead><tbody id="rapat-table-2" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
                             <h4 class="font-bold text-sm mb-3 text-rose-600">3. Evaluasi</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Hal Evaluasi</th><th class="p-3 w-2/5">Penyebab / Kendala</th></tr></thead><tbody id="rapat-table-3" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">HAL EVALUASI</th><th class="p-3 w-2/5">PENYEBAB / KENDALA</th></tr></thead><tbody id="rapat-table-3" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
                             <h4 class="font-bold text-sm mb-3 text-amber-600">4. Solusi</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Evaluasi Target</th><th class="p-3 w-2/5">Rumusan Solusi</th></tr></thead><tbody id="rapat-table-4" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">EVALUASI TARGET</th><th class="p-3 w-2/5">RUMUSAN SOLUSI</th></tr></thead><tbody id="rapat-table-4" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
                             <h4 class="font-bold text-sm mb-3 text-indigo-600">5. Program Kerja Yang Akan Datang</h4>
-                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">Bagian</th><th class="p-3 w-2/5">Program Kerja Mendatang</th><th class="p-3 w-2/5">Rencana / Sumber</th></tr></thead><tbody id="rapat-table-5" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left border-collapse"><thead class="bg-gray-100 dark:bg-gray-700/80 uppercase font-semibold"><tr class="divide-x divide-gray-200 dark:divide-gray-600"><th class="p-3 w-1/5">BAGIAN</th><th class="p-3 w-2/5">PROGRAM KERJA MENDATANG</th><th class="p-3 w-2/5">RENCANA / SUMBER</th></tr></thead><tbody id="rapat-table-5" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 6. REKAP & LAPORAN (Diperbaiki Download Excel .xlsx) -->
+                <!-- 6. REKAP -->
                 <section id="page-rekap" class="page-content space-y-6 hidden">
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                         <div class="flex flex-wrap items-center gap-3">
@@ -437,14 +447,15 @@
                     </div>
                 </section>
 
+                <!-- 7. LAPORAN (With Detailed Tables, Notulensi PDF Review & Download Features) -->
                 <section id="page-laporan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
                             <h3 class="text-lg font-bold">Arsip Laporan Rapat Mingguan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Seluruh data riwayat rapat yang telah disimpan dan diarsipkan.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Seluruh data riwayat rapat yang telah diarsipkan lengkap dengan lampiran notulensi.</p>
                         </div>
                     </div>
-                    <div id="laporan-container" class="space-y-4"></div>
+                    <div id="laporan-container" class="space-y-6"></div>
                 </section>
 
                 <!-- 8. ROOMCHAT -->
@@ -462,36 +473,9 @@
                     <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]">
                     </div>
 
-                    <div id="reply-banner" class="hidden px-4 py-2 bg-gray-100 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex items-center justify-between text-xs">
-                        <div class="flex items-center space-x-2 truncate">
-                            <i class="fa-solid fa-reply text-blue-500"></i>
-                            <span class="font-semibold text-gray-700 dark:text-gray-300">Membalas:</span>
-                            <span id="reply-text" class="text-gray-500 truncate">...</span>
-                        </div>
-                        <button onclick="cancelReply()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-
-                    <div id="emoji-picker" class="hidden p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 grid grid-cols-8 gap-2 text-xl max-h-36 overflow-y-auto">
-                        <button onclick="addEmoji('😊')">😊</button><button onclick="addEmoji('😂')">😂</button><button onclick="addEmoji('👍')">👍</button>
-                        <button onclick="addEmoji('❤️')">❤️</button><button onclick="addEmoji('🙏')">🙏</button><button onclick="addEmoji('🔥')">🔥</button>
-                        <button onclick="addEmoji('🎉')">🎉</button><button onclick="addEmoji('✅')">✅</button><button onclick="addEmoji('🙌')">🙌</button>
-                        <button onclick="addEmoji('👏')">👏</button><button onclick="addEmoji('💡')">💡</button><button onclick="addEmoji('🚀')">🚀</button>
-                        <button onclick="addEmoji('📌')">📌</button><button onclick="addEmoji('⚠️')">⚠️</button><button onclick="addEmoji('💪')">💪</button>
-                        <button onclick="addEmoji('😎')">😎</button>
-                    </div>
-
                     <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                         <form id="chat-form" onsubmit="handleSendChat(event)" class="flex items-center space-x-2">
-                            <button type="button" onclick="toggleEmojiPicker()" class="p-2 text-gray-500 hover:text-amber-500">
-                                <i class="fa-regular fa-face-smile text-lg"></i>
-                            </button>
-                            <label class="p-2 text-gray-500 hover:text-blue-500 cursor-pointer" title="Lampirkan File/Foto/Dokumen">
-                                <i class="fa-solid fa-paperclip text-lg"></i>
-                                <input type="file" id="chat-file-input" class="hidden" onchange="handleChatFileUpload(event)">
-                            </label>
-
                             <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-1 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500">
-
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white p-2.5 rounded-lg shadow transition">
                                 <i class="fa-solid fa-paper-plane text-sm"></i>
                             </button>
@@ -522,6 +506,28 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Modal Preview PDF Notulensi -->
+    <div id="modal-preview-pdf" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl p-5 space-y-4 flex flex-col h-[85vh]">
+            <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
+                <h3 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-rose-500 text-lg"></i> Preview Document Notulensi (PDF Viewer)
+                </h3>
+                <button onclick="closeModal('modal-preview-pdf')" class="text-gray-400 hover:text-rose-500 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 bg-gray-100 dark:bg-gray-900 rounded-lg p-4 flex flex-col items-center justify-center border text-center space-y-3">
+                <i class="fa-solid fa-file-pdf text-5xl text-rose-500 animate-pulse"></i>
+                <div>
+                    <p id="pdf-preview-filename" class="font-bold text-sm text-gray-800 dark:text-gray-200">Dokumen_Notulensi.pdf</p>
+                    <p class="text-xs text-gray-400 mt-1">Pratinjau mode PDF viewer siap ditampilkan secara interaktif.</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 border-t pt-3 dark:border-gray-700">
+                <button onclick="closeModal('modal-preview-pdf')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beri Penugasan Baru</h3>
@@ -537,8 +543,9 @@
 
     <div id="modal-proker" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
+            <h3 id="modal-proker-title" class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
             <form id="form-proker" onsubmit="saveProker(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="proker-target-type" value="minggu_ini">
                 <div><label class="block font-medium mb-1">Nama Program Kerja</label><input type="text" id="proker-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
                 <div><label class="block font-medium mb-1">Deskripsi / Target</label><textarea id="proker-input-desc" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-proker')" class="px-4 py-2 border rounded-lg">Batal</button><button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg">Simpan Proker</button></div>
@@ -575,10 +582,10 @@
 
         let activeUserId = localStorage.getItem('dcc_active_user') || 'u1';
         let activeTab = 'beranda';
+        
         let countdownRotationIndex = 0;
         let countdownTimerInterval = null;
         let countdownRotationTimer = null;
-        let activeReplyMsg = null;
 
         let tasks = JSON.parse(localStorage.getItem('dcc_tasks')) || [
             { id: 't1', title: 'Menyiapkan Proposal Sponsor', pj: 'Ahmad Member', bagian: 'Sekretaris', deadline: '2026-11-05', status: 'Baru Dikerjakan', history: ['Dibuat pada 2026-10-23'] },
@@ -614,11 +621,7 @@
             }
         ];
 
-        let chatMessages = JSON.parse(localStorage.getItem('dcc_chat_messages')) || [
-            { id: 'c1', senderId: 'u1', senderName: 'Admin Utama', text: 'Halo tim DCC, mari koordinasikan agenda minggu ini!', file: null, replyTo: null, timestamp: '10:00' },
-            { id: 'c2', senderId: 'u3', senderName: 'Ahmad Member', text: 'Siap min, persiapan modul IoT D-Tech sedang berjalan.', file: null, replyTo: null, timestamp: '10:05' }
-        ];
-
+        let chatMessages = JSON.parse(localStorage.getItem('dcc_chat_messages')) || [];
         let reportsArchive = JSON.parse(localStorage.getItem('dcc_reports')) || [];
         let notulensiFiles = JSON.parse(localStorage.getItem('dcc_notulensi')) || [];
 
@@ -714,7 +717,7 @@
             else if (activeTab === 'users') renderUsersPage();
         }
 
-        // --- 1. BERANDA ---
+        // --- 1. BERANDA (Smooth Moving Countdown per 10 Detik) ---
         function renderBerandaPage() {
             const tbodyUnreported = document.getElementById('home-unreported-table');
             tbodyUnreported.innerHTML = '';
@@ -765,37 +768,65 @@
             const sortedEvents = [...panitiaList].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
             if (countdownRotationIndex >= sortedEvents.length) countdownRotationIndex = 0;
 
-            function updateCountdownForEvent(eventObj) {
-                document.getElementById('event-title-display').innerText = eventObj.nama;
-                document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${eventObj.tanggal}`;
+            function updateCountdownUI() {
+                const activeEv = sortedEvents[countdownRotationIndex];
+                if (!activeEv) return;
+
+                const box = document.getElementById('countdown-banner-box');
+                if (box) {
+                    box.classList.remove('slide-banner-enter');
+                    void box.offsetWidth;
+                    box.classList.add('slide-banner-enter');
+                }
+
+                document.getElementById('event-title-display').innerText = activeEv.nama;
+                document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${activeEv.tanggal}`;
                 
                 if (sortedEvents.length > 1) {
-                    document.getElementById('countdown-indicator').innerText = `(Agenda ${countdownRotationIndex + 1} dari ${sortedEvents.length})`;
+                    document.getElementById('countdown-indicator').innerText = `(Agenda ${countdownRotationIndex + 1} dari ${sortedEvents.length} - Berganti tiap 10s)`;
                 } else {
                     document.getElementById('countdown-indicator').innerText = "(Agenda Terdekat)";
                 }
-
-                const targetTime = new Date(eventObj.tanggal + 'T08:00:00').getTime();
-
-                function computeTime() {
-                    const now = new Date().getTime();
-                    const diff = targetTime - now;
-
-                    if (diff > 0) {
-                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                        document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-                        document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-                        document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
-                        document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
-                    }
-                }
-                computeTime();
             }
-            updateCountdownForEvent(sortedEvents[countdownRotationIndex]);
+
+            function tickCountdown() {
+                const activeEv = sortedEvents[countdownRotationIndex];
+                if (!activeEv) return;
+
+                const targetTime = new Date(activeEv.tanggal + 'T08:00:00').getTime();
+                const now = new Date().getTime();
+                const diff = targetTime - now;
+
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+                    document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+                    document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
+                    document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
+                } else {
+                    document.getElementById('cd-days').innerText = "00";
+                    document.getElementById('cd-hours').innerText = "00";
+                    document.getElementById('cd-minutes').innerText = "00";
+                    document.getElementById('cd-seconds').innerText = "00";
+                }
+            }
+
+            updateCountdownUI();
+            tickCountdown();
+
+            countdownTimerInterval = setInterval(tickCountdown, 1000);
+
+            if (sortedEvents.length > 1) {
+                countdownRotationTimer = setInterval(() => {
+                    countdownRotationIndex = (countdownRotationIndex + 1) % sortedEvents.length;
+                    updateCountdownUI();
+                    tickCountdown();
+                }, 10000);
+            }
         }
 
         // --- 2. PENUGASAN ---
@@ -860,7 +891,7 @@
             if (confirm('Hapus tugas ini?')) { tasks = tasks.filter(t => t.id !== taskId); saveData(); renderPenugasanPage(); }
         }
 
-        // --- 3. PROGRAM KERJA (Diperbaiki) ---
+        // --- 3. PROGRAM KERJA (Conditional Proker Minggu Depan Active State) ---
         function renderProkerPage() {
             const filterSelect = document.getElementById('proker-bagian-filter');
             const currentBagian = filterSelect ? filterSelect.value : BAGIAN_LIST[0];
@@ -883,6 +914,20 @@
             }
 
             const bagProker = prokerList.filter(p => p.bagian === currentBagian);
+
+            // Conditional Activation: "Tambah Proker Minggu Depan" button active if Hasil Usaha/Evaluasi/Solusi are filled
+            const btnNextWeek = document.getElementById('btn-next-week-proker');
+            const hasProgressData = bagProker.some(p => (p.hasilUsaha && p.hasilUsaha.trim() !== '') || (p.evaluasi && p.evaluasi.trim() !== '') || (p.solusi && p.solusi.trim() !== ''));
+
+            if (btnNextWeek) {
+                if (hasProgressData) {
+                    btnNextWeek.removeAttribute('disabled');
+                    btnNextWeek.className = "bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer";
+                } else {
+                    btnNextWeek.setAttribute('disabled', 'true');
+                    btnNextWeek.className = "bg-gray-400 cursor-not-allowed text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition";
+                }
+            }
 
             const t1 = document.getElementById('proker-table-1');
             if (t1) {
@@ -923,7 +968,7 @@
                         <tr>
                             <td class="p-3 font-semibold text-rose-600">${p.title}</td>
                             <td class="p-3 text-xs font-medium text-rose-700 dark:text-rose-300">${p.evaluasi || 'Belum ada kendala'}</td>
-                            <td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded-lg">Edit Kendala</button></td>
+                            <td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded-lg font-semibold">Edit Kendala</button></td>
                         </tr>
                     `;
                 });
@@ -937,7 +982,7 @@
                         <tr>
                             <td class="p-3 font-semibold">${p.title}</td>
                             <td class="p-3 text-xs font-medium text-amber-700 dark:text-amber-300">${p.solusi || 'Belum ada solusi'}</td>
-                            <td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded-lg">Edit Solusi</button></td>
+                            <td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded-lg font-semibold">Edit Solusi</button></td>
                         </tr>
                     `;
                 });
@@ -946,23 +991,30 @@
             const t5 = document.getElementById('proker-table-5');
             if (t5) {
                 t5.innerHTML = '';
-                bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly).forEach(p => {
+                bagProker.filter(p => p.isFutureOnly || (!p.accMusyrif && (p.evaluasi || p.solusi))).forEach(p => {
                     t5.innerHTML += `
-                        <tr class="bg-rose-50/30">
-                            <td class="p-3 font-semibold text-indigo-600">${p.title}</td>
-                            <td class="p-3 text-xs">${p.solusi || p.evaluasi || 'Lanjutan'}</td>
-                            <td class="p-3 text-xs text-gray-500">Minggu Depan</td>
+                        <tr class="bg-indigo-50/40 dark:bg-indigo-950/20">
+                            <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${p.title}</td>
+                            <td class="p-3 text-xs font-semibold text-gray-500">${p.isFutureOnly ? 'Rencana Minggu Depan' : 'Lanjutan Evaluasi'}</td>
+                            <td class="p-3 text-xs">${p.desc || p.solusi || 'Eksekusi Periode Mendatang'}</td>
                         </tr>
                     `;
                 });
             }
         }
 
-        function openProkerModal() { document.getElementById('modal-proker').classList.remove('hidden'); }
+        function openProkerModal(type) {
+            document.getElementById('proker-target-type').value = type;
+            document.getElementById('modal-proker-title').innerText = type === 'minggu_depan' ? 'Tambah Program Kerja Minggu Depan' : 'Tambah Program Kerja';
+            document.getElementById('modal-proker').classList.remove('hidden');
+        }
+
         function saveProker(e) {
             e.preventDefault();
             const filterSelect = document.getElementById('proker-bagian-filter');
             const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
+            const type = document.getElementById('proker-target-type').value;
+
             prokerList.push({
                 id: 'p' + Date.now(),
                 bagian: currentBagian,
@@ -974,42 +1026,51 @@
                 hasilUsaha: '',
                 evaluasi: '',
                 solusi: '',
-                dateReported: newDateString()
+                dateReported: newDateString(),
+                isFutureOnly: type === 'minggu_depan'
             });
             saveData(); closeModal('modal-proker'); renderProkerPage();
+            if (activeTab === 'rapat') renderRapatPage();
         }
+
         function toggleAccProker(id) {
             const p = prokerList.find(x => x.id === id);
-            if (p) { p.accMusyrif = !p.accMusyrif; saveData(); renderProkerPage(); }
+            if (p) { p.accMusyrif = !p.accMusyrif; saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); }
         }
+
         function toggleHasilDone(id) {
             const p = prokerList.find(x => x.id === id);
             if (p) {
                 p.isHasilDone = !p.isHasilDone;
                 if (p.isHasilDone && !p.hasilUsaha) p.hasilUsaha = prompt('Masukkan capaian hasil usaha:') || 'Selesai';
-                saveData(); renderProkerPage();
+                saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage();
             }
         }
+
         function deleteProker(id) {
-            if (confirm('Hapus proker ini?')) { prokerList = prokerList.filter(x => x.id !== id); saveData(); renderProkerPage(); }
+            if (confirm('Hapus proker ini?')) { prokerList = prokerList.filter(x => x.id !== id); saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); }
         }
+
         function laporMusyrif() {
             const filterSelect = document.getElementById('proker-bagian-filter');
             const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
             musyrifReportStatus[currentBagian] = true;
             saveData(); alert(`Laporan bagian ${currentBagian} berhasil dikirim ke Musyrif!`); renderProkerPage();
         }
+
         function editKendala(id) {
             const p = prokerList.find(x => x.id === id);
             if (p) { const val = prompt('Masukkan kendala / evaluasi:', p.evaluasi); if (val !== null) { p.evaluasi = val; saveData(); renderProkerPage(); } }
         }
+
         function editSolusi(id) {
             const p = prokerList.find(x => x.id === id);
             if (p) { const val = prompt('Masukkan solusi:', p.solusi); if (val !== null) { p.solusi = val; saveData(); renderProkerPage(); } }
         }
+
         function openImportLastWeekModal() { alert('Fitur Impor Proker Minggu Lalu aktif.'); }
 
-        // --- 4. KEPANITIAAN (Diperbaiki Agenda Baru & Jobdesk) ---
+        // --- 4. KEPANITIAAN ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
             if (!container) return;
@@ -1100,16 +1161,50 @@
             if (k) { k.joblists = k.joblists.filter(y => y.id !== jId); saveData(); renderPanitiaPage(); }
         }
 
-        // --- 5. RAPAT MINGGUAN (Diperbaiki Simpan & Upload Notulensi) ---
+        // --- 5. RAPAT MINGGUAN (Real-Time Synchronization with Proker Data) ---
         function renderRapatPage() {
             const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
             let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
 
-            const t1 = document.getElementById('rapat-table-1'); if(t1) { t1.innerHTML = ''; filteredProker.forEach(p => { t1.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-blue-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc}</td></tr>`; }); }
-            const t2 = document.getElementById('rapat-table-2'); if(t2) { t2.innerHTML = ''; filteredProker.filter(p => p.accMusyrif).forEach(p => { t2.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-emerald-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-emerald-600">${p.hasilUsaha || 'Terlaksana'}</td></tr>`; }); }
-            const t3 = document.getElementById('rapat-table-3'); if(t3) { t3.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif).forEach(p => { t3.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-rose-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-rose-500">${p.evaluasi || 'Perlu evaluasi'}</td></tr>`; }); }
-            const t4 = document.getElementById('rapat-table-4'); if(t4) { t4.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif).forEach(p => { t4.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-amber-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-amber-600">${p.solusi || 'Belum ada solusi'}</td></tr>`; }); }
-            const t5 = document.getElementById('rapat-table-5'); if(t5) { t5.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif || p.isFutureOnly).forEach(p => { t5.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">Agenda Mendatang</td></tr>`; }); }
+            const t1 = document.getElementById('rapat-table-1');
+            if (t1) {
+                t1.innerHTML = '';
+                filteredProker.filter(p => !p.isFutureOnly).forEach(p => {
+                    t1.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-blue-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc}</td></tr>`;
+                });
+            }
+
+            const t2 = document.getElementById('rapat-table-2');
+            if (t2) {
+                t2.innerHTML = '';
+                filteredProker.filter(p => p.accMusyrif).forEach(p => {
+                    t2.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-emerald-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-emerald-600 font-medium">${p.hasilUsaha || 'Terlaksana / Di-ACC'}</td></tr>`;
+                });
+            }
+
+            const t3 = document.getElementById('rapat-table-3');
+            if (t3) {
+                t3.innerHTML = '';
+                filteredProker.filter(p => !p.accMusyrif || (p.accMusyrif && !p.isHasilDone)).forEach(p => {
+                    t3.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-rose-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-rose-500 font-medium">${p.evaluasi || 'Belum ada kendala diisi'}</td></tr>`;
+                });
+            }
+
+            const t4 = document.getElementById('rapat-table-4');
+            if (t4) {
+                t4.innerHTML = '';
+                filteredProker.filter(p => !p.accMusyrif || (p.accMusyrif && !p.isHasilDone)).forEach(p => {
+                    t4.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-amber-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-amber-600 font-medium">${p.solusi || 'Belum ada solusi'}</td></tr>`;
+                });
+            }
+
+            const t5 = document.getElementById('rapat-table-5');
+            if (t5) {
+                t5.innerHTML = '';
+                filteredProker.filter(p => p.isFutureOnly || (!p.accMusyrif && (p.evaluasi || p.solusi))).forEach(p => {
+                    t5.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc || p.solusi || 'Rencana Periode Mendatang'}</td></tr>`;
+                });
+            }
 
             renderNotulensiFileList();
         }
@@ -1117,8 +1212,20 @@
         function simpanHasilRapat() {
             const title = prompt('Masukkan judul arsip rapat mingguan:', `Rapat Mingguan - ${newDateString()}`);
             if (title) {
-                reportsArchive.push({ id: 'r' + Date.now(), title: title, date: newDateString() });
-                saveData(); alert('Hasil rapat berhasil disimpan ke Arsip Laporan!');
+                const snapshotProker = JSON.parse(JSON.stringify(prokerList));
+                const snapshotNotulensi = JSON.parse(JSON.stringify(notulensiFiles));
+
+                reportsArchive.push({
+                    id: 'r' + Date.now(),
+                    title: title,
+                    date: newDateString(),
+                    prokerData: snapshotProker,
+                    notulensiFiles: snapshotNotulensi
+                });
+
+                saveData();
+                alert('Hasil rapat berhasil disimpan dan diarsipkan ke Laporan!');
+                if (activeTab === 'laporan') renderLaporanPage();
             }
         }
 
@@ -1143,7 +1250,14 @@
                 return;
             }
             notulensiFiles.forEach((f, idx) => {
-                listContainer.innerHTML += `<div class="bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-200 flex items-center gap-2"><i class="fa-solid fa-file-lines"></i><span>${f.name}</span><button onclick="deleteNotulensi(${idx})" class="text-rose-500 ml-2 hover:font-bold">×</button></div>`;
+                listContainer.innerHTML += `
+                    <div class="bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-200 flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span>${f.name}</span>
+                        <button onclick="previewNotulensiPDF('${f.name}')" class="text-xs font-semibold text-blue-600 hover:underline ml-1" title="Review PDF"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="deleteNotulensi(${idx})" class="text-rose-500 ml-2 hover:font-bold">×</button>
+                    </div>
+                `;
             });
         }
 
@@ -1152,7 +1266,7 @@
             saveData(); renderNotulensiFileList();
         }
 
-        // --- 6. REKAP & LAPORAN (Diperbaiki Download Excel SheetJS) ---
+        // --- 6. REKAP ---
         function renderRekapPage() {
             const bagianFilter = document.getElementById('rekap-filter-bagian')?.value || 'ALL';
             let filtered = bagianFilter !== 'ALL' ? prokerList.filter(p => p.bagian === bagianFilter) : prokerList;
@@ -1191,14 +1305,95 @@
             }
         }
 
+        // --- 7. LAPORAN (Detailed Meeting Archive Cards with Review PDF & Download) ---
         function renderLaporanPage() {
             const container = document.getElementById('laporan-container');
             if (!container) return;
             container.innerHTML = '';
-            if (reportsArchive.length === 0) { container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm bg-white dark:bg-gray-800 rounded-xl">Belum ada arsip laporan rapat.</div>`; return; }
+
+            if (reportsArchive.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm bg-white dark:bg-gray-800 rounded-xl">Belum ada arsip laporan rapat yang disimpan.</div>`;
+                return;
+            }
+
             reportsArchive.forEach(r => {
-                container.innerHTML += `<div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border dark:border-gray-700 flex items-center justify-between"><h4 class="font-bold text-base">${r.title}</h4><span class="text-xs text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> ${r.date}</span></div>`;
+                const prokers = r.prokerData || prokerList;
+                const files = r.notulensiFiles || notulensiFiles;
+
+                const totalHasil = prokers.filter(p => p.accMusyrif).length;
+                const totalEval = prokers.filter(p => p.evaluasi && p.evaluasi.trim() !== '').length;
+                const totalMendatang = prokers.filter(p => p.isFutureOnly || p.solusi).length;
+
+                let filesHTML = '';
+                if (files && files.length > 0) {
+                    files.forEach(f => {
+                        filesHTML += `
+                            <div class="bg-gray-100 dark:bg-gray-700 p-2.5 rounded-lg flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2 truncate">
+                                    <i class="fa-solid fa-file-pdf text-rose-500 text-base"></i>
+                                    <span class="font-medium truncate">${f.name}</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button onclick="previewNotulensiPDF('${f.name}')" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded hover:bg-blue-700 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-eye"></i> Review PDF
+                                    </button>
+                                    <button onclick="downloadNotulensiFile('${f.name}')" class="bg-emerald-600 text-white text-[11px] px-2.5 py-1 rounded hover:bg-emerald-700 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    filesHTML = `<div class="text-xs text-gray-400 italic">Tidak ada lampiran file notulensi.</div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 dark:border-gray-700">
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-900 dark:text-white">${r.title}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-regular fa-calendar-check mr-1"></i> Tanggal Arsip: ${r.date}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">${totalHasil} Hasil Usaha</span>
+                                <span class="bg-rose-100 text-rose-800 text-xs px-2.5 py-1 rounded-full font-bold">${totalEval} Evaluasi</span>
+                            </div>
+                        </div>
+
+                        <!-- Summary Tables in Archive -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                <div class="font-bold text-emerald-600 mb-1">Hasil Usaha Di-ACC</div>
+                                <div class="text-gray-600 dark:text-gray-300 font-medium">${totalHasil} Program Selesai/Di-ACC</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                <div class="font-bold text-rose-600 mb-1">Evaluasi & Kendala</div>
+                                <div class="text-gray-600 dark:text-gray-300 font-medium">${totalEval} Masalah Terdata</div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                <div class="font-bold text-indigo-600 mb-1">Proker Mendatang</div>
+                                <div class="text-gray-600 dark:text-gray-300 font-medium">${totalMendatang} Agenda Terjadwal</div>
+                            </div>
+                        </div>
+
+                        <!-- Attached Files Box -->
+                        <div class="space-y-2 pt-1">
+                            <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider"><i class="fa-solid fa-paperclip mr-1"></i> File Notulensi Terlampir</h5>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${filesHTML}</div>
+                        </div>
+                    </div>
+                `;
             });
+        }
+
+        function previewNotulensiPDF(fileName) {
+            document.getElementById('pdf-preview-filename').innerText = fileName;
+            document.getElementById('modal-preview-pdf').classList.remove('hidden');
+        }
+
+        function downloadNotulensiFile(fileName) {
+            alert(`Mengunduh file notulensi: ${fileName}`);
         }
 
         function renderUsersPage() {
@@ -1239,14 +1434,6 @@
             chatMessages.push({ id: 'c' + Date.now(), senderId: currentUser.id, senderName: currentUser.name, text: input.value.trim(), timestamp: timeStr });
             saveData(); input.value = ''; renderRoomchatPage();
         }
-
-        function toggleEmojiPicker() { document.getElementById('emoji-picker')?.classList.toggle('hidden'); }
-        function addEmoji(emoji) {
-            const input = document.getElementById('chat-input');
-            if (input) { input.value += emoji; input.focus(); }
-            toggleEmojiPicker();
-        }
-        function cancelReply() {}
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
