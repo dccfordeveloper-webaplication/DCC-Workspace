@@ -54,7 +54,7 @@
         }
         
         .custom-scrollbar-y {
-            max-height: 360px;
+            max-height: 380px;
             overflow-y: auto;
         }
     </style>
@@ -157,7 +157,7 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <!-- Quick Role Switcher for Demo -->
+                    <!-- Role Switcher -->
                     <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-lg text-xs">
                         <span class="text-gray-500 dark:text-gray-400 font-medium pl-1 hidden sm:inline"><i class="fa-solid fa-user-gear mr-1"></i> Mode:</span>
                         <select id="role-switcher" onchange="changeActiveUser(this.value)" class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-semibold py-1 px-2 rounded border border-gray-300 dark:border-gray-600 focus:outline-none text-xs">
@@ -175,9 +175,8 @@
             <!-- Dynamic Body Pages Container -->
             <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
 
-                <!-- 1. BERANDA (Layout Atas Bawah) -->
+                <!-- 1. BERANDA (Atas-Bawah) -->
                 <section id="page-beranda" class="page-content space-y-6">
-                    <!-- Countdown Banner -->
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
@@ -206,7 +205,6 @@
                         </div>
                     </div>
 
-                    <!-- Layout Atas: Status Pelaporan Proker -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
@@ -231,7 +229,6 @@
                         </div>
                     </div>
 
-                    <!-- Layout Bawah: Rekapan Penugasan Sedang Berjalan -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
@@ -257,7 +254,7 @@
                     </div>
                 </section>
 
-                <!-- 2. PENUGASAN -->
+                <!-- 2. PENUGASAN (PJ & Bagian Manual Text Input) -->
                 <section id="page-penugasan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -289,7 +286,7 @@
                     </div>
                 </section>
 
-                <!-- 3. PROGRAM KERJA -->
+                <!-- 3. PROGRAM KERJA (Kendala & Solusi Manual, Lapor Musyrif Role-based) -->
                 <section id="page-proker" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
@@ -301,13 +298,20 @@
                             <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Tambah Proker Minggu Ini
                             </button>
-                            <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
-                            </button>
+                            
+                            <!-- Akses khusus Member / Admin-Musyrif Notification Banner -->
+                            <div id="lapor-musyrif-container">
+                                <button id="btn-lapor-musyrif" onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
+                                </button>
+                                <div id="notif-laporan-musyrif" class="hidden bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 border border-blue-300">
+                                    <i class="fa-solid fa-bell text-amber-500 animate-bounce"></i>
+                                    <span id="notif-laporan-text">Status: Belum dilaporkan member</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 5 Tables Flow -->
                     <div class="space-y-6">
                         <!-- Table 1: Program Kerja -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -358,12 +362,12 @@
                             </div>
                         </div>
 
-                        <!-- Table 3: Evaluasi -->
+                        <!-- Table 3: Evaluasi (Kendala BISA DIISI MANUAL) -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-                                    3. Evaluasi (Proker Belum Di-ACC / Kendala Usaha)
+                                    3. Evaluasi (Kendala Bisa Diisi Manual)
                                 </h4>
                             </div>
                             <div class="custom-scrollbar-y">
@@ -371,8 +375,8 @@
                                     <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
                                         <tr>
                                             <th class="p-3">Program / Hal Evaluasi</th>
-                                            <th class="p-3">Penyebab / Kendala</th>
-                                            <th class="p-3">Status Solusi</th>
+                                            <th class="p-3">Penyebab / Kendala (Manual Input)</th>
+                                            <th class="p-3 text-right">Aksi Input / Edit Kendala</th>
                                         </tr>
                                     </thead>
                                     <tbody id="proker-table-3" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
@@ -394,7 +398,7 @@
                                         <tr>
                                             <th class="p-3">Evaluasi Target</th>
                                             <th class="p-3">Rumusan Solusi</th>
-                                            <th class="p-3 text-right">Aksi Input / Edit</th>
+                                            <th class="p-3 text-right">Aksi Input / Edit Solusi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="proker-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
@@ -409,7 +413,6 @@
                                     <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
                                     5. Program Kerja Yang Akan Datang
                                 </h4>
-                                <!-- Fitur Tambah Proker Mendatang -->
                                 <button id="btn-add-proker-future" onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition">
                                     <i class="fa-solid fa-plus"></i> Tambah Proker Mendatang
                                 </button>
@@ -430,12 +433,12 @@
                     </div>
                 </section>
 
-                <!-- 4. KEPANITIAAN (Fitur Lengkap: Deskripsi, Target/Rundown, Joblist Flexible & Strikethrough) -->
+                <!-- 4. KEPANITIAAN (Fitur Tambah Kolom/Bagian Manual) -->
                 <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
                             <h3 class="text-lg font-bold">Master Program Kepanitiaan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan pelaksanaan kegiatan/event lengkap dengan Joblist & Rundown.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan pelaksanaan kegiatan dengan susunan bagian/jobdesk fleksibel.</p>
                         </div>
                         <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
                             <i class="fa-solid fa-plus"></i> Buat Agenda Kegiatan Baru
@@ -446,12 +449,12 @@
                     </div>
                 </section>
 
-                <!-- 5. RAPAT MINGGUAN (Filter Perbagian, Default: Ketua) -->
+                <!-- 5. RAPAT MINGGUAN (Simetris & Rapi) -->
                 <section id="page-rapat" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
                             <h3 class="text-lg font-bold">Platform Utama Rapat Mingguan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Agregasi otomatis dari data Program Kerja per bagian.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Agregasi otomatis dari data Program Kerja per bagian secara simetris.</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex items-center gap-2">
@@ -487,64 +490,94 @@
                         </div>
                     </div>
 
-                    <!-- Aggregated Tables -->
+                    <!-- Aggregated Tables Rapi & Simetris -->
                     <div class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-blue-600 dark:text-blue-400">1. Program Kerja Minggu Lalu</h4>
-                            <div class="custom-scrollbar-y">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Program Kerja</th><th class="p-2">Deskripsi</th></tr>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h4 class="font-bold text-sm mb-3 text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 1. Program Kerja Minggu Lalu
+                            </h4>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 uppercase font-semibold">
+                                        <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                                            <th class="p-3 w-1/5">Bagian</th>
+                                            <th class="p-3 w-2/5">Program Kerja</th>
+                                            <th class="p-3 w-2/5">Deskripsi / Target</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="rapat-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                                    <tbody id="rapat-table-1" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-emerald-600 dark:text-emerald-400">2. Hasil Usaha Rapat</h4>
-                            <div class="custom-scrollbar-y">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Program Kerja</th><th class="p-2">Capaian Hasil</th></tr>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h4 class="font-bold text-sm mb-3 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 2. Hasil Usaha Rapat
+                            </h4>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 uppercase font-semibold">
+                                        <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                                            <th class="p-3 w-1/5">Bagian</th>
+                                            <th class="p-3 w-2/5">Program Kerja</th>
+                                            <th class="p-3 w-2/5">Capaian Hasil Usaha</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="rapat-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                                    <tbody id="rapat-table-2" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-rose-600 dark:text-rose-400">3. Evaluasi</h4>
-                            <div class="custom-scrollbar-y">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Hal Evaluasi</th><th class="p-2">Kendala</th></tr>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h4 class="font-bold text-sm mb-3 text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 3. Evaluasi
+                            </h4>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 uppercase font-semibold">
+                                        <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                                            <th class="p-3 w-1/5">Bagian</th>
+                                            <th class="p-3 w-2/5">Hal Evaluasi</th>
+                                            <th class="p-3 w-2/5">Penyebab / Kendala</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="rapat-table-3" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                                    <tbody id="rapat-table-3" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-amber-600 dark:text-amber-400">4. Solusi</h4>
-                            <div class="custom-scrollbar-y">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Evaluasi</th><th class="p-2">Rumusan Solusi</th></tr>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h4 class="font-bold text-sm mb-3 text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 4. Solusi
+                            </h4>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 uppercase font-semibold">
+                                        <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                                            <th class="p-3 w-1/5">Bagian</th>
+                                            <th class="p-3 w-2/5">Evaluasi Target</th>
+                                            <th class="p-3 w-2/5">Rumusan Solusi</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="rapat-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                                    <tbody id="rapat-table-4" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-indigo-600 dark:text-indigo-400">5. Program Kerja Yang Akan Datang</h4>
-                            <div class="custom-scrollbar-y">
-                                <table class="w-full text-xs text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Program Kerja Mendatang</th><th class="p-2">Rencana / Sumber</th></tr>
+                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <h4 class="font-bold text-sm mb-3 text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> 5. Program Kerja Yang Akan Datang
+                            </h4>
+                            <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 uppercase font-semibold">
+                                        <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                                            <th class="p-3 w-1/5">Bagian</th>
+                                            <th class="p-3 w-2/5">Program Kerja Mendatang</th>
+                                            <th class="p-3 w-2/5">Rencana / Sumber</th>
+                                        </tr>
                                     </thead>
-                                    <tbody id="rapat-table-5" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                                    <tbody id="rapat-table-5" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -620,7 +653,7 @@
                     </div>
                 </section>
 
-                <!-- 7. LAPORAN -->
+                <!-- 7. LAPORAN (Fitur View & Download File Notulensi Attached) -->
                 <section id="page-laporan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -729,29 +762,22 @@
 
     <!-- MODALS -->
 
-    <!-- Task Modal -->
+    <!-- Task Modal (PJ & Bagian diubah menjadi Text Field Kosong) -->
     <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beri Penugasan Baru</h3>
             <form id="form-task" onsubmit="saveTask(event)" class="space-y-3 text-xs sm:text-sm">
                 <div>
                     <label class="block font-medium mb-1">Judul Task / Tugas</label>
-                    <input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    <input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" placeholder="Masukkan judul tugas">
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Penanggung Jawab (PJ)</label>
-                    <select id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+                    <input type="text" id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" placeholder="Ketik nama PJ secara manual">
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Bagian</label>
-                    <select id="task-input-bagian" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                        <option value="Ketua">Ketua</option>
-                        <option value="Sekretaris">Sekretaris</option>
-                        <option value="Bendahara">Bendahara</option>
-                        <option value="Gigabyte">Gigabyte</option>
-                        <option value="D-Tech">D-Tech</option>
-                        <option value="Perkap">Perkap</option>
-                    </select>
+                    <input type="text" id="task-input-bagian" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" placeholder="Ketik nama bagian secara manual">
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Deadline</label>
@@ -787,6 +813,26 @@
         </div>
     </div>
 
+    <!-- Kendala Modal (Baru) -->
+    <div id="modal-kendala" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Isi / Edit Kendala Evaluasi</h3>
+            <input type="hidden" id="kendala-eval-id">
+            <div>
+                <label class="block font-medium mb-1 text-xs">Program / Hal Evaluasi:</label>
+                <div id="kendala-eval-text" class="p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs font-semibold mb-3"></div>
+            </div>
+            <div>
+                <label class="block font-medium mb-1 text-xs">Penyebab / Kendala (Manual Input):</label>
+                <textarea id="kendala-input-text" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-xs dark:border-gray-600" rows="3" placeholder="Tuliskan kendala secara detail..."></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('modal-kendala')" class="px-4 py-2 border rounded-lg text-xs">Batal</button>
+                <button type="button" onclick="saveKendala()" class="px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-semibold">Simpan Kendala</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Solution Modal -->
     <div id="modal-solusi" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
@@ -807,10 +853,10 @@
         </div>
     </div>
 
-    <!-- Kepanitiaan Modal (Fitur Lengkap) -->
+    <!-- Kepanitiaan Modal (Fitur Dynamic Columns / Bagian Tambahan) -->
     <div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Buat Agenda Kepanitiaan</h3>
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Buat Agenda Kepanitiaan Baru</h3>
             <form id="form-panitia" onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
                 <div>
                     <label class="block font-medium mb-1">Nama Kegiatan / Event</label>
@@ -820,53 +866,24 @@
                     <label class="block font-medium mb-1">Deskripsi Kegiatan</label>
                     <textarea id="panitia-input-deskripsi" placeholder="Sampaikan tujuan & perincian singkat kegiatan..." required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" rows="2"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-medium mb-1">Hari & Tanggal Pelaksanaan</label>
-                        <input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Target / Deadline Persiapan</label>
-                        <input type="date" id="panitia-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                    </div>
-                </div>
-
-                <div class="border-t pt-3 dark:border-gray-700">
-                    <label class="block font-bold text-amber-600 dark:text-amber-400 mb-1">Program Kerja / Joblist Perbagian (Fleksibel):</label>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                            <span class="font-bold">Ketua:</span>
-                            <input type="text" id="job-Ketua" placeholder="Jobdesk Ketua" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <span class="font-bold">Sekretaris:</span>
-                            <input type="text" id="job-Sekretaris" placeholder="Jobdesk Sekretaris" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <span class="font-bold">Bendahara:</span>
-                            <input type="text" id="job-Bendahara" placeholder="Jobdesk Bendahara" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <span class="font-bold">Gigabyte:</span>
-                            <input type="text" id="job-Gigabyte" placeholder="Jobdesk Gigabyte" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <span class="font-bold">D-Tech:</span>
-                            <input type="text" id="job-D-Tech" placeholder="Jobdesk D-Tech" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <span class="font-bold">Perkap:</span>
-                            <input type="text" id="job-Perkap" placeholder="Jobdesk Perkap" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
-                        </div>
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block font-medium mb-1">Rundown / Agenda Persiapan Acara (Satu per baris)</label>
-                    <textarea id="panitia-input-rundown" placeholder="08.00 Pembukaan&#10;09.00 Sambutan Ketua&#10;10.00 Sesi Utama Expo" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" rows="3"></textarea>
+                    <label class="block font-medium mb-1">Hari & Tanggal Pelaksanaan</label>
+                    <input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="border-t pt-3 dark:border-gray-700 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block font-bold text-amber-600 dark:text-amber-400">Daftar Bagian & Jobdesk (Fleksibel):</label>
+                        <button type="button" onclick="addPanitiaRowInput()" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded font-semibold flex items-center gap-1 shadow">
+                            <i class="fa-solid fa-plus"></i> Tambah Bagian
+                        </button>
+                    </div>
+                    <div id="panitia-dynamic-rows" class="space-y-2">
+                        <!-- Default Rows -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3">
                     <button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan Agenda Kepanitiaan</button>
                 </div>
@@ -931,6 +948,11 @@
     <script>
         const BAGIAN_LIST = ["Ketua", "Sekretaris", "Bendahara", "Gigabyte", "D-Tech", "Perkap"];
 
+        // State Musyrif Report Notification
+        let musyrifReportStatus = JSON.parse(localStorage.getItem('dcc_report_status')) || {
+            'Ketua': false, 'Sekretaris': false, 'Bendahara': false, 'Gigabyte': false, 'D-Tech': false, 'Perkap': false
+        };
+
         // Users Data
         let users = JSON.parse(localStorage.getItem('dcc_users')) || [
             { id: 'u1', name: 'Admin Utama', role: 'admin', bagian: 'Ketua', avatar: 'https://ui-avatars.com/api/?name=Admin+Utama&background=0284c7&color=fff' },
@@ -952,20 +974,18 @@
 
         // Proker Data
         let prokerList = JSON.parse(localStorage.getItem('dcc_proker')) || [
-            { id: 'p1', bagian: 'Gigabyte', title: 'Workshop Design & Multimedia', desc: 'Mengadakan pelatihan mingguan untuk anggota', reported: true, accMusyrif: true, hasilUsaha: 'Selesai diselenggarakan batch 1', isHasilDone: true, dateReported: '2026-10-20', isFutureOnly: false },
+            { id: 'p1', bagian: 'Gigabyte', title: 'Workshop Design & Multimedia', desc: 'Mengadakan pelatihan mingguan untuk anggota', reported: true, accMusyrif: true, hasilUsaha: 'Selesai diselenggarakan batch 1', isHasilDone: true, dateReported: '2026-10-20', isFutureOnly: false, evaluasi: '', solusi: '' },
             { id: 'p2', bagian: 'D-Tech', title: 'Maintenance Jaringan WiFi Area', desc: 'Optimalisasi router & bandwidth', reported: true, accMusyrif: false, evaluasi: 'Kendala alat mikrotik terbatas', solusi: 'Pengadaan router cadangan', dateReported: '2026-10-21', isFutureOnly: false },
-            { id: 'p3', bagian: 'Ketua', title: 'Evaluasi Bulanan Kinerja', desc: 'Rapat pleno triwulan seluruh pengurus', reported: false, accMusyrif: false, dateReported: '', isFutureOnly: false }
+            { id: 'p3', bagian: 'Ketua', title: 'Evaluasi Bulanan Kinerja', desc: 'Rapat pleno triwulan seluruh pengurus', reported: false, accMusyrif: false, dateReported: '', isFutureOnly: false, evaluasi: '', solusi: '' }
         ];
 
-        // Kepanitiaan Data (Lengkap)
+        // Kepanitiaan Data
         let panitiaList = JSON.parse(localStorage.getItem('dcc_panitia')) || [
             {
                 id: 'k1',
                 nama: 'Peringatan Hari Besar DCC & Expo Teknologi',
                 deskripsi: 'Pameran inovasi teknologi tahunan sekaligus ajang silaturahmi seluruh anggota.',
                 tanggal: '2026-11-10',
-                deadline: '2026-11-08',
-                rundown: ['08:00 Pembukaan Expo', '10:00 Demo Inovasi D-Tech & Gigabyte', '13:00 Pleno Kepengurusan'],
                 joblists: [
                     { id: 'j1', bagian: 'Ketua', task: 'Pengawasan umum & sambutan', done: false },
                     { id: 'j2', bagian: 'Sekretaris', task: 'Pengurusan surat izin & tempat', done: true },
@@ -982,7 +1002,7 @@
 
         // Notulensi files
         let notulensiFiles = JSON.parse(localStorage.getItem('dcc_notulensi')) || [
-            { name: 'Notulensi_Rapat_Minggu1.pdf', size: '1.2 MB' }
+            { name: 'Notulensi_Rapat_Minggu1.pdf', size: '1.2 MB', url: '#' }
         ];
 
         // Chat Messages
@@ -999,6 +1019,7 @@
             localStorage.setItem('dcc_reports', JSON.stringify(reportsArchive));
             localStorage.setItem('dcc_notulensi', JSON.stringify(notulensiFiles));
             localStorage.setItem('dcc_chats', JSON.stringify(chatMessages));
+            localStorage.setItem('dcc_report_status', JSON.stringify(musyrifReportStatus));
             localStorage.setItem('dcc_active_user', activeUserId);
         }
 
@@ -1082,7 +1103,7 @@
             else if (activeTab === 'users') renderUsersPage();
         }
 
-        // --- 1. BERANDA TAB (Layout Atas Bawah) ---
+        // --- 1. BERANDA TAB ---
         function renderBerandaPage() {
             const tbodyUnreported = document.getElementById('home-unreported-table');
             tbodyUnreported.innerHTML = '';
@@ -1138,7 +1159,7 @@
             }, 1000);
         }
 
-        // --- 2. PENUGASAN TAB ---
+        // --- 2. PENUGASAN TAB (PJ & Bagian Text Field Input) ---
         function renderPenugasanPage() {
             const tbody = document.getElementById('tasks-table-body');
             tbody.innerHTML = '';
@@ -1151,7 +1172,7 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
                         <td class="p-4 font-semibold text-gray-900 dark:text-white">${t.title}</td>
-                        <td class="p-4 text-xs">${t.pj}</td>
+                        <td class="p-4 text-xs font-bold text-gray-700 dark:text-gray-300">${t.pj}</td>
                         <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-medium">${t.bagian}</span></td>
                         <td class="p-4 text-xs text-rose-500 font-bold">${t.deadline}</td>
                         <td class="p-4">
@@ -1172,11 +1193,10 @@
         }
 
         function openTaskModal() {
-            const selectPJ = document.getElementById('task-input-pj');
-            selectPJ.innerHTML = '';
-            users.forEach(u => {
-                selectPJ.innerHTML += `<option value="${u.name}">${u.name} (${u.bagian})</option>`;
-            });
+            document.getElementById('task-input-title').value = '';
+            document.getElementById('task-input-pj').value = '';
+            document.getElementById('task-input-bagian').value = '';
+            document.getElementById('task-input-deadline').value = '';
             document.getElementById('modal-task').classList.remove('hidden');
         }
 
@@ -1209,7 +1229,7 @@
             }
         }
 
-        // --- 3. PROGRAM KERJA TAB ---
+        // --- 3. PROGRAM KERJA TAB (Kendala & Solusi Manual, Lapor Musyrif Role Check) ---
         function renderProkerPage() {
             const filterSelect = document.getElementById('proker-bagian-filter');
             if (filterSelect.children.length === 0) {
@@ -1221,6 +1241,24 @@
             const currentBagian = filterSelect.value || BAGIAN_LIST[0];
             const user = getActiveUser();
             const canAcc = user.role === 'admin' || user.role === 'musyrif';
+            const isMember = user.role === 'member';
+
+            // Toggle "Lapor Musyrif" Button vs Notification
+            const btnLapor = document.getElementById('btn-lapor-musyrif');
+            const notifLapor = document.getElementById('notif-laporan-musyrif');
+            const notifText = document.getElementById('notif-laporan-text');
+
+            if (isMember) {
+                btnLapor.classList.remove('hidden');
+                notifLapor.classList.add('hidden');
+            } else {
+                btnLapor.classList.add('hidden');
+                notifLapor.classList.remove('hidden');
+                const isReported = musyrifReportStatus[currentBagian];
+                notifText.innerText = isReported 
+                    ? `Notifikasi: Bagian ${currentBagian} SUDAH Melapor!` 
+                    : `Notifikasi: Bagian ${currentBagian} BELUM Melapor.`;
+            }
 
             const bagProker = prokerList.filter(p => p.bagian === currentBagian);
 
@@ -1243,7 +1281,7 @@
                 `;
             });
 
-            // Table 2: Hasil Usaha (Proker di-ACC)
+            // Table 2: Hasil Usaha
             const t2 = document.getElementById('proker-table-2');
             t2.innerHTML = '';
             bagProker.filter(p => p.accMusyrif && !p.isFutureOnly).forEach(p => {
@@ -1259,7 +1297,7 @@
                 `;
             });
 
-            // Table 3: Evaluasi (Otomatis masuk jika belum di-ACC atau hasil usaha durasi/kendala)
+            // Table 3: Evaluasi (Kendala Manual Input)
             const t3 = document.getElementById('proker-table-3');
             t3.innerHTML = '';
             const evalList = bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly);
@@ -1267,13 +1305,17 @@
                 t3.innerHTML += `
                     <tr>
                         <td class="p-3 font-semibold text-rose-600">${p.title}</td>
-                        <td class="p-3 text-xs">${p.evaluasi || 'Program kerja belum selesai/di-ACC minggu ini'}</td>
-                        <td class="p-3 text-xs"><span class="${p.solusi ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.solusi ? 'Solusi Dirumuskan' : 'Perlu Solusi'}</span></td>
+                        <td class="p-3 text-xs font-medium text-rose-700 dark:text-rose-300">${p.evaluasi || '<i class="text-gray-400">Belum ada kendala diisi (klik tombol untuk mengisi secara manual)</i>'}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="openKendalaModal('${p.id}')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1 rounded-lg font-semibold shadow-sm">
+                                <i class="fa-solid fa-pen mr-1"></i> ${p.evaluasi ? 'Edit Kendala' : 'Isi Kendala'}
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
 
-            // Table 4: Solusi (Dapat Diisi Manual oleh Seluruh User)
+            // Table 4: Solusi (Manual Input Seluruh User)
             const t4 = document.getElementById('proker-table-4');
             t4.innerHTML = '';
             evalList.forEach(p => {
@@ -1290,22 +1332,20 @@
                 `;
             });
 
-            // Table 5: Program Kerja Yang Akan Datang (Otomatis duplikasi dari Evaluasi + Proker baru mendatang)
+            // Table 5: Program Kerja Yang Akan Datang
             const t5 = document.getElementById('proker-table-5');
             t5.innerHTML = '';
 
-            // 1. Duplikasi dari Evaluasi
             evalList.forEach(p => {
                 t5.innerHTML += `
                     <tr class="bg-rose-50/30 dark:bg-rose-950/20">
                         <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${p.title} <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded ml-1">Lanjutan Evaluasi</span></td>
-                        <td class="p-3 text-xs">${p.solusi ? 'Solusi: ' + p.solusi : 'Belum selesai minggu ini'}</td>
-                        <td class="p-3 text-xs text-gray-500">Otomatis dijadwalkan ulang untuk minggu depan</td>
+                        <td class="p-3 text-xs">${p.solusi ? 'Solusi: ' + p.solusi : (p.evaluasi ? 'Kendala: ' + p.evaluasi : 'Belum selesai minggu ini')}</td>
+                        <td class="p-3 text-xs text-gray-500">Otomatis terduplikasi & dijadwalkan ulang minggu depan</td>
                     </tr>
                 `;
             });
 
-            // 2. Proker khusus Minggu Depan (Yang dibuat manual)
             bagProker.filter(p => p.isFutureOnly).forEach(p => {
                 t5.innerHTML += `
                     <tr>
@@ -1316,17 +1356,10 @@
                 `;
             });
 
-            // Aktifkan Fitur Tambah Proker Mendatang jika sudah ada Hasil Usaha / Evaluasi & Solusi
             const hasActivityCompleted = bagProker.some(p => p.accMusyrif || p.evaluasi || p.solusi);
             const btnFuture = document.getElementById('btn-add-proker-future');
             if (btnFuture) {
-                if (hasActivityCompleted) {
-                    btnFuture.disabled = false;
-                    btnFuture.title = "Tambah program kerja baru untuk minggu mendatang";
-                } else {
-                    btnFuture.disabled = true;
-                    btnFuture.title = "Fitur ini aktif setelah ada Hasil Usaha / Evaluasi & Solusi minggu ini.";
-                }
+                btnFuture.disabled = !hasActivityCompleted;
             }
         }
 
@@ -1357,7 +1390,9 @@
                 hasilUsaha: '',
                 isHasilDone: false,
                 dateReported: '',
-                isFutureOnly: targetType === 'minggu_depan'
+                isFutureOnly: targetType === 'minggu_depan',
+                evaluasi: '',
+                solusi: ''
             });
 
             saveData();
@@ -1370,8 +1405,9 @@
             prokerList.forEach(p => {
                 if (p.bagian === currentBagian) p.reported = true;
             });
+            musyrifReportStatus[currentBagian] = true;
             saveData();
-            alert(`Seluruh Program Kerja bagian ${currentBagian} telah dilaporkan ke Musyrif!`);
+            alert(`Laporan Program Kerja bagian ${currentBagian} telah terkirim ke Musyrif!`);
             renderProkerPage();
         }
 
@@ -1382,8 +1418,6 @@
                 if (p.accMusyrif) {
                     p.hasilUsaha = 'Terlaksana sesuai target awal';
                     p.dateReported = newDateString();
-                } else {
-                    p.evaluasi = 'Proker membutuhkan evaluasi dan penyelesaian ulang';
                 }
                 saveData();
                 renderProkerPage();
@@ -1399,11 +1433,33 @@
             }
         }
 
+        function openKendalaModal(id) {
+            const p = prokerList.find(x => x.id === id);
+            if (p) {
+                document.getElementById('kendala-eval-id').value = id;
+                document.getElementById('kendala-eval-text').innerText = p.title;
+                document.getElementById('kendala-input-text').value = p.evaluasi || '';
+                document.getElementById('modal-kendala').classList.remove('hidden');
+            }
+        }
+
+        function saveKendala() {
+            const id = document.getElementById('kendala-eval-id').value;
+            const kendalaText = document.getElementById('kendala-input-text').value;
+            const p = prokerList.find(x => x.id === id);
+            if (p) {
+                p.evaluasi = kendalaText;
+                saveData();
+                closeModal('modal-kendala');
+                renderProkerPage();
+            }
+        }
+
         function openSolusiModal(id) {
             const p = prokerList.find(x => x.id === id);
             if (p) {
                 document.getElementById('solusi-eval-id').value = id;
-                document.getElementById('solusi-eval-text').innerText = p.title + ': ' + (p.evaluasi || 'Belum di-ACC / kendala usaha');
+                document.getElementById('solusi-eval-text').innerText = p.title + ': ' + (p.evaluasi || 'Kendala belum diisi');
                 document.getElementById('solusi-input-text').value = p.solusi || '';
                 document.getElementById('modal-solusi').classList.remove('hidden');
             }
@@ -1429,7 +1485,7 @@
             }
         }
 
-        // --- 4. KEPANITIAAN TAB (Fitur Lengkap: Deskripsi, Target/Rundown, Joblist Flexible & Strikethrough) ---
+        // --- 4. KEPANITIAAN TAB (Fitur Tambah Kolom/Bagian Manual Fleksibel) ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
             container.innerHTML = '';
@@ -1438,25 +1494,19 @@
 
             panitiaList.forEach(k => {
                 let joblistHTML = '';
-                k.joblists.forEach((j, index) => {
+                k.joblists.forEach((j) => {
                     joblistHTML += `
-                        <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600">
                             <div>
                                 <span class="font-bold text-amber-600 dark:text-amber-400 block">${j.bagian}</span>
                                 <span class="text-gray-700 dark:text-gray-200 ${j.done ? 'line-through text-gray-400' : ''}">${j.task}</span>
                             </div>
                             <input type="checkbox" ${j.done ? 'checked' : ''} ${!canChecklist ? 'disabled' : ''} 
                                    onchange="togglePanitiaJob('${k.id}', '${j.id}')" 
-                                   class="w-4 h-4 text-amber-600 rounded cursor-pointer" title="${canChecklist ? 'Checklist Joblist' : 'Hanya Admin/Musyrif'}">
+                                   class="w-4 h-4 text-amber-600 rounded cursor-pointer">
                         </div>
                     `;
                 });
-
-                // Rundown Items (Tercoret jika Joblist yang terkait/semua joblist selesai)
-                const rundownHTML = k.rundown.map((r, i) => {
-                    const isCompleted = k.joblists.length > 0 && k.joblists[i % k.joblists.length]?.done;
-                    return `<li class="text-xs ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500 font-normal' : 'text-gray-700 dark:text-gray-200 font-semibold'}">${r}</li>`;
-                }).join('');
 
                 container.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
@@ -1464,23 +1514,18 @@
                             <div>
                                 <h4 class="font-bold text-xl text-gray-900 dark:text-white">${k.nama}</h4>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${k.deskripsi || 'Tidak ada deskripsi'}</p>
-                                <div class="flex gap-4 mt-2 text-xs font-semibold">
-                                    <span class="text-blue-600"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${k.tanggal}</span>
-                                    <span class="text-rose-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Target Deadline: ${k.deadline}</span>
+                                <div class="mt-2 text-xs font-semibold text-blue-600">
+                                    <i class="fa-regular fa-calendar-check mr-1"></i> Tanggal Pelaksanaan: ${k.tanggal}
                                 </div>
                             </div>
                             <button onclick="deletePanitia('${k.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold"><i class="fa-solid fa-trash mr-1"></i> Hapus Agenda</button>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <h5 class="text-xs font-bold text-gray-400 uppercase">Program Kerja / Joblist Perbagian (Fleksibel)</h5>
+                                <h5 class="text-xs font-bold text-gray-400 uppercase">Daftar Jobdesk Perbagian</h5>
                                 <span class="text-[10px] text-gray-400">*Checklist khusus Admin & Musyrif</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">${joblistHTML}</div>
-                        </div>
-                        <div class="bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
-                            <h5 class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase mb-1">Rundown & Jadwal Persiapan Acara</h5>
-                            <ul class="list-disc list-inside space-y-1">${rundownHTML}</ul>
                         </div>
                     </div>
                 `;
@@ -1499,7 +1544,33 @@
             }
         }
 
+        function addPanitiaRowInput(bagName = '', taskVal = '') {
+            const container = document.getElementById('panitia-dynamic-rows');
+            const rowId = 'row-' + Date.now() + Math.random().toString(36).substr(2, 4);
+            
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <input type="text" class="panitia-bag-input w-1/3 p-1.5 border rounded bg-gray-50 dark:bg-gray-700 text-xs font-bold" placeholder="Nama Bagian" value="${bagName}">
+                <input type="text" class="panitia-task-input flex-1 p-1.5 border rounded bg-gray-50 dark:bg-gray-700 text-xs" placeholder="Jobdesk / Tugas" value="${taskVal}">
+                <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
         function openPanitiaModal() {
+            document.getElementById('panitia-input-nama').value = '';
+            document.getElementById('panitia-input-deskripsi').value = '';
+            document.getElementById('panitia-input-tanggal').value = '';
+            
+            const container = document.getElementById('panitia-dynamic-rows');
+            container.innerHTML = '';
+            
+            BAGIAN_LIST.forEach(bag => {
+                addPanitiaRowInput(bag, `Jobdesk khusus bagian ${bag}`);
+            });
+
             document.getElementById('modal-panitia').classList.remove('hidden');
         }
 
@@ -1508,18 +1579,19 @@
             const nama = document.getElementById('panitia-input-nama').value;
             const deskripsi = document.getElementById('panitia-input-deskripsi').value;
             const tanggal = document.getElementById('panitia-input-tanggal').value;
-            const deadline = document.getElementById('panitia-input-deadline').value;
-            const rundownRaw = document.getElementById('panitia-input-rundown').value;
-            const rundown = rundownRaw.split('\n').filter(r => r.trim().length > 0);
 
             const joblists = [];
-            BAGIAN_LIST.forEach((bag, idx) => {
-                const jobVal = document.getElementById(`job-${bag}`).value;
-                if (jobVal && jobVal.trim() !== '') {
+            const bagInputs = document.querySelectorAll('.panitia-bag-input');
+            const taskInputs = document.querySelectorAll('.panitia-task-input');
+
+            bagInputs.forEach((bagEl, idx) => {
+                const bagVal = bagEl.value.trim();
+                const taskVal = taskInputs[idx]?.value.trim();
+                if (bagVal && taskVal) {
                     joblists.push({
                         id: 'j' + Date.now() + idx,
-                        bagian: bag,
-                        task: jobVal,
+                        bagian: bagVal,
+                        task: taskVal,
                         done: false
                     });
                 }
@@ -1527,7 +1599,7 @@
 
             panitiaList.push({
                 id: 'k' + Date.now(),
-                nama, deskripsi, tanggal, deadline, rundown, joblists
+                nama, deskripsi, tanggal, joblists
             });
 
             saveData();
@@ -1543,7 +1615,7 @@
             }
         }
 
-        // --- 5. RAPAT MINGGUAN TAB (Filter Perbagian, Default: Ketua) ---
+        // --- 5. RAPAT MINGGUAN TAB (Tabel Simetris & Rapi) ---
         function renderRapatPage() {
             const filterBagian = document.getElementById('rapat-bagian-filter').value || 'Ketua';
             
@@ -1556,43 +1628,73 @@
             const t1 = document.getElementById('rapat-table-1');
             t1.innerHTML = '';
             filteredProker.forEach(p => {
-                t1.innerHTML += `<tr><td class="p-2 font-bold text-blue-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-gray-500">${p.desc}</td></tr>`;
+                t1.innerHTML += `
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
+                        <td class="p-3 font-bold text-blue-600">${p.bagian}</td>
+                        <td class="p-3 font-semibold">${p.title}</td>
+                        <td class="p-3 text-gray-500">${p.desc}</td>
+                    </tr>
+                `;
             });
 
             // 2. Hasil Usaha
             const t2 = document.getElementById('rapat-table-2');
             t2.innerHTML = '';
             filteredProker.filter(p => p.accMusyrif).forEach(p => {
-                t2.innerHTML += `<tr><td class="p-2 font-bold text-emerald-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-emerald-600 font-medium">${p.hasilUsaha || 'Terlaksana'}</td></tr>`;
+                t2.innerHTML += `
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
+                        <td class="p-3 font-bold text-emerald-600">${p.bagian}</td>
+                        <td class="p-3 font-semibold">${p.title}</td>
+                        <td class="p-3 text-emerald-600 font-medium">${p.hasilUsaha || 'Terlaksana'}</td>
+                    </tr>
+                `;
             });
 
             // 3. Evaluasi
             const t3 = document.getElementById('rapat-table-3');
             t3.innerHTML = '';
             filteredProker.filter(p => !p.accMusyrif).forEach(p => {
-                t3.innerHTML += `<tr><td class="p-2 font-bold text-rose-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-rose-500">${p.evaluasi || 'Perlu evaluasi/ACC Musyrif'}</td></tr>`;
+                t3.innerHTML += `
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
+                        <td class="p-3 font-bold text-rose-600">${p.bagian}</td>
+                        <td class="p-3 font-semibold">${p.title}</td>
+                        <td class="p-3 text-rose-500 font-medium">${p.evaluasi || 'Perlu evaluasi/ACC Musyrif'}</td>
+                    </tr>
+                `;
             });
 
             // 4. Solusi
             const t4 = document.getElementById('rapat-table-4');
             t4.innerHTML = '';
             filteredProker.filter(p => !p.accMusyrif).forEach(p => {
-                t4.innerHTML += `<tr><td class="p-2 font-bold text-amber-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-amber-600 font-medium">${p.solusi || 'Belum ada rumusan solusi'}</td></tr>`;
+                t4.innerHTML += `
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
+                        <td class="p-3 font-bold text-amber-600">${p.bagian}</td>
+                        <td class="p-3 font-semibold">${p.title}</td>
+                        <td class="p-3 text-amber-600 font-medium">${p.solusi || 'Belum ada rumusan solusi'}</td>
+                    </tr>
+                `;
             });
 
             // 5. Proker Mendatang
             const t5 = document.getElementById('rapat-table-5');
             t5.innerHTML = '';
             filteredProker.filter(p => !p.accMusyrif || p.isFutureOnly).forEach(p => {
-                t5.innerHTML += `<tr><td class="p-2 font-bold text-indigo-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-gray-500">${p.solusi ? 'Dari Solusi Evaluasi' : 'Agenda Minggu Mendatang'}</td></tr>`;
+                t5.innerHTML += `
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
+                        <td class="p-3 font-bold text-indigo-600">${p.bagian}</td>
+                        <td class="p-3 font-semibold">${p.title}</td>
+                        <td class="p-3 text-gray-500">${p.solusi ? 'Dari Solusi Evaluasi' : 'Agenda Minggu Mendatang'}</td>
+                    </tr>
+                `;
             });
 
-            // Notulensi files rendering
+            // Notulensi files
             const notulensiContainer = document.getElementById('notulensi-file-list');
             notulensiContainer.innerHTML = '';
             notulensiFiles.forEach((f, idx) => {
                 notulensiContainer.innerHTML += `
-                    <div class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-lg text-xs flex items-center gap-2">
+                    <div class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 border">
                         <i class="fa-solid fa-file-lines text-purple-500"></i>
                         <span>${f.name} (${f.size})</span>
                         <button onclick="deleteNotulensi(${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-times"></i></button>
@@ -1615,7 +1717,8 @@
 
                 notulensiFiles.push({
                     name: file.name,
-                    size: (file.size / 1024 / 1024).toFixed(2) + ' MB'
+                    size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                    url: URL.createObjectURL(file)
                 });
                 saveData();
                 renderRapatPage();
@@ -1700,7 +1803,7 @@
             XLSX.writeFile(workbook, `Rekap_Program_Kerja_DCC_${bagianFilter}.xlsx`);
         }
 
-        // --- 7. LAPORAN TAB ---
+        // --- 7. LAPORAN TAB (Fitur View & Download File Notulensi) ---
         function renderLaporanPage() {
             const container = document.getElementById('laporan-container');
             const search = (document.getElementById('laporan-search-input')?.value || '').toLowerCase();
@@ -1714,7 +1817,19 @@
             }
 
             filteredReports.forEach(r => {
-                const notulensiHTML = r.notulensi ? r.notulensi.map(n => `<span class="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded font-semibold mr-1"><i class="fa-solid fa-file mr-1"></i>${n.name}</span>`).join('') : 'Tidak ada file';
+                let notulensiHTML = '<span class="text-xs text-gray-400">Tidak ada berkas.</span>';
+                if (r.notulensi && r.notulensi.length > 0) {
+                    notulensiHTML = r.notulensi.map(n => `
+                        <div class="inline-flex items-center gap-2 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-lg text-xs font-semibold mr-2 my-1">
+                            <i class="fa-solid fa-file-lines text-purple-600"></i>
+                            <span>${n.name} (${n.size})</span>
+                            <div class="flex items-center gap-1 ml-2 pl-2 border-l border-purple-300">
+                                <a href="${n.url || '#'}" target="_blank" class="hover:bg-purple-200 dark:hover:bg-purple-800 p-1 rounded text-[11px]" title="Lihat Berkas"><i class="fa-solid fa-eye"></i> View</a>
+                                <a href="${n.url || '#'}" download="${n.name}" class="hover:bg-purple-200 dark:hover:bg-purple-800 p-1 rounded text-[11px]" title="Unduh Berkas"><i class="fa-solid fa-download"></i> Download</a>
+                            </div>
+                        </div>
+                    `).join('');
+                }
 
                 container.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 space-y-3">
@@ -1737,8 +1852,8 @@
                             </div>
                         </div>
                         <div class="pt-2 border-t dark:border-gray-700">
-                            <span class="text-xs text-gray-400 font-semibold mr-2">Notulensi Attached:</span>
-                            ${notulensiHTML}
+                            <span class="text-xs text-gray-400 font-semibold block mb-1">Notulensi Attached:</span>
+                            <div class="flex flex-wrap items-center">${notulensiHTML}</div>
                         </div>
                     </div>
                 `;
