@@ -97,9 +97,15 @@
                 <img id="sidebar-avatar" src="" alt="" class="w-9 h-9 rounded-full object-cover shrink-0">
                 <div class="sidebar-text min-w-0 flex-1">
                     <p id="sidebar-username" class="text-sm font-semibold truncate">-</p>
-                    <p id="sidebar-useremail" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">-</p>
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <p id="sidebar-useremail" class="text-[11px] text-gray-500 dark:text-gray-400 truncate flex-1">-</p>
+                        <span id="sidebar-role-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">MEMBER</span>
+                    </div>
                 </div>
             </div>
+            <button onclick="openRoleModal()" class="w-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-user-shield"></i><span class="sidebar-text">Ubah Akses Role</span>
+            </button>
             <button onclick="handleLogout()" class="w-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-right-from-bracket"></i><span class="sidebar-text">Keluar</span>
             </button>
@@ -335,6 +341,32 @@
 </div>
 
 <!-- ============ MODAL ============ -->
+<!-- Modal Ubah Akses Role -->
+<div id="modal-role" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 class="font-bold text-lg">Ubah Akses / Role Pengguna</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Masukkan kata kunci khusus untuk mendapatkan akses Admin atau Musyrif.</p>
+        <form onsubmit="handleUpgradeRole(event)" class="space-y-3 text-xs sm:text-sm">
+            <div>
+                <label class="block font-medium mb-1" for="role-select">Pilih Akses / Role</label>
+                <select id="role-select" onchange="toggleRoleKeyInput()" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 font-medium">
+                    <option value="member">Member / Anggota Biasa</option>
+                    <option value="musyrif">Musyrif</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div id="role-key-container" class="hidden">
+                <label class="block font-medium mb-1" for="role-key-input">Kata Kunci Akses</label>
+                <input type="password" id="role-key-input" placeholder="Masukkan kata kunci role" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('modal-role')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Beri penugasan baru</h3>
@@ -438,6 +470,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const today = () => new Date().toLocaleDateString('sv-SE');
 const userName = () => currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Pengguna';
+const userRole = () => currentUser?.user_metadata?.role || 'member';
+const isMusyrifOrAdmin = () => ['musyrif', 'admin'].includes(userRole());
 const list = col => [...store[col]].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 const emptyRow = (cols, text) => `<tr><td colspan="${cols}" class="p-4 text-center text-xs text-gray-400">${text}</td></tr>`;
 const bagianOptions = (withAll, allLabel = 'Semua bagian') =>
@@ -568,7 +602,7 @@ document.addEventListener('click', e => {
 });
 
 /* =====================================================================
-   AUTENTIKASI
+   AUTENTIKASI & MANAJEMEN ROLE
    ===================================================================== */
 function switchAuthMode(mode) {
     authMode = mode;
@@ -586,7 +620,10 @@ async function handleAuthSubmit(e) {
     const btn = $('auth-submit-btn'); btn.disabled = true;
     try {
         if (authMode === 'register') {
-            const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name || email.split('@')[0] } } });
+            const { data, error } = await sb.auth.signUp({
+                email, password,
+                options: { data: { full_name: name || email.split('@')[0], role: 'member' } }
+            });
             if (error) throw error;
             if (!data.session) { toast('Akun dibuat. Cek email untuk konfirmasi, lalu masuk.'); switchAuthMode('login'); }
         } else {
@@ -600,15 +637,74 @@ async function handleAuthSubmit(e) {
 
 async function handleLogout() { await sb.auth.signOut(); }
 
+function renderSidebarUserInfo() {
+    const name = userName();
+    const role = userRole().toLowerCase();
+    $('sidebar-username').textContent = name;
+    $('sidebar-useremail').textContent = currentUser?.email || '';
+    $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
+
+    const badge = $('sidebar-role-badge');
+    badge.textContent = role.toUpperCase();
+    if (role === 'admin') {
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 shrink-0';
+    } else if (role === 'musyrif') {
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 shrink-0';
+    } else {
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0';
+    }
+}
+
+function openRoleModal() {
+    $('role-select').value = userRole();
+    toggleRoleKeyInput();
+    openModal('modal-role');
+}
+
+function toggleRoleKeyInput() {
+    const sel = $('role-select').value;
+    const container = $('role-key-container');
+    if (sel === 'musyrif' || sel === 'admin') {
+        container.classList.remove('hidden');
+        $('role-key-input').value = '';
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+async function handleUpgradeRole(e) {
+    e.preventDefault();
+    const targetRole = $('role-select').value;
+    const key = $('role-key-input').value.trim();
+
+    if (targetRole === 'admin' && key !== 'dcc2026') {
+        return toast('Kata kunci Akses Admin salah!', 'err');
+    }
+    if (targetRole === 'musyrif' && key !== 'stafdcc') {
+        return toast('Kata kunci Akses Musyrif salah!', 'err');
+    }
+
+    const { data, error } = await sb.auth.updateUser({
+        data: { role: targetRole }
+    });
+
+    if (error) {
+        toast('Gagal memperbarui akses: ' + error.message, 'err');
+    } else {
+        currentUser = data.user;
+        closeModal('modal-role');
+        toast(`Akses berhasil diubah menjadi ${targetRole.toUpperCase()}`);
+        renderSidebarUserInfo();
+        renderCurrentPage();
+    }
+}
+
 function startSession(user) {
     if (currentUser && currentUser.id === user.id) return;
     currentUser = user;
     $('auth-screen').classList.add('hidden');
     $('app').classList.remove('hidden');
-    const name = userName();
-    $('sidebar-username').textContent = name;
-    $('sidebar-useremail').textContent = user.email || '';
-    $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
+    renderSidebarUserInfo();
     readCache();
     setSync('connecting');
     switchTab('beranda');
@@ -761,9 +857,10 @@ function renderProkerPage() {
     const items = list('proker').filter(p => p.bagian === bag);
     const current = items.filter(p => !p.isFutureOnly);
     const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
+    const canAcc = isMusyrifOrAdmin();
 
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
-        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600"></td>
+        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
         <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
         <td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
         <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
@@ -810,7 +907,14 @@ async function saveProker(e) {
     await save('proker', p);
 }
 const getProker = id => store.proker.find(x => x.id === id);
-async function toggleAccProker(id) { const p = getProker(id); if (p) await save('proker', { ...p, accMusyrif: !p.accMusyrif }); }
+async function toggleAccProker(id) {
+    if (!isMusyrifOrAdmin()) {
+        toast('Hanya Musyrif atau Admin yang dapat memberikan ACC.', 'err');
+        return renderProkerPage();
+    }
+    const p = getProker(id);
+    if (p) await save('proker', { ...p, accMusyrif: !p.accMusyrif });
+}
 function toggleHasilDone(id) {
     const p = getProker(id); if (!p) return;
     if (p.isHasilDone) return void save('proker', { ...p, isHasilDone: false });
