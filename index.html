@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Kerja DCC</title>
+    <title>Sistem Manajemen Kerja DCC - Supabase Auth</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,46 +30,69 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-        }
-        .dark ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.5);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(107, 114, 128, 0.8);
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 4px; }
+        .dark ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
         
-        .custom-scrollbar-y {
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .slide-banner-enter {
-            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .custom-scrollbar-y { max-height: 380px; overflow-y: auto; }
+        .slide-banner-enter { animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200 antialiased min-h-screen flex flex-col">
 
-    <div id="app" class="flex flex-1 h-screen overflow-hidden">
+    <!-- AUTHENTICATION SCREEN (SUPABASE AUTH) -->
+    <div id="auth-screen" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl mx-auto shadow-lg">
+                    DCC
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">DCC Workspace</h2>
+                <p id="auth-subtitle" class="text-xs text-gray-500 dark:text-gray-400">Masuk menggunakan akun email Supabase Anda</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1 text-xs font-semibold">
+                <button type="button" onclick="switchAuthMode('login')" id="tab-login" class="flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition">Masuk (Login)</button>
+                <button type="button" onclick="switchAuthMode('register')" id="tab-register" class="flex-1 py-2 rounded-md text-gray-500 transition">Daftar (Register)</button>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs sm:text-sm">
+                <div id="register-name-field" class="hidden">
+                    <label class="block font-medium mb-1">Nama Lengkap</label>
+                    <input type="text" id="auth-name" placeholder="Nama Anda" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Alamat Email</label>
+                    <input type="email5" id="auth-email" required placeholder="nama@email.com" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Kata Sandi (Password)</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition">
+                    Masuk ke Workspace
+                </button>
+            </form>
+
+            <div class="border-t pt-4 dark:border-gray-700 text-center">
+                <p class="text-[11px] text-gray-400">Terhubung dengan Backend Supabase Auth Database</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER (HIDDEN UNTIL AUTHENTICATED) -->
+    <div id="app" class="flex flex-1 h-screen overflow-hidden hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-30 shrink-0">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -132,24 +155,19 @@
                     <i class="fa-brands fa-whatsapp w-5 text-center text-green-500 text-lg"></i>
                     <span class="sidebar-text">Roomchat</span>
                 </button>
-
-                <div id="admin-menu" class="hidden pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-text">Admin Panel</div>
-                    <button onclick="switchTab('users')" id="nav-users" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="fa-solid fa-user-shield w-5 text-center text-red-500"></i>
-                        <span class="sidebar-text">Manajemen User</span>
-                    </button>
-                </div>
             </nav>
 
-            <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 space-y-2">
                 <div class="flex items-center space-x-3">
-                    <img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=Admin+DCC&background=0284c7&color=fff" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
+                    <img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=User+DCC&background=0284c7&color=fff" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
                     <div class="sidebar-text min-w-0 flex-1">
-                        <p id="sidebar-username" class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">Admin DCC</p>
-                        <p id="sidebar-userrole" class="text-xs text-gray-500 dark:text-gray-400 capitalize">Admin • Ketua</p>
+                        <p id="sidebar-username" class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">User DCC</p>
+                        <p id="sidebar-useremail" class="text-[11px] text-gray-500 dark:text-gray-400 truncate">email@dcc.com</p>
                     </div>
                 </div>
+                <button onclick="handleLogout()" class="w-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
+                </button>
             </div>
         </aside>
 
@@ -161,11 +179,6 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-lg text-xs">
-                        <span class="text-gray-500 dark:text-gray-400 font-medium pl-1 hidden sm:inline"><i class="fa-solid fa-user-gear mr-1"></i> Mode:</span>
-                        <select id="role-switcher" onchange="changeActiveUser(this.value)" class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-semibold py-1 px-2 rounded border border-gray-300 dark:border-gray-600 focus:outline-none text-xs">
-                        </select>
-                    </div>
                     <button id="theme-toggle" onclick="toggleTheme()" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg bg-gray-100 dark:bg-gray-700">
                         <i class="fa-solid fa-moon dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
@@ -263,7 +276,7 @@
                                 </select>
                             </div>
 
-                            <button id="btn-add-task" onclick="openTaskModal()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition">
+                            <button onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition">
                                 <i class="fa-solid fa-plus"></i> Beri Penugasan Baru
                             </button>
                         </div>
@@ -289,7 +302,7 @@
                     </div>
                 </section>
 
-                <!-- 3. PROGRAM KERJA (Fixed Evaluasi Auto Sync to Proker Mendatang) -->
+                <!-- 3. PROGRAM KERJA -->
                 <section id="page-proker" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
@@ -315,40 +328,29 @@
                             <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Tambah Proker
                             </button>
-                            <div id="lapor-musyrif-container">
-                                <button id="btn-lapor-musyrif" onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
-                                </button>
-                                <div id="notif-laporan-musyrif" class="hidden bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 border border-blue-300">
-                                    <i class="fa-solid fa-bell text-amber-500 animate-bounce"></i>
-                                    <span id="notif-laporan-text">Status: Belum dilaporkan member</span>
-                                </div>
-                            </div>
+                            <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
+                            </button>
                         </div>
                     </div>
 
                     <div class="space-y-6">
-                        <!-- Table 1 -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 1. Program Kerja (Minggu Ini)</h4></div>
                             <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-12 text-center">ACC</th><th class="p-3 w-1/3">Nama Program Kerja</th><th class="p-3 w-5/12">Target / Deskripsi</th><th class="p-3 w-28 text-center">Status Lapor</th><th class="p-3 w-20 text-right">Aksi</th></tr></thead><tbody id="proker-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                         </div>
-                        <!-- Table 2 -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 2. Hasil Usaha (Proker yang Di-ACC)</h4></div>
                             <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-16 text-center">Selesai</th><th class="p-3 w-1/3">Program Kerja</th><th class="p-3 w-5/12">Capaian Hasil Usaha</th><th class="p-3 w-32 text-center">Tanggal Lapor</th></tr></thead><tbody id="proker-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                         </div>
-                        <!-- Table 3 -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 3. Evaluasi</h4></div>
                             <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Program / Hal Evaluasi</th><th class="p-3 w-1/2">Penyebab / Kendala</th><th class="p-3 w-36 text-right">Aksi Input / Edit</th></tr></thead><tbody id="proker-table-3" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                         </div>
-                        <!-- Table 4 -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> 4. Solusi</h4></div>
                             <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Evaluasi Target</th><th class="p-3 w-1/2">Rumusan Solusi</th><th class="p-3 w-36 text-right">Aksi Input / Edit</th></tr></thead><tbody id="proker-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                         </div>
-                        <!-- Table 5 -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3"><h4 class="font-bold flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> 5. Program Kerja Yang Akan Datang</h4></div>
                             <div class="custom-scrollbar-y overflow-x-auto"><table class="w-full text-sm text-left table-fixed min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-1/3">Program Kerja Mendatang</th><th class="p-3 w-1/4">Sumber</th><th class="p-3 w-5/12">Rencana Eksekusi</th></tr></thead><tbody id="proker-table-5" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
@@ -363,13 +365,12 @@
                             <h3 class="text-lg font-bold">Master Program Kepanitiaan</h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan kegiatan kepanitiaan.</p>
                         </div>
-                        <button id="btn-add-panitia" onclick="openPanitiaModal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
+                        <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
                             <i class="fa-solid fa-plus"></i> Buat Agenda Kegiatan Baru
                         </button>
                     </div>
 
-                    <div id="panitia-cards-container" class="grid grid-cols-1 gap-6">
-                    </div>
+                    <div id="panitia-cards-container" class="grid grid-cols-1 gap-6"></div>
                 </section>
 
                 <!-- 5. RAPAT MINGGUAN -->
@@ -383,7 +384,7 @@
                             <select id="rapat-bagian-filter" onchange="renderRapatPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs font-bold rounded-lg p-2">
                                 <option value="Ketua" selected>Ketua (Default)</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Gigabyte">Gigabyte</option><option value="D-Tech">D-Tech</option><option value="Perkap">Perkap</option><option value="ALL">Semua Bagian</option>
                             </select>
-                            <button id="btn-save-rapat" onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
+                            <button onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-floppy-disk"></i> Simpan Hasil Rapat (Arsip)
                             </button>
                         </div>
@@ -450,7 +451,7 @@
                     </div>
                 </section>
 
-                <!-- 7. LAPORAN (No Review Button & Real File Download Function) -->
+                <!-- 7. LAPORAN -->
                 <section id="page-laporan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -473,8 +474,7 @@
                         </div>
                     </div>
 
-                    <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]">
-                    </div>
+                    <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
                     <div id="chat-reply-banner" class="hidden px-4 py-2 bg-blue-50 dark:bg-blue-950/60 border-t border-blue-200 dark:border-blue-800 flex items-center justify-between text-xs">
                         <div class="flex items-center space-x-2 truncate">
@@ -508,34 +508,13 @@
                                 <i class="fa-solid fa-paperclip text-lg"></i>
                                 <input type="file" id="chat-file-input" class="hidden" onchange="handleChatFileUpload(event)">
                             </label>
-
                             <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-1 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg px-4 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500">
-
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white p-2.5 rounded-lg shadow transition">
                                 <i class="fa-solid fa-paper-plane text-sm"></i>
                             </button>
                         </form>
                     </div>
                 </section>
-
-                <!-- 9. USER MANAGEMENT -->
-                <section id="page-users" class="page-content space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <h3 class="text-lg font-bold text-red-600 dark:text-red-400">Manajemen Pengguna & Hak Akses</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Khusus Admin: Tambah, edit, atau hapus user.</p>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 uppercase">
-                                <tr><th class="p-4">User</th><th class="p-4">Peran (Role)</th><th class="p-4">Bagian</th></tr>
-                            </thead>
-                            <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                        </table>
-                    </div>
-                </section>
-
             </main>
         </div>
     </div>
@@ -578,62 +557,35 @@
         </div>
     </div>
 
-    <!-- JS Logic Application -->
+    <!-- JS Logic Application & Supabase Auth Integration -->
     <script>
+        // INISIALISASI SUPABASE CLIENT (Ganti URL & Anon Key dengan kredensial proyek Supabase Anda)
+        const SUPABASE_URL = 'https://YOUR-SUPABASE-PROJECT.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR-SUPABASE-ANON-KEY';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentAuthMode = 'login'; // 'login' or 'register'
+        let currentUserSession = null;
+
         const BAGIAN_LIST = ["Ketua", "Sekretaris", "Bendahara", "Gigabyte", "D-Tech", "Perkap"];
-
-        let musyrifReportStatus = JSON.parse(localStorage.getItem('dcc_report_status')) || {
-            'Ketua': false, 'Sekretaris': false, 'Bendahara': false, 'Gigabyte': false, 'D-Tech': false, 'Perkap': false
-        };
-
-        let users = JSON.parse(localStorage.getItem('dcc_users')) || [
-            { id: 'u1', name: 'Admin Utama', role: 'admin', bagian: 'Ketua', avatar: 'https://ui-avatars.com/api/?name=Admin+Utama&background=0284c7&color=fff' },
-            { id: 'u2', name: 'Musyrif Divisi', role: 'musyrif', bagian: 'Gigabyte', avatar: 'https://ui-avatars.com/api/?name=Musyrif+Divisi&background=16a34a&color=fff' },
-            { id: 'u3', name: 'Ahmad Member', role: 'member', bagian: 'D-Tech', avatar: 'https://ui-avatars.com/api/?name=Ahmad+Member&background=9333ea&color=fff' },
-            { id: 'u4', name: 'Zaid Perkap', role: 'member', bagian: 'Perkap', avatar: 'https://ui-avatars.com/api/?name=Zaid+Perkap&background=ea580c&color=fff' }
-        ];
-
-        let activeUserId = localStorage.getItem('dcc_active_user') || 'u1';
-        let activeTab = 'beranda';
-        
-        let countdownRotationIndex = 0;
-        let countdownTimerInterval = null;
-        let countdownRotationTimer = null;
-
-        let activeChatReply = null;
-        let activeChatAttachment = null;
 
         let tasks = JSON.parse(localStorage.getItem('dcc_tasks')) || [
             { id: 't1', title: 'Menyiapkan Proposal Sponsor', pj: 'Ahmad Member', bagian: 'Sekretaris', deadline: '2026-11-05', status: 'Baru Dikerjakan', history: ['Dibuat pada 2026-10-23'] },
-            { id: 't2', title: 'Pemeriksaan Unit Server D-Tech', pj: 'Ahmad Member', bagian: 'D-Tech', deadline: '2026-10-30', status: 'Hampir Selesai', history: ['Dibuat pada 2026-10-22'] },
-            { id: 't3', title: 'Sewa Sound System & panggung', pj: 'Zaid Perkap', bagian: 'Perkap', deadline: '2026-11-02', status: 'Sudah Selesai', history: ['Dibuat pada 2026-10-20'] }
+            { id: 't2', title: 'Pemeriksaan Unit Server D-Tech', pj: 'Ahmad Member', bagian: 'D-Tech', deadline: '2026-10-30', status: 'Hampir Selesai', history: ['Dibuat pada 2026-10-22'] }
         ];
 
         let prokerList = JSON.parse(localStorage.getItem('dcc_proker')) || [
             { id: 'p1', bagian: 'Gigabyte', title: 'Workshop Design & Multimedia', desc: 'Mengadakan pelatihan mingguan untuk anggota', reported: true, accMusyrif: true, hasilUsaha: 'Selesai diselenggarakan batch 1', isHasilDone: true, dateReported: '2026-10-20', isFutureOnly: false, evaluasi: '', solusi: '' },
-            { id: 'p2', bagian: 'D-Tech', title: 'Maintenance Jaringan WiFi Area', desc: 'Optimalisasi router & bandwidth', reported: true, accMusyrif: false, evaluasi: 'Kendala alat mikrotik terbatas', solusi: 'Pengadaan router cadangan', dateReported: '2026-10-21', isFutureOnly: false },
-            { id: 'p3', bagian: 'Ketua', title: 'Evaluasi Bulanan Kinerja', desc: 'Rapat pleno triwulan seluruh pengurus', reported: false, accMusyrif: false, dateReported: '', isFutureOnly: false, evaluasi: '', solusi: '' }
+            { id: 'p2', bagian: 'D-Tech', title: 'Maintenance Jaringan WiFi Area', desc: 'Optimalisasi router & bandwidth', reported: true, accMusyrif: false, evaluasi: 'Kendala alat mikrotik terbatas', solusi: 'Pengadaan router cadangan', dateReported: '2026-10-21', isFutureOnly: false }
         ];
 
         let panitiaList = JSON.parse(localStorage.getItem('dcc_panitia')) || [
             {
                 id: 'k1',
                 nama: 'Peringatan Hari Besar DCC & Expo Teknologi',
-                deskripsi: 'Pameran inovasi teknologi tahunan sekaligus ajang silaturahmi seluruh anggota.',
+                deskripsi: 'Pameran inovasi teknologi tahunan.',
                 tanggal: '2026-11-10',
-                joblists: [
-                    { id: 'j1', bagian: 'Ketua', task: 'Pengawasan umum & sambutan', done: false },
-                    { id: 'j2', bagian: 'Sekretaris', task: 'Pengurusan surat izin & tempat', done: true }
-                ]
-            },
-            {
-                id: 'k2',
-                nama: 'Pelatihan IoT & Smart Device',
-                deskripsi: 'Pelatihan pengenalan mikrokontroler dan perangkat pintar.',
-                tanggal: '2026-11-18',
-                joblists: [
-                    { id: 'j3', bagian: 'D-Tech', task: 'Persiapan modul alat IoT', done: false }
-                ]
+                joblists: [{ id: 'j1', bagian: 'Ketua', task: 'Pengawasan umum & sambutan', done: false }]
             }
         ];
 
@@ -642,68 +594,99 @@
         let notulensiFiles = JSON.parse(localStorage.getItem('dcc_notulensi')) || [];
 
         function saveData() {
-            localStorage.setItem('dcc_users', JSON.stringify(users));
             localStorage.setItem('dcc_tasks', JSON.stringify(tasks));
             localStorage.setItem('dcc_proker', JSON.stringify(prokerList));
             localStorage.setItem('dcc_panitia', JSON.stringify(panitiaList));
             localStorage.setItem('dcc_reports', JSON.stringify(reportsArchive));
             localStorage.setItem('dcc_notulensi', JSON.stringify(notulensiFiles));
             localStorage.setItem('dcc_chat_messages', JSON.stringify(chatMessages));
-            localStorage.setItem('dcc_report_status', JSON.stringify(musyrifReportStatus));
-            localStorage.setItem('dcc_active_user', activeUserId);
         }
 
-        function getActiveUser() {
-            return users.find(u => u.id === activeUserId) || users[0];
-        }
+        // --- AUTH LOGIC (SUPABASE) ---
+        function switchAuthMode(mode) {
+            currentAuthMode = mode;
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const nameField = document.getElementById('register-name-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const subtitle = document.getElementById('auth-subtitle');
 
-        function changeActiveUser(id) {
-            activeUserId = id;
-            saveData();
-            updateHeaderProfile();
-            applyRolePermissions();
-            renderCurrentPage();
-        }
-
-        function updateHeaderProfile() {
-            const user = getActiveUser();
-            document.getElementById('sidebar-username').innerText = user.name;
-            document.getElementById('sidebar-userrole').innerText = `${user.role} • ${user.bagian}`;
-            document.getElementById('sidebar-avatar').src = user.avatar;
-
-            const select = document.getElementById('role-switcher');
-            select.innerHTML = '';
-            users.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id;
-                opt.innerText = `${u.name} (${u.role.toUpperCase()} - ${u.bagian})`;
-                if (u.id === activeUserId) opt.selected = true;
-                select.appendChild(opt);
-            });
-        }
-
-        function applyRolePermissions() {
-            const user = getActiveUser();
-            const isAdmin = user.role === 'admin';
-            const isMusyrif = user.role === 'musyrif';
-
-            const adminMenu = document.getElementById('admin-menu');
-            if (isAdmin) adminMenu.classList.remove('hidden');
-            else adminMenu.classList.add('hidden');
-
-            const btnAddTask = document.getElementById('btn-add-task');
-            if (btnAddTask) {
-                if (isAdmin || isMusyrif) btnAddTask.classList.remove('hidden');
-                else btnAddTask.classList.add('hidden');
-            }
-
-            const btnAddPanitia = document.getElementById('btn-add-panitia');
-            if (btnAddPanitia) {
-                if (isAdmin || isMusyrif) btnAddPanitia.classList.remove('hidden');
-                else btnAddPanitia.classList.add('hidden');
+            if (mode === 'login') {
+                tabLogin.className = "flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition";
+                tabRegister.className = "flex-1 py-2 rounded-md text-gray-500 transition";
+                nameField.classList.add('hidden');
+                submitBtn.innerText = "Masuk ke Workspace";
+                subtitle.innerText = "Masuk menggunakan akun email Supabase Anda";
+            } else {
+                tabRegister.className = "flex-1 py-2 rounded-md bg-white dark:bg-gray-800 shadow-sm text-blue-600 transition";
+                tabLogin.className = "flex-1 py-2 rounded-md text-gray-500 transition";
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = "Daftar Akun Baru";
+                subtitle.innerText = "Buat akun baru melalui Supabase Auth";
             }
         }
 
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+
+            try {
+                if (currentAuthMode === 'register') {
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: { data: { full_name: name || 'Anggota DCC' } }
+                    });
+                    if (error) throw error;
+                    alert('Registrasi berhasil! Silakan periksa email Anda atau langsung masuk jika konfirmasi dimatikan.');
+                    switchAuthMode('login');
+                } else {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    if (error) throw error;
+                    currentUserSession = data.user;
+                    initAppSession(currentUserSession);
+                }
+            } catch (err) {
+                alert('Autentikasi Gagal: ' + err.message);
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            currentUserSession = null;
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+        }
+
+        function initAppSession(user) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+
+            const email = user.email;
+            const fullName = user.user_metadata?.full_name || email.split('@')[0];
+
+            document.getElementById('sidebar-username').innerText = fullName;
+            document.getElementById('sidebar-useremail').innerText = email;
+            document.getElementById('sidebar-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0284c7&color=fff`;
+
+            switchTab('beranda');
+        }
+
+        // Check active session on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+                currentUserSession = session.user;
+                initAppSession(currentUserSession);
+            }
+        });
+
+        // --- TABS NAVIGATION ---
         function switchTab(tabId) {
             activeTab = tabId;
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -721,6 +704,13 @@
             renderCurrentPage();
         }
 
+        let activeTab = 'beranda';
+        let countdownRotationIndex = 0;
+        let countdownTimerInterval = null;
+        let countdownRotationTimer = null;
+        let activeChatReply = null;
+        let activeChatAttachment = null;
+
         function renderCurrentPage() {
             if (activeTab === 'beranda') renderBerandaPage();
             else if (activeTab === 'penugasan') renderPenugasanPage();
@@ -730,7 +720,6 @@
             else if (activeTab === 'rekap') renderRekapPage();
             else if (activeTab === 'laporan') renderLaporanPage();
             else if (activeTab === 'roomchat') renderRoomchatPage();
-            else if (activeTab === 'users') renderUsersPage();
         }
 
         // --- 1. BERANDA ---
@@ -745,27 +734,13 @@
                     ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>`
                     : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
 
-                tbodyUnreported.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">${bag}</td>
-                        <td class="p-3 text-center">${total}</td>
-                        <td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td>
-                        <td class="p-3 text-center">${statusBadge}</td>
-                    </tr>
-                `;
+                tbodyUnreported.innerHTML += `<tr><td class="p-3 font-semibold">${bag}</td><td class="p-3 text-center">${total}</td><td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td><td class="p-3 text-center">${statusBadge}</td></tr>`;
             });
 
             const tbodyTasks = document.getElementById('home-tasks-table');
             tbodyTasks.innerHTML = '';
             tasks.slice(0, 5).forEach(t => {
-                tbodyTasks.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-medium">${t.title}</td>
-                        <td class="p-3 text-xs">${t.pj} (${t.bagian})</td>
-                        <td class="p-3 text-xs text-rose-500 font-semibold">${t.deadline}</td>
-                        <td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${t.status}</span></td>
-                    </tr>
-                `;
+                tbodyTasks.innerHTML += `<tr><td class="p-3 font-medium">${t.title}</td><td class="p-3 text-xs">${t.pj} (${t.bagian})</td><td class="p-3 text-xs text-rose-500 font-semibold">${t.deadline}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${t.status}</span></td></tr>`;
             });
             initDynamicCountdown();
         }
@@ -773,13 +748,7 @@
         function initDynamicCountdown() {
             if (countdownTimerInterval) clearInterval(countdownTimerInterval);
             if (countdownRotationTimer) clearInterval(countdownRotationTimer);
-
-            if (panitiaList.length === 0) {
-                document.getElementById('event-title-display').innerText = "Belum ada agenda kepanitiaan";
-                document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: -`;
-                document.getElementById('countdown-indicator').innerText = "";
-                return;
-            }
+            if (panitiaList.length === 0) return;
 
             const sortedEvents = [...panitiaList].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
             if (countdownRotationIndex >= sortedEvents.length) countdownRotationIndex = 0;
@@ -787,104 +756,43 @@
             function updateCountdownUI() {
                 const activeEv = sortedEvents[countdownRotationIndex];
                 if (!activeEv) return;
-
-                const box = document.getElementById('countdown-banner-box');
-                if (box) {
-                    box.classList.remove('slide-banner-enter');
-                    void box.offsetWidth;
-                    box.classList.add('slide-banner-enter');
-                }
-
                 document.getElementById('event-title-display').innerText = activeEv.nama;
                 document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${activeEv.tanggal}`;
-                
-                if (sortedEvents.length > 1) {
-                    document.getElementById('countdown-indicator').innerText = `(Agenda ${countdownRotationIndex + 1} dari ${sortedEvents.length} - Berganti tiap 10s)`;
-                } else {
-                    document.getElementById('countdown-indicator').innerText = "(Agenda Terdekat)";
-                }
             }
-
             function tickCountdown() {
                 const activeEv = sortedEvents[countdownRotationIndex];
                 if (!activeEv) return;
-
-                const targetTime = new Date(activeEv.tanggal + 'T08:00:00').getTime();
-                const now = new Date().getTime();
-                const diff = targetTime - now;
-
+                const diff = new Date(activeEv.tanggal + 'T08:00:00').getTime() - new Date().getTime();
                 if (diff > 0) {
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                    document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-                    document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-                    document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
-                    document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
-                } else {
-                    document.getElementById('cd-days').innerText = "00";
-                    document.getElementById('cd-hours').innerText = "00";
-                    document.getElementById('cd-minutes').innerText = "00";
-                    document.getElementById('cd-seconds').innerText = "00";
+                    document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                    document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                    document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                    document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
                 }
             }
-
             updateCountdownUI();
             tickCountdown();
-
             countdownTimerInterval = setInterval(tickCountdown, 1000);
-
-            if (sortedEvents.length > 1) {
-                countdownRotationTimer = setInterval(() => {
-                    countdownRotationIndex = (countdownRotationIndex + 1) % sortedEvents.length;
-                    updateCountdownUI();
-                    tickCountdown();
-                }, 10000);
-            }
         }
 
         // --- 2. PENUGASAN ---
         function renderPenugasanPage() {
             const tbody = document.getElementById('tasks-table-body');
             tbody.innerHTML = '';
-            const filterBagian = document.getElementById('task-filter-bagian')?.value || 'ALL';
-            const filterStatus = document.getElementById('task-filter-status')?.value || 'ALL';
-            const currentUser = getActiveUser();
-            const canDelete = currentUser.role === 'admin' || currentUser.role === 'musyrif';
-
-            let filteredTasks = tasks;
-            if (filterBagian !== 'ALL') filteredTasks = filteredTasks.filter(t => t.bagian === filterBagian);
-            if (filterStatus !== 'ALL') filteredTasks = filteredTasks.filter(t => t.status === filterStatus);
-
-            if (filteredTasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 text-xs">Tidak ada penugasan sesuai filter.</td></tr>`;
-                return;
-            }
-
-            filteredTasks.forEach(t => {
-                const actionDelete = canDelete ? `<button onclick="deleteTask('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>` : `-`;
+            tasks.forEach(t => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
-                        <td class="p-4 font-semibold text-gray-900 dark:text-white">${t.title}</td>
-                        <td class="p-4 text-xs font-bold text-gray-700 dark:text-gray-300">${t.pj}</td>
-                        <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-medium">${t.bagian}</span></td>
+                        <td class="p-4 font-semibold">${t.title}</td>
+                        <td class="p-4 text-xs font-bold">${t.pj}</td>
+                        <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${t.bagian}</span></td>
                         <td class="p-4 text-xs text-rose-500 font-bold">${t.deadline}</td>
-                        <td class="p-4">
-                            <select onchange="updateTaskStatus('${t.id}', this.value)" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs rounded-lg p-1.5 font-semibold">
-                                <option value="Baru Dikerjakan" ${t.status === 'Baru Dikerjakan' ? 'selected' : ''}>Baru Dikerjakan</option>
-                                <option value="Hampir Selesai" ${t.status === 'Hampir Selesai' ? 'selected' : ''}>Hampir Selesai</option>
-                                <option value="Sudah Selesai" ${t.status === 'Sudah Selesai' ? 'selected' : ''}>Sudah Selesai</option>
-                            </select>
-                        </td>
-                        <td class="p-4 text-center"><button onclick="alert('Log:\\n${t.history.join('\\n')}')" class="text-blue-600 text-xs font-semibold">Lihat Log</button></td>
-                        <td class="p-4 text-right">${actionDelete}</td>
+                        <td class="p-4"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${t.status}</span></td>
+                        <td class="p-4 text-center"><button onclick="alert('Log:\\n${t.history.join('\\n')}')" class="text-blue-600 text-xs">Lihat Log</button></td>
+                        <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
                     </tr>
                 `;
             });
         }
-
         function openTaskModal() { document.getElementById('modal-task').classList.remove('hidden'); }
         function saveTask(e) {
             e.preventDefault();
@@ -899,293 +807,95 @@
             });
             saveData(); closeModal('modal-task'); renderPenugasanPage();
         }
-        function updateTaskStatus(taskId, newStatus) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) { task.status = newStatus; task.history.push(`Status diubah ke '${newStatus}'`); saveData(); renderPenugasanPage(); }
-        }
-        function deleteTask(taskId) {
-            if (confirm('Hapus tugas ini?')) { tasks = tasks.filter(t => t.id !== taskId); saveData(); renderPenugasanPage(); }
-        }
+        function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); saveData(); renderPenugasanPage(); }
 
-        // --- 3. PROGRAM KERJA (Fixed Evaluasi Auto-Sync to Proker Mendatang) ---
+        // --- 3. PROGRAM KERJA ---
         function renderProkerPage() {
-            const filterSelect = document.getElementById('proker-bagian-filter');
-            const currentBagian = filterSelect ? filterSelect.value : BAGIAN_LIST[0];
-            const user = getActiveUser();
-            const canAcc = user.role === 'admin' || user.role === 'musyrif';
-            const isMember = user.role === 'member';
-
-            const btnLapor = document.getElementById('btn-lapor-musyrif');
-            const notifLapor = document.getElementById('notif-laporan-musyrif');
-            const notifText = document.getElementById('notif-laporan-text');
-
-            if (isMember) {
-                if (btnLapor) btnLapor.classList.remove('hidden');
-                if (notifLapor) notifLapor.classList.add('hidden');
-            } else {
-                if (btnLapor) btnLapor.classList.add('hidden');
-                if (notifLapor) notifLapor.classList.remove('hidden');
-                const isReported = musyrifReportStatus[currentBagian];
-                if (notifText) notifText.innerText = isReported ? `Bagian ${currentBagian} SUDAH Melapor!` : `Bagian ${currentBagian} BELUM Melapor.`;
-            }
-
+            const currentBagian = document.getElementById('proker-bagian-filter')?.value || 'Ketua';
             const bagProker = prokerList.filter(p => p.bagian === currentBagian);
 
-            const btnNextWeek = document.getElementById('btn-next-week-proker');
-            const hasProgressData = bagProker.some(p => (p.hasilUsaha && p.hasilUsaha.trim() !== '') || (p.evaluasi && p.evaluasi.trim() !== '') || (p.solusi && p.solusi.trim() !== ''));
-
-            if (btnNextWeek) {
-                if (hasProgressData) {
-                    btnNextWeek.removeAttribute('disabled');
-                    btnNextWeek.className = "bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer";
-                } else {
-                    btnNextWeek.setAttribute('disabled', 'true');
-                    btnNextWeek.className = "bg-gray-400 cursor-not-allowed text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition";
-                }
-            }
-
-            // Table 1: Program Kerja Minggu Ini
             const t1 = document.getElementById('proker-table-1');
             if (t1) {
                 t1.innerHTML = '';
                 bagProker.filter(p => !p.isFutureOnly).forEach(p => {
-                    t1.innerHTML += `
-                        <tr>
-                            <td class="p-3 text-center"><input type="checkbox" ${p.accMusyrif ? 'checked' : ''} ${!canAcc ? 'disabled' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 text-emerald-600 rounded"></td>
-                            <td class="p-3 font-semibold text-gray-800 dark:text-gray-100">${p.title}</td>
-                            <td class="p-3 text-xs text-gray-500 truncate">${p.desc}</td>
-                            <td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
-                            <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button></td>
-                        </tr>
-                    `;
+                    t1.innerHTML += `<tr><td class="p-3 text-center"><input type="checkbox" ${p.accMusyrif ? 'checked' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 text-emerald-600 rounded"></td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-gray-500">${p.desc}</td><td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td><td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
 
-            // Table 2: Hasil Usaha (Di-ACC & Terceklist)
             const t2 = document.getElementById('proker-table-2');
             if (t2) {
                 t2.innerHTML = '';
                 bagProker.filter(p => p.accMusyrif && !p.isFutureOnly).forEach(p => {
-                    t2.innerHTML += `
-                        <tr>
-                            <td class="p-3 text-center"><input type="checkbox" ${p.isHasilDone ? 'checked' : ''} onchange="toggleHasilDone('${p.id}')" class="w-4 h-4 text-blue-600 rounded"></td>
-                            <td class="p-3 font-semibold">${p.title}</td>
-                            <td class="p-3 text-xs text-emerald-600 font-medium">${p.hasilUsaha || 'Belum diisi capaian'}</td>
-                            <td class="p-3 text-xs text-center text-gray-400">${p.dateReported || '-'}</td>
-                        </tr>
-                    `;
+                    t2.innerHTML += `<tr><td class="p-3 text-center"><input type="checkbox" ${p.isHasilDone ? 'checked' : ''} onchange="toggleHasilDone('${p.id}')" class="w-4 h-4 text-blue-600 rounded"></td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-emerald-600 font-medium">${p.hasilUsaha || 'Belum diisi'}</td><td class="p-3 text-xs text-center text-gray-400">${p.dateReported || '-'}</td></tr>`;
                 });
             }
 
-            // Table 3: Evaluasi (Semua proker yang belum terceklist selesai)
             const evalItems = bagProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly);
             const t3 = document.getElementById('proker-table-3');
             if (t3) {
                 t3.innerHTML = '';
                 evalItems.forEach(p => {
-                    t3.innerHTML += `
-                        <tr>
-                            <td class="p-3 font-semibold text-rose-600">${p.title}</td>
-                            <td class="p-3 text-xs font-medium text-rose-700 dark:text-rose-300">${p.evaluasi || 'Belum ada kendala diisi'}</td>
-                            <td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1 rounded-lg font-semibold shadow-sm">Edit Kendala</button></td>
-                        </tr>
-                    `;
+                    t3.innerHTML += `<tr><td class="p-3 font-semibold text-rose-600">${p.title}</td><td class="p-3 text-xs text-rose-700">${p.evaluasi || 'Belum ada kendala'}</td><td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded">Edit Kendala</button></td></tr>`;
                 });
             }
 
-            // Table 4: Solusi
             const t4 = document.getElementById('proker-table-4');
             if (t4) {
                 t4.innerHTML = '';
                 evalItems.forEach(p => {
-                    t4.innerHTML += `
-                        <tr>
-                            <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">${p.title}</td>
-                            <td class="p-3 text-xs font-medium text-amber-700 dark:text-amber-300">${p.solusi || 'Belum ada solusi'}</td>
-                            <td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1 rounded-lg font-semibold shadow-sm">Edit Solusi</button></td>
-                        </tr>
-                    `;
+                    t4.innerHTML += `<tr><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-xs text-amber-700">${p.solusi || 'Belum ada solusi'}</td><td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded">Edit Solusi</button></td></tr>`;
                 });
             }
 
-            // Table 5: Program Kerja Yang Akan Datang (SEMUA DARI EVALUASI + PROKER MINGGU DEPAN)
             const t5 = document.getElementById('proker-table-5');
             if (t5) {
                 t5.innerHTML = '';
                 const futureItems = bagProker.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif));
-                
-                if (futureItems.length === 0) {
-                    t5.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-xs text-gray-400">Belum ada program kerja mendatang.</td></tr>`;
-                } else {
-                    futureItems.forEach(p => {
-                        t5.innerHTML += `
-                            <tr class="bg-indigo-50/30 dark:bg-indigo-950/20">
-                                <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${p.title}</td>
-                                <td class="p-3 text-xs font-semibold text-gray-500">${p.isFutureOnly ? 'Rencana Minggu Depan' : 'Otomatis dari Evaluasi'}</td>
-                                <td class="p-3 text-xs text-gray-600 dark:text-gray-300">${p.solusi || p.desc || 'Eksekusi Periode Mendatang'}</td>
-                            </tr>
-                        `;
-                    });
-                }
+                futureItems.forEach(p => {
+                    t5.innerHTML += `<tr class="bg-indigo-50/30"><td class="p-3 font-semibold text-indigo-600">${p.title}</td><td class="p-3 text-xs">${p.isFutureOnly ? 'Rencana Minggu Depan' : 'Otomatis dari Evaluasi'}</td><td class="p-3 text-xs">${p.solusi || p.desc || '-'}</td></tr>`;
+                });
             }
         }
 
         function openProkerModal(type) {
             document.getElementById('proker-target-type').value = type;
-            document.getElementById('modal-proker-title').innerText = type === 'minggu_depan' ? 'Tambah Program Kerja Minggu Depan' : 'Tambah Program Kerja';
             document.getElementById('modal-proker').classList.remove('hidden');
         }
-
         function saveProker(e) {
             e.preventDefault();
-            const filterSelect = document.getElementById('proker-bagian-filter');
-            const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
+            const currentBagian = document.getElementById('proker-bagian-filter').value;
             const type = document.getElementById('proker-target-type').value;
-
             prokerList.push({
                 id: 'p' + Date.now(),
                 bagian: currentBagian,
                 title: document.getElementById('proker-input-title').value,
                 desc: document.getElementById('proker-input-desc').value,
-                reported: true,
-                accMusyrif: false,
-                isHasilDone: false,
-                hasilUsaha: '',
-                evaluasi: '',
-                solusi: '',
-                dateReported: newDateString(),
-                isFutureOnly: type === 'minggu_depan'
+                reported: true, accMusyrif: false, isHasilDone: false, hasilUsaha: '', evaluasi: '', solusi: '', dateReported: newDateString(), isFutureOnly: type === 'minggu_depan'
             });
             saveData(); closeModal('modal-proker'); renderProkerPage();
-            if (activeTab === 'rapat') renderRapatPage();
         }
-
-        function toggleAccProker(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) { p.accMusyrif = !p.accMusyrif; saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); }
-        }
-
-        function toggleHasilDone(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) {
-                p.isHasilDone = !p.isHasilDone;
-                if (p.isHasilDone && !p.hasilUsaha) p.hasilUsaha = prompt('Masukkan capaian hasil usaha:') || 'Selesai';
-                saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage();
-            }
-        }
-
-        function deleteProker(id) {
-            if (confirm('Hapus proker ini?')) { prokerList = prokerList.filter(x => x.id !== id); saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); }
-        }
-
-        function laporMusyrif() {
-            const filterSelect = document.getElementById('proker-bagian-filter');
-            const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
-            musyrifReportStatus[currentBagian] = true;
-            saveData(); alert(`Laporan bagian ${currentBagian} berhasil dikirim ke Musyrif!`); renderProkerPage();
-        }
-
-        function editKendala(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) { const val = prompt('Masukkan kendala / evaluasi:', p.evaluasi); if (val !== null) { p.evaluasi = val; saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); } }
-        }
-
-        function editSolusi(id) {
-            const p = prokerList.find(x => x.id === id);
-            if (p) { const val = prompt('Masukkan solusi:', p.solusi); if (val !== null) { p.solusi = val; saveData(); renderProkerPage(); if (activeTab === 'rapat') renderRapatPage(); } }
-        }
-
-        function openImportLastWeekModal() { alert('Fitur Impor Proker Minggu Lalu aktif.'); }
+        function toggleAccProker(id) { const p = prokerList.find(x => x.id === id); if (p) { p.accMusyrif = !p.accMusyrif; saveData(); renderProkerPage(); } }
+        function toggleHasilDone(id) { const p = prokerList.find(x => x.id === id); if (p) { p.isHasilDone = !p.isHasilDone; if (p.isHasilDone && !p.hasilUsaha) p.hasilUsaha = prompt('Masukkan capaian:') || 'Selesai'; saveData(); renderProkerPage(); } }
+        function deleteProker(id) { prokerList = prokerList.filter(x => x.id !== id); saveData(); renderProkerPage(); }
+        function editKendala(id) { const p = prokerList.find(x => x.id === id); if (p) { p.evaluasi = prompt('Kendala:', p.evaluasi) || p.evaluasi; saveData(); renderProkerPage(); } }
+        function editSolusi(id) { const p = prokerList.find(x => x.id === id); if (p) { p.solusi = prompt('Solusi:', p.solusi) || p.solusi; saveData(); renderProkerPage(); } }
+        function laporMusyrif() { alert('Laporan berhasil dikirim ke Musyrif!'); }
+        function openImportLastWeekModal() { alert('Fitur Impor Proker Minggu Lalu.'); }
 
         // --- 4. KEPANITIAAN ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
             if (!container) return;
             container.innerHTML = '';
-            const user = getActiveUser();
-            const canManage = user.role === 'admin' || user.role === 'musyrif';
-
             panitiaList.forEach(k => {
-                let joblistHTML = '';
-                k.joblists.forEach((j) => {
-                    if (canManage) {
-                        joblistHTML += `
-                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600 gap-2">
-                                <div class="flex-1 flex items-center gap-2">
-                                    <input type="text" value="${j.bagian}" onchange="updatePanitiaJobField('${k.id}', '${j.id}', 'bagian', this.value)" class="w-24 p-1 border rounded bg-white dark:bg-gray-800 font-bold text-amber-600">
-                                    <input type="text" value="${j.task}" onchange="updatePanitiaJobField('${k.id}', '${j.id}', 'task', this.value)" class="flex-1 p-1 border rounded bg-white dark:bg-gray-800 ${j.done ? 'line-through text-gray-400' : ''}">
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <input type="checkbox" ${j.done ? 'checked' : ''} onchange="togglePanitiaJob('${k.id}', '${j.id}')" class="w-4 h-4 text-amber-600 rounded">
-                                    <button onclick="deletePanitiaJob('${k.id}', '${j.id}')" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        joblistHTML += `
-                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border">
-                                <div><span class="font-bold text-amber-600 block">${j.bagian}</span><span class="${j.done ? 'line-through text-gray-400' : ''}">${j.task}</span></div>
-                                <span class="text-[10px] font-bold ${j.done ? 'text-emerald-600' : 'text-amber-600'}">${j.done ? 'Selesai' : 'Proses'}</span>
-                            </div>
-                        `;
-                    }
-                });
-
-                const deleteAgendaBtn = canManage ? `<button onclick="deletePanitia('${k.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold"><i class="fa-solid fa-trash mr-1"></i> Hapus Agenda</button>` : '';
-                const addJobBtn = canManage ? `<button onclick="addNewJobToPanitia('${k.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-2.5 py-1 rounded font-semibold flex items-center gap-1 shadow"><i class="fa-solid fa-plus"></i> Tambah Jobdesk</button>` : '';
-
-                container.innerHTML += `
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
-                        <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
-                            <div>
-                                <h4 class="font-bold text-xl text-gray-900 dark:text-white">${k.nama}</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${k.deskripsi || ''}</p>
-                                <div class="mt-2 text-xs font-semibold text-blue-600"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${k.tanggal}</div>
-                            </div>
-                            ${deleteAgendaBtn}
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <h5 class="text-xs font-bold text-gray-400 uppercase">Daftar Jobdesk Perbagian</h5>
-                                ${addJobBtn}
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${joblistHTML}</div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML += `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border"><h4 class="font-bold text-lg">${k.nama}</h4><p class="text-xs text-gray-500">${k.deskripsi}</p><div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${k.tanggal}</div></div>`;
             });
         }
-
         function openPanitiaModal() { document.getElementById('modal-panitia').classList.remove('hidden'); }
         function savePanitia(e) {
             e.preventDefault();
-            panitiaList.push({
-                id: 'k' + Date.now(),
-                nama: document.getElementById('panitia-input-nama').value,
-                deskripsi: document.getElementById('panitia-input-deskripsi').value,
-                tanggal: document.getElementById('panitia-input-tanggal').value,
-                joblists: [{ id: 'j' + Date.now(), bagian: 'Ketua', task: 'Persiapan awal kegiatan', done: false }]
-            });
+            panitiaList.push({ id: 'k' + Date.now(), nama: document.getElementById('panitia-input-nama').value, deskripsi: document.getElementById('panitia-input-deskripsi').value, tanggal: document.getElementById('panitia-input-tanggal').value, joblists: [] });
             saveData(); closeModal('modal-panitia'); renderPanitiaPage();
-        }
-        function deletePanitia(id) {
-            if (confirm('Hapus agenda kepanitiaan ini?')) { panitiaList = panitiaList.filter(x => x.id !== id); saveData(); renderPanitiaPage(); }
-        }
-        function togglePanitiaJob(kId, jId) {
-            const k = panitiaList.find(x => x.id === kId);
-            if (k) { const j = k.joblists.find(y => y.id === jId); if (j) { j.done = !j.done; saveData(); renderPanitiaPage(); } }
-        }
-        function updatePanitiaJobField(kId, jId, field, val) {
-            const k = panitiaList.find(x => x.id === kId);
-            if (k) { const j = k.joblists.find(y => y.id === jId); if (j) { j[field] = val; saveData(); } }
-        }
-        function addNewJobToPanitia(kId) {
-            const k = panitiaList.find(x => x.id === kId);
-            if (k) { k.joblists.push({ id: 'j' + Date.now(), bagian: 'Bagian Baru', task: 'Jobdesk baru', done: false }); saveData(); renderPanitiaPage(); }
-        }
-        function deletePanitiaJob(kId, jId) {
-            const k = panitiaList.find(x => x.id === kId);
-            if (k) { k.joblists = k.joblists.filter(y => y.id !== jId); saveData(); renderPanitiaPage(); }
         }
 
         // --- 5. RAPAT MINGGUAN ---
@@ -1193,106 +903,43 @@
             const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
             let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
 
-            // 1. Program Kerja Minggu Lalu
             const t1 = document.getElementById('rapat-table-1');
-            if (t1) {
-                t1.innerHTML = '';
-                const items1 = filteredProker.filter(p => !p.isFutureOnly);
-                if (items1.length === 0) t1.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Tidak ada data.</td></tr>`;
-                items1.forEach(p => {
-                    t1.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-blue-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc}</td></tr>`;
-                });
-            }
-
-            // 2. Hasil Usaha Rapat
+            if (t1) { t1.innerHTML = ''; filteredProker.filter(p => !p.isFutureOnly).forEach(p => { t1.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3">${p.desc}</td></tr>`; }); }
+            
             const t2 = document.getElementById('rapat-table-2');
-            if (t2) {
-                t2.innerHTML = '';
-                const items2 = filteredProker.filter(p => p.accMusyrif && p.isHasilDone && !p.isFutureOnly);
-                if (items2.length === 0) t2.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Belum ada hasil usaha terceklist.</td></tr>`;
-                items2.forEach(p => {
-                    t2.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-emerald-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-emerald-600 font-medium">${p.hasilUsaha || 'Terlaksana / Di-ACC'}</td></tr>`;
-                });
-            }
+            if (t2) { t2.innerHTML = ''; filteredProker.filter(p => p.accMusyrif && p.isHasilDone && !p.isFutureOnly).forEach(p => { t2.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-emerald-600">${p.hasilUsaha}</td></tr>`; }); }
 
-            // 3. Evaluasi
             const t3 = document.getElementById('rapat-table-3');
-            if (t3) {
-                t3.innerHTML = '';
-                const items3 = filteredProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly);
-                if (items3.length === 0) t3.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Tidak ada evaluasi aktif.</td></tr>`;
-                items3.forEach(p => {
-                    t3.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-rose-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-rose-500 font-medium">${p.evaluasi || 'Belum ada kendala diisi'}</td></tr>`;
-                });
-            }
+            if (t3) { t3.innerHTML = ''; filteredProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).forEach(p => { t3.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-rose-500">${p.evaluasi || '-'}</td></tr>`; }); }
 
-            // 4. Solusi
             const t4 = document.getElementById('rapat-table-4');
-            if (t4) {
-                t4.innerHTML = '';
-                const items4 = filteredProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly);
-                if (items4.length === 0) t4.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Tidak ada solusi aktif.</td></tr>`;
-                items4.forEach(p => {
-                    t4.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-amber-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-amber-600 font-medium">${p.solusi || 'Belum ada solusi'}</td></tr>`;
-                });
-            }
+            if (t4) { t4.innerHTML = ''; filteredProker.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).forEach(p => { t4.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3 text-amber-600">${p.solusi || '-'}</td></tr>`; }); }
 
-            // 5. Program Kerja Yang Akan Datang (Auto Sync Evaluasi)
             const t5 = document.getElementById('rapat-table-5');
-            if (t5) {
-                t5.innerHTML = '';
-                const items5 = filteredProker.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif));
-                if (items5.length === 0) t5.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">Tidak ada proker mendatang.</td></tr>`;
-                items5.forEach(p => {
-                    t5.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.solusi || p.desc || 'Rencana Periode Mendatang'}</td></tr>`;
-                });
-            }
+            if (t5) { t5.innerHTML = ''; filteredProker.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif)).forEach(p => { t5.innerHTML += `<tr><td class="p-3 font-bold">${p.bagian}</td><td class="p-3">${p.title}</td><td class="p-3">${p.solusi || p.desc || '-'}</td></tr>`; }); }
 
             renderNotulensiFileList();
         }
 
         function simpanHasilRapat() {
-            const title = prompt('Masukkan judul arsip rapat mingguan:', `Rapat Mingguan - ${newDateString()}`);
+            const title = prompt('Judul Arsip Rapat:', `Rapat Mingguan - ${newDateString()}`);
             if (title) {
-                const snapshotProker = JSON.parse(JSON.stringify(prokerList));
-                const snapshotNotulensi = JSON.parse(JSON.stringify(notulensiFiles));
-
-                reportsArchive.push({
-                    id: 'r' + Date.now(),
-                    title: title,
-                    date: newDateString(),
-                    prokerData: snapshotProker,
-                    notulensiFiles: snapshotNotulensi
-                });
-
-                saveData();
-                alert('Hasil rapat berhasil disimpan dan diarsipkan ke Laporan!');
-                if (activeTab === 'laporan') renderLaporanPage();
+                reportsArchive.push({ id: 'r' + Date.now(), title: title, date: newDateString(), prokerData: JSON.parse(JSON.stringify(prokerList)), notulensiFiles: JSON.parse(JSON.stringify(notulensiFiles)) });
+                saveData(); alert('Hasil rapat berhasil diarsipkan!');
             }
         }
 
-        // Real File Upload with FileReader (Data URL)
         function uploadNotulensiFile() {
             const input = document.getElementById('notulensi-file-input');
             if (input && input.files[0]) {
                 const file = input.files[0];
                 const reader = new FileReader();
-
                 reader.onload = function (e) {
-                    notulensiFiles.push({
-                        id: 'f' + Date.now(),
-                        name: file.name,
-                        dataUrl: e.target.result,
-                        date: newDateString()
-                    });
-                    saveData();
-                    renderNotulensiFileList();
-                    alert(`File '${file.name}' berhasil diunggah!`);
+                    notulensiFiles.push({ id: 'f' + Date.now(), name: file.name, dataUrl: e.target.result, date: newDateString() });
+                    saveData(); renderNotulensiFileList(); alert('File berhasil diunggah!');
                     input.value = '';
                 };
                 reader.readAsDataURL(file);
-            } else {
-                alert('Pilih file terlebih dahulu!');
             }
         }
 
@@ -1300,178 +947,42 @@
             const listContainer = document.getElementById('notulensi-file-list');
             if (!listContainer) return;
             listContainer.innerHTML = '';
-            if (notulensiFiles.length === 0) {
-                listContainer.innerHTML = `<span class="text-xs text-gray-400 italic">Belum ada file notulensi diunggah.</span>`;
-                return;
-            }
             notulensiFiles.forEach((f, idx) => {
-                listContainer.innerHTML += `
-                    <div class="bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-200 flex items-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-file-lines"></i>
-                        <span>${f.name}</span>
-                        <button onclick="downloadRealFile('${f.id}')" class="text-xs font-semibold text-emerald-600 hover:underline ml-1" title="Download Real File"><i class="fa-solid fa-download"></i></button>
-                        <button onclick="deleteNotulensi(${idx})" class="text-rose-500 ml-2 hover:font-bold">×</button>
-                    </div>
-                `;
+                listContainer.innerHTML += `<div class="bg-purple-50 text-purple-700 text-xs px-3 py-1.5 rounded border flex items-center gap-2"><span>${f.name}</span><button onclick="downloadRealFile('${f.id}')" class="text-emerald-600 font-bold"><i class="fa-solid fa-download"></i></button><button onclick="deleteNotulensi(${idx})" class="text-rose-500 font-bold">×</button></div>`;
             });
         }
-
-        function deleteNotulensi(idx) {
-            notulensiFiles.splice(idx, 1);
-            saveData(); renderNotulensiFileList();
-        }
+        function deleteNotulensi(idx) { notulensiFiles.splice(idx, 1); saveData(); renderNotulensiFileList(); }
 
         // --- 6. REKAP ---
         function renderRekapPage() {
-            const bagianFilter = document.getElementById('rekap-filter-bagian')?.value || 'ALL';
-            let filtered = bagianFilter !== 'ALL' ? prokerList.filter(p => p.bagian === bagianFilter) : prokerList;
-            
             const tProker = document.getElementById('rekap-table-proker');
-            if (tProker) {
-                tProker.innerHTML = '';
-                filtered.forEach(p => { tProker.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.title}</td><td class="p-2.5"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">${p.accMusyrif ? 'Di-ACC' : 'Proses'}</span></td></tr>`; });
-            }
-            
+            if (tProker) { tProker.innerHTML = ''; prokerList.forEach(p => { tProker.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.title}</td><td class="p-2.5">${p.accMusyrif ? 'Di-ACC' : 'Proses'}</td></tr>`; }); }
             const tHasil = document.getElementById('rekap-table-hasil');
-            if (tHasil) {
-                tHasil.innerHTML = '';
-                filtered.filter(p => p.accMusyrif).forEach(p => { tHasil.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.hasilUsaha || p.title}</td><td class="p-2.5 text-gray-500">${p.dateReported || '-'}</td></tr>`; });
-            }
+            if (tHasil) { tHasil.innerHTML = ''; prokerList.filter(p => p.accMusyrif).forEach(p => { tHasil.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.hasilUsaha || p.title}</td><td class="p-2.5">${p.dateReported || '-'}</td></tr>`; }); }
         }
-
         function downloadRekapExcel() {
-            try {
-                let dataToExport = prokerList.map(p => ({
-                    Bagian: p.bagian,
-                    "Program Kerja": p.title,
-                    Deskripsi: p.desc,
-                    Status_ACC: p.accMusyrif ? 'Di-ACC' : 'Belum ACC',
-                    "Hasil Usaha": p.hasilUsaha || '-',
-                    Kendala: p.evaluasi || '-',
-                    Solusi: p.solusi || '-'
-                }));
-
-                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Proker DCC");
-                XLSX.writeFile(workbook, `Rekap_Program_Kerja_DCC_${newDateString()}.xlsx`);
-            } catch (err) {
-                alert('Gagal mengunduh file Excel: ' + err.message);
-            }
+            const worksheet = XLSX.utils.json_to_sheet(prokerList);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Proker");
+            XLSX.writeFile(workbook, "Rekap_DCC.xlsx");
         }
 
-        // --- 7. LAPORAN (Removed Review Button & Real File Download Function) ---
+        // --- 7. LAPORAN ---
         function renderLaporanPage() {
             const container = document.getElementById('laporan-container');
             if (!container) return;
             container.innerHTML = '';
-
-            if (reportsArchive.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm bg-white dark:bg-gray-800 rounded-xl">Belum ada arsip laporan rapat yang disimpan.</div>`;
-                return;
-            }
-
             reportsArchive.forEach(r => {
-                const prokers = r.prokerData || prokerList;
-                const files = r.notulensiFiles || notulensiFiles;
-
-                const totalHasil = prokers.filter(p => p.accMusyrif && p.isHasilDone).length;
-                const totalEval = prokers.filter(p => (!p.isHasilDone || !p.accMusyrif) && !p.isFutureOnly).length;
-                const totalMendatang = prokers.filter(p => p.isFutureOnly || (!p.isHasilDone || !p.accMusyrif)).length;
-
-                let filesHTML = '';
-                if (files && files.length > 0) {
-                    files.forEach(f => {
-                        filesHTML += `
-                            <div class="bg-gray-100 dark:bg-gray-700 p-2.5 rounded-lg flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2 truncate">
-                                    <i class="fa-solid fa-file-lines text-purple-600 text-base"></i>
-                                    <span class="font-medium truncate">${f.name}</span>
-                                </div>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <button onclick="downloadRealFile('${f.id}')" class="bg-emerald-600 text-white text-[11px] px-3 py-1.5 rounded hover:bg-emerald-700 font-semibold flex items-center gap-1 shadow-sm">
-                                        <i class="fa-solid fa-download"></i> Download File
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    filesHTML = `<div class="text-xs text-gray-400 italic">Tidak ada lampiran file notulensi.</div>`;
-                }
-
-                container.innerHTML += `
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 dark:border-gray-700">
-                            <div>
-                                <h4 class="font-bold text-lg text-gray-900 dark:text-white">${r.title}</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-regular fa-calendar-check mr-1"></i> Tanggal Arsip: ${r.date}</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="editReportTitle('${r.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 text-xs px-2.5 py-1 rounded font-semibold"><i class="fa-solid fa-pen-to-square mr-1"></i> Edit Judul</button>
-                                <button onclick="deleteReportArchive('${r.id}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs px-2.5 py-1 rounded font-semibold"><i class="fa-solid fa-trash mr-1"></i> Hapus Arsip</button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                            <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg border border-emerald-200">
-                                <div class="font-bold text-emerald-700 dark:text-emerald-300 mb-1">Hasil Usaha Selesai</div>
-                                <div class="text-xl font-black text-emerald-800 dark:text-emerald-200">${totalHasil} Program</div>
-                            </div>
-                            <div class="bg-rose-50 dark:bg-rose-950/30 p-3 rounded-lg border border-rose-200">
-                                <div class="font-bold text-rose-700 dark:text-rose-300 mb-1">Evaluasi / Kendala</div>
-                                <div class="text-xl font-black text-rose-800 dark:text-rose-200">${totalEval} Masalah</div>
-                            </div>
-                            <div class="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-lg border border-indigo-200">
-                                <div class="font-bold text-indigo-700 dark:text-indigo-300 mb-1">Proker Mendatang</div>
-                                <div class="text-xl font-black text-indigo-800 dark:text-indigo-200">${totalMendatang} Agenda</div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2 pt-1">
-                            <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider"><i class="fa-solid fa-paperclip mr-1"></i> File Notulensi Terlampir</h5>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${filesHTML}</div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML += `<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border space-y-2"><h4 class="font-bold text-lg">${r.title}</h4><p class="text-xs text-gray-500">Arsip: ${r.date}</p></div>`;
             });
         }
-
-        // Real File Download Handler
         function downloadRealFile(fileId) {
-            const fileObj = notulensiFiles.find(f => f.id === fileId);
-            if (fileObj && fileObj.dataUrl) {
+            const f = notulensiFiles.find(x => x.id === fileId);
+            if (f && f.dataUrl) {
                 const link = document.createElement('a');
-                link.href = fileObj.dataUrl;
-                link.download = fileObj.name;
-                document.body.appendChild(link);
+                link.href = f.dataUrl; link.download = f.name;
                 link.click();
-                document.body.removeChild(link);
-            } else {
-                alert("File dokumen asli tidak ditemukan atau perlu diunggah ulang.");
             }
-        }
-
-        function editReportTitle(rId) {
-            const rep = reportsArchive.find(x => x.id === rId);
-            if (rep) {
-                const newTitle = prompt('Edit Judul Arsip Laporan Rapat:', rep.title);
-                if (newTitle) { rep.title = newTitle; saveData(); renderLaporanPage(); }
-            }
-        }
-
-        function deleteReportArchive(rId) {
-            if (confirm('Hapus arsip laporan rapat ini?')) {
-                reportsArchive = reportsArchive.filter(x => x.id !== rId);
-                saveData(); renderLaporanPage();
-            }
-        }
-
-        function renderUsersPage() {
-            const tbody = document.getElementById('users-table-body');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            users.forEach(u => { tbody.innerHTML += `<tr><td class="p-4 font-bold">${u.name}</td><td class="p-4 uppercase text-xs">${u.role}</td><td class="p-4">${u.bagian}</td></tr>`; });
         }
 
         // --- 8. ROOMCHAT ---
@@ -1479,153 +990,21 @@
             const container = document.getElementById('chat-messages-container');
             if (!container) return;
             container.innerHTML = '';
-            const currentUser = getActiveUser();
-
-            if (chatMessages.length === 0) { 
-                container.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">Belum ada pesan obrolan. Mulai diskusi sekarang!</div>`; 
-                return; 
-            }
-
             chatMessages.forEach(msg => {
-                const isMe = msg.senderId === currentUser.id;
-                
-                let replyBadgeHTML = '';
-                if (msg.replyTo) {
-                    replyBadgeHTML = `
-                        <div class="text-[10px] bg-black/10 dark:bg-white/10 p-1.5 rounded-lg mb-1.5 border-l-2 border-blue-500 italic">
-                            <span class="font-bold opacity-80">${msg.replyTo.sender}:</span> ${msg.replyTo.text}
-                        </div>
-                    `;
-                }
-
-                let attachmentHTML = '';
-                if (msg.file) {
-                    if (msg.file.isImage) {
-                        attachmentHTML = `<div class="mt-1.5"><img src="${msg.file.url}" class="max-w-xs max-h-48 rounded-lg border shadow-sm"></div>`;
-                    } else {
-                        attachmentHTML = `<div class="mt-1.5 flex items-center gap-2 bg-black/10 p-2 rounded-lg text-xs"><i class="fa-solid fa-paperclip"></i><span>${msg.file.name}</span></div>`;
-                    }
-                }
-
-                container.innerHTML += `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-3 group">
-                        <div class="text-[10px] text-gray-400 mb-0.5">${msg.senderName} • ${msg.timestamp}</div>
-                        <div class="relative max-w-[80%]">
-                            <div class="p-3 rounded-2xl ${isMe ? 'bg-green-600 text-white rounded-tr-none' : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-none'} shadow-sm text-xs sm:text-sm">
-                                ${replyBadgeHTML}
-                                <div class="break-words">${msg.text}</div>
-                                ${attachmentHTML}
-                            </div>
-
-                            <div class="absolute top-0 ${isMe ? '-left-28' : '-right-28'} hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 p-1 rounded-lg border shadow-sm text-xs z-10">
-                                <button onclick="replyChat('${msg.id}')" title="Balas" class="p-1 text-blue-600 hover:bg-blue-50 rounded"><i class="fa-solid fa-reply"></i></button>
-                                <button onclick="copyChatText('${msg.id}')" title="Salin" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i class="fa-solid fa-copy"></i></button>
-                                ${isMe ? `<button onclick="editChat('${msg.id}')" title="Edit" class="p-1 text-amber-600 hover:bg-amber-50 rounded"><i class="fa-solid fa-pen"></i></button>` : ''}
-                                ${isMe || currentUser.role === 'admin' ? `<button onclick="deleteChat('${msg.id}')" title="Hapus" class="p-1 text-rose-600 hover:bg-rose-50 rounded"><i class="fa-solid fa-trash"></i></button>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML += `<div class="p-2 bg-white dark:bg-gray-700 rounded text-xs"><b>${msg.senderName}:</b> ${msg.text}</div>`;
             });
-            container.scrollTop = container.scrollHeight;
         }
-
         function handleSendChat(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
-            if (!input || (!input.value.trim() && !activeChatAttachment)) return;
-            
-            const currentUser = getActiveUser();
-            const now = new Date();
-            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-            chatMessages.push({
-                id: 'c' + Date.now(),
-                senderId: currentUser.id,
-                senderName: currentUser.name,
-                text: input.value.trim(),
-                file: activeChatAttachment,
-                replyTo: activeChatReply,
-                timestamp: timeStr
-            });
-
-            saveData();
-            input.value = '';
-            cancelReplyChat();
-            cancelAttachmentChat();
-            renderRoomchatPage();
+            if (!input || !input.value.trim()) return;
+            chatMessages.push({ id: 'c' + Date.now(), senderName: currentUserSession?.email || 'User', text: input.value.trim(), timestamp: '12:00' });
+            saveData(); input.value = ''; renderRoomchatPage();
         }
-
-        function replyChat(msgId) {
-            const msg = chatMessages.find(m => m.id === msgId);
-            if (msg) {
-                activeChatReply = { id: msg.id, sender: msg.senderName, text: msg.text };
-                document.getElementById('chat-reply-text').innerText = `${msg.senderName}: "${msg.text}"`;
-                document.getElementById('chat-reply-banner').classList.remove('hidden');
-            }
-        }
-
-        function cancelReplyChat() {
-            activeChatReply = null;
-            document.getElementById('chat-reply-banner')?.classList.add('hidden');
-        }
-
-        function copyChatText(msgId) {
-            const msg = chatMessages.find(m => m.id === msgId);
-            if (msg) {
-                navigator.clipboard.writeText(msg.text);
-                alert('Teks pesan berhasil disalin!');
-            }
-        }
-
-        function editChat(msgId) {
-            const msg = chatMessages.find(m => m.id === msgId);
-            if (msg) {
-                const newTxt = prompt('Edit Pesan Anda:', msg.text);
-                if (newTxt !== null && newTxt.trim() !== '') {
-                    msg.text = newTxt.trim();
-                    saveData();
-                    renderRoomchatPage();
-                }
-            }
-        }
-
-        function deleteChat(msgId) {
-            if (confirm('Hapus pesan ini?')) {
-                chatMessages = chatMessages.filter(m => m.id !== msgId);
-                saveData();
-                renderRoomchatPage();
-            }
-        }
-
-        function handleChatFileUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const isImg = file.type.startsWith('image/');
-                activeChatAttachment = {
-                    name: file.name,
-                    isImage: isImg,
-                    url: isImg ? URL.createObjectURL(file) : null
-                };
-                document.getElementById('chat-attachment-name').innerText = file.name;
-                document.getElementById('chat-attachment-banner').classList.remove('hidden');
-            }
-        }
-
-        function cancelAttachmentChat() {
-            activeChatAttachment = null;
-            document.getElementById('chat-attachment-banner')?.classList.add('hidden');
-            const inp = document.getElementById('chat-file-input');
-            if (inp) inp.value = '';
-        }
-
         function toggleEmojiPicker() { document.getElementById('emoji-picker')?.classList.toggle('hidden'); }
-        function addEmoji(emoji) {
-            const input = document.getElementById('chat-input');
-            if (input) { input.value += emoji; input.focus(); }
-            toggleEmojiPicker();
-        }
+        function addEmoji(emoji) { document.getElementById('chat-input').value += emoji; toggleEmojiPicker(); }
 
+        // UTILS
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
         function newDateString() { return new Date().toISOString().split('T')[0]; }
@@ -1635,12 +1014,6 @@
             document.getElementById('sidebar').classList.toggle('w-16');
             document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden'));
         });
-
-        window.onload = function() {
-            updateHeaderProfile();
-            applyRolePermissions();
-            switchTab('beranda');
-        };
     </script>
 </body>
 </html>
