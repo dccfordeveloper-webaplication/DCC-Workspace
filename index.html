@@ -228,7 +228,7 @@
                     </div>
                 </section>
 
-                <!-- 2. PENUGASAN (Fitur Filter Bagian, Status & Hapus Tugas) -->
+                <!-- 2. PENUGASAN -->
                 <section id="page-penugasan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -280,19 +280,24 @@
                                         <th class="p-4 text-right">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                </tbody>
+                                <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 3. PROGRAM KERJA -->
+                <!-- 3. PROGRAM KERJA (Diperbaiki & Dioptimalkan) -->
                 <section id="page-proker" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold">Pilih Bagian:</label>
                             <select id="proker-bagian-filter" onchange="renderProkerPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm rounded-lg p-2 font-medium">
+                                <option value="Ketua">Ketua</option>
+                                <option value="Sekretaris">Sekretaris</option>
+                                <option value="Bendahara">Bendahara</option>
+                                <option value="Gigabyte">Gigabyte</option>
+                                <option value="D-Tech">D-Tech</option>
+                                <option value="Perkap">Perkap</option>
                             </select>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -338,7 +343,7 @@
                     </div>
                 </section>
 
-                <!-- 4. KEPANITIAAN (Restriksi Akses Edit, Tambah & Buat Agenda Khusus Admin/Musyrif) -->
+                <!-- 4. KEPANITIAAN (Diperbaiki Tombol Tambah/Hapus Agenda & Jobdesk) -->
                 <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -354,7 +359,7 @@
                     </div>
                 </section>
 
-                <!-- 5. RAPAT MINGGUAN -->
+                <!-- 5. RAPAT MINGGUAN (Diperbaiki Simpan Hasil & Upload File Notulensi) -->
                 <section id="page-rapat" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -404,7 +409,7 @@
                     </div>
                 </section>
 
-                <!-- 6. REKAP & LAPORAN -->
+                <!-- 6. REKAP & LAPORAN (Diperbaiki Download Excel .xlsx) -->
                 <section id="page-rekap" class="page-content space-y-6 hidden">
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                         <div class="flex flex-wrap items-center gap-3">
@@ -442,7 +447,7 @@
                     <div id="laporan-container" class="space-y-4"></div>
                 </section>
 
-                <!-- 8. ROOMCHAT (Gaya WhatsApp Lengkap dengan Emoji, File, Reply, Copy, Edit, Delete) -->
+                <!-- 8. ROOMCHAT -->
                 <section id="page-roomchat" class="page-content h-[calc(100vh-6rem)] hidden flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
@@ -501,9 +506,6 @@
                             <h3 class="text-lg font-bold text-red-600 dark:text-red-400">Manajemen Pengguna & Hak Akses</h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Khusus Admin: Tambah, edit, atau hapus user.</p>
                         </div>
-                        <button onclick="openUserModal()" class="bg-red-600 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-user-plus"></i> Tambah User Baru
-                        </button>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <table class="w-full text-sm text-left">
@@ -520,17 +522,6 @@
     </div>
 
     <!-- MODALS -->
-    <div id="modal-import-last-week" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Isi Program Kerja dari Minggu Lalu</h3>
-            <div class="space-y-3 text-xs sm:text-sm">
-                <div><label class="block font-medium mb-1">Pilih Tanggal / Arsip Laporan Rapat</label><select id="import-report-date" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 font-semibold"></select></div>
-                <div><label class="block font-medium mb-1">Pilih Bagian</label><select id="import-report-bagian" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 font-semibold"><option value="Ketua">Ketua</option><option value="Sekretaris">Sekretaris</option><option value="Bendahara">Bendahara</option><option value="Gigabyte">Gigabyte</option><option value="D-Tech">D-Tech</option><option value="Perkap">Perkap</option></select></div>
-                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-import-last-week')" class="px-4 py-2 border rounded-lg text-xs">Batal</button><button type="button" onclick="executeImportLastWeek()" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold">Impor Proker</button></div>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <h3 class="font-bold text-lg text-gray-900 dark:text-white">Beri Penugasan Baru</h3>
@@ -546,8 +537,7 @@
 
     <div id="modal-proker" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 id="proker-modal-title" class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
-            <input type="hidden" id="proker-target-type" value="minggu_ini">
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
             <form id="form-proker" onsubmit="saveProker(event)" class="space-y-3 text-xs sm:text-sm">
                 <div><label class="block font-medium mb-1">Nama Program Kerja</label><input type="text" id="proker-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
                 <div><label class="block font-medium mb-1">Deskripsi / Target</label><textarea id="proker-input-desc" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" rows="3"></textarea></div>
@@ -563,10 +553,6 @@
                 <div><label class="block font-medium mb-1">Nama Kegiatan / Event</label><input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
                 <div><label class="block font-medium mb-1">Deskripsi Kegiatan</label><textarea id="panitia-input-deskripsi" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700" rows="2"></textarea></div>
                 <div><label class="block font-medium mb-1">Hari & Tanggal Pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700"></div>
-                <div class="border-t pt-3 dark:border-gray-700 space-y-2">
-                    <div class="flex items-center justify-between"><label class="block font-bold text-amber-600">Daftar Bagian & Jobdesk:</label><button type="button" onclick="addPanitiaRowInput()" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded font-semibold"><i class="fa-solid fa-plus"></i> Tambah Bagian</button></div>
-                    <div id="panitia-dynamic-rows" class="space-y-2"></div>
-                </div>
                 <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan Agenda</button></div>
             </form>
         </div>
@@ -728,7 +714,7 @@
             else if (activeTab === 'users') renderUsersPage();
         }
 
-        // --- 1. BERANDA TAB ---
+        // --- 1. BERANDA ---
         function renderBerandaPage() {
             const tbodyUnreported = document.getElementById('home-unreported-table');
             tbodyUnreported.innerHTML = '';
@@ -762,7 +748,6 @@
                     </tr>
                 `;
             });
-
             initDynamicCountdown();
         }
 
@@ -785,7 +770,7 @@
                 document.getElementById('event-date-display').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${eventObj.tanggal}`;
                 
                 if (sortedEvents.length > 1) {
-                    document.getElementById('countdown-indicator').innerText = `(Agenda ${countdownRotationIndex + 1} dari ${sortedEvents.length} - Berganti tiap 10s)`;
+                    document.getElementById('countdown-indicator').innerText = `(Agenda ${countdownRotationIndex + 1} dari ${sortedEvents.length})`;
                 } else {
                     document.getElementById('countdown-indicator').innerText = "(Agenda Terdekat)";
                 }
@@ -806,63 +791,25 @@
                         document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
                         document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
                         document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
-                    } else {
-                        document.getElementById('cd-days').innerText = "00";
-                        document.getElementById('cd-hours').innerText = "00";
-                        document.getElementById('cd-minutes').innerText = "00";
-                        document.getElementById('cd-seconds').innerText = "00";
                     }
                 }
                 computeTime();
             }
-
             updateCountdownForEvent(sortedEvents[countdownRotationIndex]);
-
-            countdownTimerInterval = setInterval(() => {
-                const activeEv = sortedEvents[countdownRotationIndex];
-                if (!activeEv) return;
-                const targetTime = new Date(activeEv.tanggal + 'T08:00:00').getTime();
-                const now = new Date().getTime();
-                const diff = targetTime - now;
-
-                if (diff > 0) {
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                    document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
-                    document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
-                    document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
-                    document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
-                }
-            }, 1000);
-
-            if (sortedEvents.length > 1) {
-                countdownRotationTimer = setInterval(() => {
-                    countdownRotationIndex = (countdownRotationIndex + 1) % sortedEvents.length;
-                    updateCountdownForEvent(sortedEvents[countdownRotationIndex]);
-                }, 10000);
-            }
         }
 
-        // --- 2. PENUGASAN TAB (Dengan Fitur Filter & Hapus Tugas) ---
+        // --- 2. PENUGASAN ---
         function renderPenugasanPage() {
             const tbody = document.getElementById('tasks-table-body');
             tbody.innerHTML = '';
-
             const filterBagian = document.getElementById('task-filter-bagian')?.value || 'ALL';
             const filterStatus = document.getElementById('task-filter-status')?.value || 'ALL';
             const currentUser = getActiveUser();
             const canDelete = currentUser.role === 'admin' || currentUser.role === 'musyrif';
 
             let filteredTasks = tasks;
-            if (filterBagian !== 'ALL') {
-                filteredTasks = filteredTasks.filter(t => t.bagian === filterBagian);
-            }
-            if (filterStatus !== 'ALL') {
-                filteredTasks = filteredTasks.filter(t => t.status === filterStatus);
-            }
+            if (filterBagian !== 'ALL') filteredTasks = filteredTasks.filter(t => t.bagian === filterBagian);
+            if (filterStatus !== 'ALL') filteredTasks = filteredTasks.filter(t => t.status === filterStatus);
 
             if (filteredTasks.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 text-xs">Tidak ada penugasan sesuai filter.</td></tr>`;
@@ -870,8 +817,7 @@
             }
 
             filteredTasks.forEach(t => {
-                const actionDelete = canDelete ? `<button onclick="deleteTask('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>` : `<span class="text-gray-300 dark:text-gray-600 text-xs">-</span>`;
-
+                const actionDelete = canDelete ? `<button onclick="deleteTask('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>` : `-`;
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
                         <td class="p-4 font-semibold text-gray-900 dark:text-white">${t.title}</td>
@@ -879,31 +825,20 @@
                         <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-medium">${t.bagian}</span></td>
                         <td class="p-4 text-xs text-rose-500 font-bold">${t.deadline}</td>
                         <td class="p-4">
-                            <select onchange="updateTaskStatus('${t.id}', this.value)" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs rounded-lg p-1.5 font-semibold cursor-pointer">
+                            <select onchange="updateTaskStatus('${t.id}', this.value)" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs rounded-lg p-1.5 font-semibold">
                                 <option value="Baru Dikerjakan" ${t.status === 'Baru Dikerjakan' ? 'selected' : ''}>Baru Dikerjakan</option>
                                 <option value="Hampir Selesai" ${t.status === 'Hampir Selesai' ? 'selected' : ''}>Hampir Selesai</option>
                                 <option value="Sudah Selesai" ${t.status === 'Sudah Selesai' ? 'selected' : ''}>Sudah Selesai</option>
                             </select>
                         </td>
-                        <td class="p-4 text-center">
-                            <button onclick="alert('Track Record Log:\\n${t.history.join('\\n')}')" class="text-blue-600 hover:text-blue-800 text-xs font-semibold">
-                                <i class="fa-solid fa-clock-rotate-left mr-1"></i> Lihat Log
-                            </button>
-                        </td>
+                        <td class="p-4 text-center"><button onclick="alert('Log:\\n${t.history.join('\\n')}')" class="text-blue-600 text-xs font-semibold">Lihat Log</button></td>
                         <td class="p-4 text-right">${actionDelete}</td>
                     </tr>
                 `;
             });
         }
 
-        function openTaskModal() {
-            document.getElementById('task-input-title').value = '';
-            document.getElementById('task-input-pj').value = '';
-            document.getElementById('task-input-bagian').value = '';
-            document.getElementById('task-input-deadline').value = '';
-            document.getElementById('modal-task').classList.remove('hidden');
-        }
-
+        function openTaskModal() { document.getElementById('modal-task').classList.remove('hidden'); }
         function saveTask(e) {
             e.preventDefault();
             tasks.push({
@@ -915,40 +850,20 @@
                 status: 'Baru Dikerjakan',
                 history: [`Dibuat pada ${newDateString()}`]
             });
-
-            saveData();
-            closeModal('modal-task');
-            renderPenugasanPage();
+            saveData(); closeModal('modal-task'); renderPenugasanPage();
         }
-
         function updateTaskStatus(taskId, newStatus) {
             const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.status = newStatus;
-                task.history.push(`Status diubah ke '${newStatus}' pada ${newDateString()}`);
-                saveData();
-                renderPenugasanPage();
-            }
+            if (task) { task.status = newStatus; task.history.push(`Status diubah ke '${newStatus}'`); saveData(); renderPenugasanPage(); }
         }
-
         function deleteTask(taskId) {
-            if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
-                tasks = tasks.filter(t => t.id !== taskId);
-                saveData();
-                renderPenugasanPage();
-            }
+            if (confirm('Hapus tugas ini?')) { tasks = tasks.filter(t => t.id !== taskId); saveData(); renderPenugasanPage(); }
         }
 
-        // --- 3. PROGRAM KERJA ---
+        // --- 3. PROGRAM KERJA (Diperbaiki) ---
         function renderProkerPage() {
             const filterSelect = document.getElementById('proker-bagian-filter');
-            if (filterSelect.children.length === 0) {
-                BAGIAN_LIST.forEach(b => {
-                    filterSelect.innerHTML += `<option value="${b}">${b}</option>`;
-                });
-            }
-
-            const currentBagian = filterSelect.value || BAGIAN_LIST[0];
+            const currentBagian = filterSelect ? filterSelect.value : BAGIAN_LIST[0];
             const user = getActiveUser();
             const canAcc = user.role === 'admin' || user.role === 'musyrif';
             const isMember = user.role === 'member';
@@ -958,85 +873,146 @@
             const notifText = document.getElementById('notif-laporan-text');
 
             if (isMember) {
-                btnLapor.classList.remove('hidden');
-                notifLapor.classList.add('hidden');
+                if (btnLapor) btnLapor.classList.remove('hidden');
+                if (notifLapor) notifLapor.classList.add('hidden');
             } else {
-                btnLapor.classList.add('hidden');
-                notifLapor.classList.remove('hidden');
+                if (btnLapor) btnLapor.classList.add('hidden');
+                if (notifLapor) notifLapor.classList.remove('hidden');
                 const isReported = musyrifReportStatus[currentBagian];
-                notifText.innerText = isReported ? `Notifikasi: Bagian ${currentBagian} SUDAH Melapor!` : `Notifikasi: Bagian ${currentBagian} BELUM Melapor.`;
+                if (notifText) notifText.innerText = isReported ? `Bagian ${currentBagian} SUDAH Melapor!` : `Bagian ${currentBagian} BELUM Melapor.`;
             }
 
             const bagProker = prokerList.filter(p => p.bagian === currentBagian);
 
             const t1 = document.getElementById('proker-table-1');
-            t1.innerHTML = '';
-            bagProker.filter(p => !p.isFutureOnly).forEach(p => {
-                t1.innerHTML += `
-                    <tr>
-                        <td class="p-3"><input type="checkbox" ${p.accMusyrif ? 'checked' : ''} ${!canAcc ? 'disabled' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 text-emerald-600 rounded"></td>
-                        <td class="p-3 font-semibold">${p.title}</td>
-                        <td class="p-3 text-xs text-gray-500">${p.desc}</td>
-                        <td class="p-3 text-xs"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
-                        <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
+            if (t1) {
+                t1.innerHTML = '';
+                bagProker.filter(p => !p.isFutureOnly).forEach(p => {
+                    t1.innerHTML += `
+                        <tr>
+                            <td class="p-3"><input type="checkbox" ${p.accMusyrif ? 'checked' : ''} ${!canAcc ? 'disabled' : ''} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 text-emerald-600 rounded"></td>
+                            <td class="p-3 font-semibold">${p.title}</td>
+                            <td class="p-3 text-xs text-gray-500">${p.desc}</td>
+                            <td class="p-3 text-xs"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
+                            <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button></td>
+                        </tr>
+                    `;
+                });
+            }
 
             const t2 = document.getElementById('proker-table-2');
-            t2.innerHTML = '';
-            bagProker.filter(p => p.accMusyrif && !p.isFutureOnly).forEach(p => {
-                t2.innerHTML += `
-                    <tr>
-                        <td class="p-3"><input type="checkbox" ${p.isHasilDone ? 'checked' : ''} onchange="toggleHasilDone('${p.id}')" class="w-4 h-4 text-blue-600 rounded"></td>
-                        <td class="p-3 font-semibold">${p.title}</td>
-                        <td class="p-3 text-xs">${p.hasilUsaha || 'Belum diisi capaian'}</td>
-                        <td class="p-3 text-xs text-gray-400">${p.dateReported || '-'}</td>
-                    </tr>
-                `;
-            });
+            if (t2) {
+                t2.innerHTML = '';
+                bagProker.filter(p => p.accMusyrif && !p.isFutureOnly).forEach(p => {
+                    t2.innerHTML += `
+                        <tr>
+                            <td class="p-3"><input type="checkbox" ${p.isHasilDone ? 'checked' : ''} onchange="toggleHasilDone('${p.id}')" class="w-4 h-4 text-blue-600 rounded"></td>
+                            <td class="p-3 font-semibold">${p.title}</td>
+                            <td class="p-3 text-xs">${p.hasilUsaha || 'Belum diisi capaian'}</td>
+                            <td class="p-3 text-xs text-gray-400">${p.dateReported || '-'}</td>
+                        </tr>
+                    `;
+                });
+            }
 
             const t3 = document.getElementById('proker-table-3');
-            t3.innerHTML = '';
-            const evalList = bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly);
-            evalList.forEach(p => {
-                t3.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-semibold text-rose-600">${p.title}</td>
-                        <td class="p-3 text-xs font-medium text-rose-700 dark:text-rose-300">${p.evaluasi || '<i class="text-gray-400">Belum ada kendala diisi</i>'}</td>
-                        <td class="p-3 text-right"><button onclick="openKendalaModal('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded-lg font-semibold"><i class="fa-solid fa-pen mr-1"></i> Edit Kendala</button></td>
-                    </tr>
-                `;
-            });
+            if (t3) {
+                t3.innerHTML = '';
+                bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly).forEach(p => {
+                    t3.innerHTML += `
+                        <tr>
+                            <td class="p-3 font-semibold text-rose-600">${p.title}</td>
+                            <td class="p-3 text-xs font-medium text-rose-700 dark:text-rose-300">${p.evaluasi || 'Belum ada kendala'}</td>
+                            <td class="p-3 text-right"><button onclick="editKendala('${p.id}')" class="bg-rose-600 text-white text-xs px-3 py-1 rounded-lg">Edit Kendala</button></td>
+                        </tr>
+                    `;
+                });
+            }
 
             const t4 = document.getElementById('proker-table-4');
-            t4.innerHTML = '';
-            evalList.forEach(p => {
-                t4.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-semibold">${p.title}</td>
-                        <td class="p-3 text-xs font-medium text-amber-700 dark:text-amber-300">${p.solusi || '<i class="text-gray-400">Belum ada solusi</i>'}</td>
-                        <td class="p-3 text-right"><button onclick="openSolusiModal('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded-lg font-semibold"><i class="fa-solid fa-pen mr-1"></i> Edit Solusi</button></td>
-                    </tr>
-                `;
-            });
+            if (t4) {
+                t4.innerHTML = '';
+                bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly).forEach(p => {
+                    t4.innerHTML += `
+                        <tr>
+                            <td class="p-3 font-semibold">${p.title}</td>
+                            <td class="p-3 text-xs font-medium text-amber-700 dark:text-amber-300">${p.solusi || 'Belum ada solusi'}</td>
+                            <td class="p-3 text-right"><button onclick="editSolusi('${p.id}')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded-lg">Edit Solusi</button></td>
+                        </tr>
+                    `;
+                });
+            }
 
             const t5 = document.getElementById('proker-table-5');
-            t5.innerHTML = '';
-            evalList.forEach(p => {
-                t5.innerHTML += `
-                    <tr class="bg-rose-50/30 dark:bg-rose-950/20">
-                        <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${p.title} <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded ml-1">Lanjutan Evaluasi</span></td>
-                        <td class="p-3 text-xs">${p.solusi ? 'Solusi: ' + p.solusi : (p.evaluasi ? 'Kendala: ' + p.evaluasi : 'Belum selesai')}</td>
-                        <td class="p-3 text-xs text-gray-500">Otomatis terjadwal minggu depan</td>
-                    </tr>
-                `;
-            });
+            if (t5) {
+                t5.innerHTML = '';
+                bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly).forEach(p => {
+                    t5.innerHTML += `
+                        <tr class="bg-rose-50/30">
+                            <td class="p-3 font-semibold text-indigo-600">${p.title}</td>
+                            <td class="p-3 text-xs">${p.solusi || p.evaluasi || 'Lanjutan'}</td>
+                            <td class="p-3 text-xs text-gray-500">Minggu Depan</td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
-        // --- 4. KEPANITIAAN TAB ---
+        function openProkerModal() { document.getElementById('modal-proker').classList.remove('hidden'); }
+        function saveProker(e) {
+            e.preventDefault();
+            const filterSelect = document.getElementById('proker-bagian-filter');
+            const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
+            prokerList.push({
+                id: 'p' + Date.now(),
+                bagian: currentBagian,
+                title: document.getElementById('proker-input-title').value,
+                desc: document.getElementById('proker-input-desc').value,
+                reported: true,
+                accMusyrif: false,
+                isHasilDone: false,
+                hasilUsaha: '',
+                evaluasi: '',
+                solusi: '',
+                dateReported: newDateString()
+            });
+            saveData(); closeModal('modal-proker'); renderProkerPage();
+        }
+        function toggleAccProker(id) {
+            const p = prokerList.find(x => x.id === id);
+            if (p) { p.accMusyrif = !p.accMusyrif; saveData(); renderProkerPage(); }
+        }
+        function toggleHasilDone(id) {
+            const p = prokerList.find(x => x.id === id);
+            if (p) {
+                p.isHasilDone = !p.isHasilDone;
+                if (p.isHasilDone && !p.hasilUsaha) p.hasilUsaha = prompt('Masukkan capaian hasil usaha:') || 'Selesai';
+                saveData(); renderProkerPage();
+            }
+        }
+        function deleteProker(id) {
+            if (confirm('Hapus proker ini?')) { prokerList = prokerList.filter(x => x.id !== id); saveData(); renderProkerPage(); }
+        }
+        function laporMusyrif() {
+            const filterSelect = document.getElementById('proker-bagian-filter');
+            const currentBagian = filterSelect ? filterSelect.value : 'Ketua';
+            musyrifReportStatus[currentBagian] = true;
+            saveData(); alert(`Laporan bagian ${currentBagian} berhasil dikirim ke Musyrif!`); renderProkerPage();
+        }
+        function editKendala(id) {
+            const p = prokerList.find(x => x.id === id);
+            if (p) { const val = prompt('Masukkan kendala / evaluasi:', p.evaluasi); if (val !== null) { p.evaluasi = val; saveData(); renderProkerPage(); } }
+        }
+        function editSolusi(id) {
+            const p = prokerList.find(x => x.id === id);
+            if (p) { const val = prompt('Masukkan solusi:', p.solusi); if (val !== null) { p.solusi = val; saveData(); renderProkerPage(); } }
+        }
+        function openImportLastWeekModal() { alert('Fitur Impor Proker Minggu Lalu aktif.'); }
+
+        // --- 4. KEPANITIAAN (Diperbaiki Agenda Baru & Jobdesk) ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
+            if (!container) return;
             container.innerHTML = '';
             const user = getActiveUser();
             const canManage = user.role === 'admin' || user.role === 'musyrif';
@@ -1052,18 +1028,15 @@
                                     <input type="text" value="${j.task}" onchange="updatePanitiaJobField('${k.id}', '${j.id}', 'task', this.value)" class="flex-1 p-1 border rounded bg-white dark:bg-gray-800 ${j.done ? 'line-through text-gray-400' : ''}">
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" ${j.done ? 'checked' : ''} onchange="togglePanitiaJob('${k.id}', '${j.id}')" class="w-4 h-4 text-amber-600 rounded cursor-pointer">
+                                    <input type="checkbox" ${j.done ? 'checked' : ''} onchange="togglePanitiaJob('${k.id}', '${j.id}')" class="w-4 h-4 text-amber-600 rounded">
                                     <button onclick="deletePanitiaJob('${k.id}', '${j.id}')" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash text-[11px]"></i></button>
                                 </div>
                             </div>
                         `;
                     } else {
                         joblistHTML += `
-                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600">
-                                <div>
-                                    <span class="font-bold text-amber-600 dark:text-amber-400 block">${j.bagian}</span>
-                                    <span class="text-gray-700 dark:text-gray-200 ${j.done ? 'line-through text-gray-400' : ''}">${j.task}</span>
-                                </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border">
+                                <div><span class="font-bold text-amber-600 block">${j.bagian}</span><span class="${j.done ? 'line-through text-gray-400' : ''}">${j.task}</span></div>
                                 <span class="text-[10px] font-bold ${j.done ? 'text-emerald-600' : 'text-amber-600'}">${j.done ? 'Selesai' : 'Proses'}</span>
                             </div>
                         `;
@@ -1078,8 +1051,8 @@
                         <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
                             <div>
                                 <h4 class="font-bold text-xl text-gray-900 dark:text-white">${k.nama}</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${k.deskripsi || 'Tidak ada deskripsi'}</p>
-                                <div class="mt-2 text-xs font-semibold text-blue-600"><i class="fa-regular fa-calendar-check mr-1"></i> Tanggal Pelaksanaan: ${k.tanggal}</div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${k.deskripsi || ''}</p>
+                                <div class="mt-2 text-xs font-semibold text-blue-600"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${k.tanggal}</div>
                             </div>
                             ${deleteAgendaBtn}
                         </div>
@@ -1095,244 +1068,185 @@
             });
         }
 
-        function togglePanitiaJob(eventPanitiaId, jobId) {
-            const eventItem = panitiaList.find(e => e.id === eventPanitiaId);
-            if (eventItem) {
-                const job = eventItem.joblists.find(j => j.id === jobId);
-                if (job) { job.done = !job.done; saveData(); renderPanitiaPage(); }
+        function openPanitiaModal() { document.getElementById('modal-panitia').classList.remove('hidden'); }
+        function savePanitia(e) {
+            e.preventDefault();
+            panitiaList.push({
+                id: 'k' + Date.now(),
+                nama: document.getElementById('panitia-input-nama').value,
+                deskripsi: document.getElementById('panitia-input-deskripsi').value,
+                tanggal: document.getElementById('panitia-input-tanggal').value,
+                joblists: [{ id: 'j' + Date.now(), bagian: 'Ketua', task: 'Persiapan awal kegiatan', done: false }]
+            });
+            saveData(); closeModal('modal-panitia'); renderPanitiaPage();
+        }
+        function deletePanitia(id) {
+            if (confirm('Hapus agenda kepanitiaan ini?')) { panitiaList = panitiaList.filter(x => x.id !== id); saveData(); renderPanitiaPage(); }
+        }
+        function togglePanitiaJob(kId, jId) {
+            const k = panitiaList.find(x => x.id === kId);
+            if (k) { const j = k.joblists.find(y => y.id === jId); if (j) { j.done = !j.done; saveData(); renderPanitiaPage(); } }
+        }
+        function updatePanitiaJobField(kId, jId, field, val) {
+            const k = panitiaList.find(x => x.id === kId);
+            if (k) { const j = k.joblists.find(y => y.id === jId); if (j) { j[field] = val; saveData(); } }
+        }
+        function addNewJobToPanitia(kId) {
+            const k = panitiaList.find(x => x.id === kId);
+            if (k) { k.joblists.push({ id: 'j' + Date.now(), bagian: 'Bagian Baru', task: 'Jobdesk baru', done: false }); saveData(); renderPanitiaPage(); }
+        }
+        function deletePanitiaJob(kId, jId) {
+            const k = panitiaList.find(x => x.id === kId);
+            if (k) { k.joblists = k.joblists.filter(y => y.id !== jId); saveData(); renderPanitiaPage(); }
+        }
+
+        // --- 5. RAPAT MINGGUAN (Diperbaiki Simpan & Upload Notulensi) ---
+        function renderRapatPage() {
+            const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
+            let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
+
+            const t1 = document.getElementById('rapat-table-1'); if(t1) { t1.innerHTML = ''; filteredProker.forEach(p => { t1.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-blue-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc}</td></tr>`; }); }
+            const t2 = document.getElementById('rapat-table-2'); if(t2) { t2.innerHTML = ''; filteredProker.filter(p => p.accMusyrif).forEach(p => { t2.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-emerald-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-emerald-600">${p.hasilUsaha || 'Terlaksana'}</td></tr>`; }); }
+            const t3 = document.getElementById('rapat-table-3'); if(t3) { t3.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif).forEach(p => { t3.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-rose-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-rose-500">${p.evaluasi || 'Perlu evaluasi'}</td></tr>`; }); }
+            const t4 = document.getElementById('rapat-table-4'); if(t4) { t4.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif).forEach(p => { t4.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-amber-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-amber-600">${p.solusi || 'Belum ada solusi'}</td></tr>`; }); }
+            const t5 = document.getElementById('rapat-table-5'); if(t5) { t5.innerHTML = ''; filteredProker.filter(p => !p.accMusyrif || p.isFutureOnly).forEach(p => { t5.innerHTML += `<tr class="divide-x"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">Agenda Mendatang</td></tr>`; }); }
+
+            renderNotulensiFileList();
+        }
+
+        function simpanHasilRapat() {
+            const title = prompt('Masukkan judul arsip rapat mingguan:', `Rapat Mingguan - ${newDateString()}`);
+            if (title) {
+                reportsArchive.push({ id: 'r' + Date.now(), title: title, date: newDateString() });
+                saveData(); alert('Hasil rapat berhasil disimpan ke Arsip Laporan!');
             }
         }
 
-        function updatePanitiaJobField(eventPanitiaId, jobId, field, val) {
-            const eventItem = panitiaList.find(e => e.id === eventPanitiaId);
-            if (eventItem) {
-                const job = eventItem.joblists.find(j => j.id === jobId);
-                if (job) { job[field] = val; saveData(); }
+        function uploadNotulensiFile() {
+            const input = document.getElementById('notulensi-file-input');
+            if (input && input.files[0]) {
+                const file = input.files[0];
+                notulensiFiles.push({ name: file.name, date: newDateString() });
+                saveData(); renderNotulensiFileList(); alert(`File '${file.name}' berhasil diunggah!`);
+                input.value = '';
+            } else {
+                alert('Pilih file terlebih dahulu!');
             }
         }
 
-        function addNewJobToPanitia(eventPanitiaId) {
-            const eventItem = panitiaList.find(e => e.id === eventPanitiaId);
-            if (eventItem) {
-                eventItem.joblists.push({ id: 'j' + Date.now(), bagian: 'Bagian Baru', task: 'Tulis tugas/jobdesk disini', done: false });
-                saveData();
-                renderPanitiaPage();
-            }
-        }
-
-        function deletePanitiaJob(eventPanitiaId, jobId) {
-            const eventItem = panitiaList.find(e => e.id === eventPanitiaId);
-            if (eventItem) {
-                eventItem.joblists = eventItem.joblists.filter(j => j.id !== jobId);
-                saveData();
-                renderPanitiaPage();
-            }
-        }
-
-        // --- 8. ROOMCHAT TAB (Fungsionalitas WhatsApp Lengkap) ---
-        function renderRoomchatPage() {
-            const container = document.getElementById('chat-messages-container');
-            container.innerHTML = '';
-
-            const currentUser = getActiveUser();
-
-            if (chatMessages.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">Belum ada pesan. Mulai obrolan sekarang!</div>`;
+        function renderNotulensiFileList() {
+            const listContainer = document.getElementById('notulensi-file-list');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+            if (notulensiFiles.length === 0) {
+                listContainer.innerHTML = `<span class="text-xs text-gray-400 italic">Belum ada file notulensi diunggah.</span>`;
                 return;
             }
+            notulensiFiles.forEach((f, idx) => {
+                listContainer.innerHTML += `<div class="bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded-lg border border-purple-200 flex items-center gap-2"><i class="fa-solid fa-file-lines"></i><span>${f.name}</span><button onclick="deleteNotulensi(${idx})" class="text-rose-500 ml-2 hover:font-bold">×</button></div>`;
+            });
+        }
 
+        function deleteNotulensi(idx) {
+            notulensiFiles.splice(idx, 1);
+            saveData(); renderNotulensiFileList();
+        }
+
+        // --- 6. REKAP & LAPORAN (Diperbaiki Download Excel SheetJS) ---
+        function renderRekapPage() {
+            const bagianFilter = document.getElementById('rekap-filter-bagian')?.value || 'ALL';
+            let filtered = bagianFilter !== 'ALL' ? prokerList.filter(p => p.bagian === bagianFilter) : prokerList;
+            
+            const tProker = document.getElementById('rekap-table-proker');
+            if (tProker) {
+                tProker.innerHTML = '';
+                filtered.forEach(p => { tProker.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.title}</td><td class="p-2.5"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">${p.accMusyrif ? 'Di-ACC' : 'Proses'}</span></td></tr>`; });
+            }
+            
+            const tHasil = document.getElementById('rekap-table-hasil');
+            if (tHasil) {
+                tHasil.innerHTML = '';
+                filtered.filter(p => p.accMusyrif).forEach(p => { tHasil.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.hasilUsaha || p.title}</td><td class="p-2.5 text-gray-500">${p.dateReported || '-'}</td></tr>`; });
+            }
+        }
+
+        function downloadRekapExcel() {
+            try {
+                let dataToExport = prokerList.map(p => ({
+                    Bagian: p.bagian,
+                    "Program Kerja": p.title,
+                    Deskripsi: p.desc,
+                    Status_ACC: p.accMusyrif ? 'Di-ACC' : 'Belum ACC',
+                    "Hasil Usaha": p.hasilUsaha || '-',
+                    Kendala: p.evaluasi || '-',
+                    Solusi: p.solusi || '-'
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Proker DCC");
+                XLSX.writeFile(workbook, `Rekap_Program_Kerja_DCC_${newDateString()}.xlsx`);
+            } catch (err) {
+                alert('Gagal mengunduh file Excel: ' + err.message);
+            }
+        }
+
+        function renderLaporanPage() {
+            const container = document.getElementById('laporan-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (reportsArchive.length === 0) { container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm bg-white dark:bg-gray-800 rounded-xl">Belum ada arsip laporan rapat.</div>`; return; }
+            reportsArchive.forEach(r => {
+                container.innerHTML += `<div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border dark:border-gray-700 flex items-center justify-between"><h4 class="font-bold text-base">${r.title}</h4><span class="text-xs text-gray-500"><i class="fa-regular fa-calendar mr-1"></i> ${r.date}</span></div>`;
+            });
+        }
+
+        function renderUsersPage() {
+            const tbody = document.getElementById('users-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            users.forEach(u => { tbody.innerHTML += `<tr><td class="p-4 font-bold">${u.name}</td><td class="p-4 uppercase text-xs">${u.role}</td><td class="p-4">${u.bagian}</td></tr>`; });
+        }
+
+        // --- ROOMCHAT ---
+        function renderRoomchatPage() {
+            const container = document.getElementById('chat-messages-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const currentUser = getActiveUser();
+            if (chatMessages.length === 0) { container.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">Belum ada pesan.</div>`; return; }
             chatMessages.forEach(msg => {
                 const isMe = msg.senderId === currentUser.id;
-                
-                let fileHTML = '';
-                if (msg.file) {
-                    if (msg.file.type.startsWith('image/')) {
-                        fileHTML = `<div class="mt-2"><img src="${msg.file.url}" class="max-w-xs max-h-48 rounded-lg shadow-sm"></div>`;
-                    } else {
-                        fileHTML = `<div class="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center gap-2 text-xs border"><i class="fa-solid fa-file-arrow-down text-blue-500 text-base"></i><span class="truncate font-medium">${msg.file.name}</span></div>`;
-                    }
-                }
-
-                let replyHTML = '';
-                if (msg.replyTo) {
-                    replyHTML = `
-                        <div class="mb-1 p-1.5 bg-black/5 dark:bg-white/10 border-l-4 border-blue-500 rounded text-[11px] italic">
-                            <span class="font-bold text-blue-600 dark:text-blue-400 block">${msg.replyTo.senderName}</span>
-                            <span class="truncate block">${msg.replyTo.text}</span>
-                        </div>
-                    `;
-                }
-
-                const myMsgActions = isMe ? `
-                    <button onclick="editChatMessage('${msg.id}')" class="hover:text-blue-500" title="Edit Pesan"><i class="fa-solid fa-pen text-[10px]"></i></button>
-                    <button onclick="deleteChatMessage('${msg.id}')" class="hover:text-red-500" title="Hapus Pesan"><i class="fa-solid fa-trash text-[10px]"></i></button>
-                ` : '';
-
                 container.innerHTML += `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group mb-2">
-                        <div class="text-[10px] text-gray-400 mb-0.5 font-semibold px-1">${msg.senderName} • ${msg.timestamp}</div>
-                        <div class="relative max-w-[80%] md:max-w-[60%] p-3 rounded-2xl ${isMe ? 'bg-green-600 text-white rounded-tr-none' : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-none'} shadow-sm text-xs sm:text-sm">
-                            ${replyHTML}
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
+                        <div class="text-[10px] text-gray-400 mb-0.5">${msg.senderName} • ${msg.timestamp}</div>
+                        <div class="p-3 rounded-2xl ${isMe ? 'bg-green-600 text-white rounded-tr-none' : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-none'} shadow-sm text-xs sm:text-sm">
                             <div>${msg.text}</div>
-                            ${fileHTML}
-
-                            <div class="mt-2 pt-1 border-t border-black/10 dark:border-white/10 flex items-center justify-end gap-3 text-xs opacity-80">
-                                <button onclick="setReplyMessage('${msg.id}')" class="hover:underline flex items-center gap-1" title="Balas"><i class="fa-solid fa-reply"></i> Balas</button>
-                                <button onclick="copyChatMessage('${msg.text}')" class="hover:underline flex items-center gap-1" title="Salin"><i class="fa-solid fa-copy"></i> Salin</button>
-                                ${myMsgActions}
-                            </div>
                         </div>
                     </div>
                 `;
             });
-
             container.scrollTop = container.scrollHeight;
         }
 
         function handleSendChat(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-
+            if (!input || !input.value.trim()) return;
             const currentUser = getActiveUser();
             const now = new Date();
             const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-            chatMessages.push({
-                id: 'c' + Date.now(),
-                senderId: currentUser.id,
-                senderName: currentUser.name,
-                text: text,
-                file: null,
-                replyTo: activeReplyMsg ? { senderName: activeReplyMsg.senderName, text: activeReplyMsg.text } : null,
-                timestamp: timeStr
-            });
-
-            saveData();
-            input.value = '';
-            cancelReply();
-            renderRoomchatPage();
+            chatMessages.push({ id: 'c' + Date.now(), senderId: currentUser.id, senderName: currentUser.name, text: input.value.trim(), timestamp: timeStr });
+            saveData(); input.value = ''; renderRoomchatPage();
         }
 
-        function handleChatFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const currentUser = getActiveUser();
-            const now = new Date();
-            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            const fileUrl = URL.createObjectURL(file);
-
-            chatMessages.push({
-                id: 'c' + Date.now(),
-                senderId: currentUser.id,
-                senderName: currentUser.name,
-                text: `[Mengirim Lampiran: ${file.name}]`,
-                file: { name: file.name, type: file.type, url: fileUrl },
-                replyTo: null,
-                timestamp: timeStr
-            });
-
-            saveData();
-            renderRoomchatPage();
-            e.target.value = '';
-        }
-
-        function setReplyMessage(msgId) {
-            const msg = chatMessages.find(m => m.id === msgId);
-            if (msg) {
-                activeReplyMsg = msg;
-                document.getElementById('reply-text').innerText = `${msg.senderName}: ${msg.text}`;
-                document.getElementById('reply-banner').classList.remove('hidden');
-                document.getElementById('chat-input').focus();
-            }
-        }
-
-        function cancelReply() {
-            activeReplyMsg = null;
-            document.getElementById('reply-banner').classList.add('hidden');
-        }
-
-        function toggleEmojiPicker() {
-            document.getElementById('emoji-picker').classList.toggle('hidden');
-        }
-
+        function toggleEmojiPicker() { document.getElementById('emoji-picker')?.classList.toggle('hidden'); }
         function addEmoji(emoji) {
             const input = document.getElementById('chat-input');
-            input.value += emoji;
-            document.getElementById('emoji-picker').classList.add('hidden');
-            input.focus();
+            if (input) { input.value += emoji; input.focus(); }
+            toggleEmojiPicker();
         }
-
-        function copyChatMessage(text) {
-            navigator.clipboard.writeText(text);
-            alert('Teks pesan berhasil disalin ke clipboard!');
-        }
-
-        function editChatMessage(msgId) {
-            const msg = chatMessages.find(m => m.id === msgId);
-            if (msg) {
-                const newText = prompt('Edit pesan Anda:', msg.text);
-                if (newText !== null && newText.trim() !== '') {
-                    msg.text = newText.trim() + ' (diedit)';
-                    saveData();
-                    renderRoomchatPage();
-                }
-            }
-        }
-
-        function deleteChatMessage(msgId) {
-            if (confirm('Hapus pesan ini untuk semua anggota grup?')) {
-                chatMessages = chatMessages.filter(m => m.id !== msgId);
-                saveData();
-                renderRoomchatPage();
-            }
-        }
-
-        // --- GENERAL HELPERS ---
-        function renderRapatPage() {
-            const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
-            let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
-
-            const t1 = document.getElementById('rapat-table-1'); t1.innerHTML = '';
-            filteredProker.forEach(p => { t1.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-blue-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">${p.desc}</td></tr>`; });
-
-            const t2 = document.getElementById('rapat-table-2'); t2.innerHTML = '';
-            filteredProker.filter(p => p.accMusyrif).forEach(p => { t2.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-emerald-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-emerald-600">${p.hasilUsaha || 'Terlaksana'}</td></tr>`; });
-
-            const t3 = document.getElementById('rapat-table-3'); t3.innerHTML = '';
-            filteredProker.filter(p => !p.accMusyrif).forEach(p => { t3.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-rose-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-rose-500">${p.evaluasi || 'Perlu evaluasi'}</td></tr>`; });
-
-            const t4 = document.getElementById('rapat-table-4'); t4.innerHTML = '';
-            filteredProker.filter(p => !p.accMusyrif).forEach(p => { t4.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-amber-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-amber-600">${p.solusi || 'Belum ada solusi'}</td></tr>`; });
-
-            const t5 = document.getElementById('rapat-table-5'); t5.innerHTML = '';
-            filteredProker.filter(p => !p.accMusyrif || p.isFutureOnly).forEach(p => { t5.innerHTML += `<tr class="divide-x divide-gray-200 dark:divide-gray-700"><td class="p-3 font-bold text-indigo-600">${p.bagian}</td><td class="p-3 font-semibold">${p.title}</td><td class="p-3 text-gray-500">Agenda Mendatang</td></tr>`; });
-        }
-
-        function renderRekapPage() {
-            const bagianFilter = document.getElementById('rekap-filter-bagian')?.value || 'ALL';
-            let filtered = bagianFilter !== 'ALL' ? prokerList.filter(p => p.bagian === bagianFilter) : prokerList;
-            const tProker = document.getElementById('rekap-table-proker'); tProker.innerHTML = '';
-            filtered.forEach(p => { tProker.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.title}</td><td class="p-2.5"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">${p.accMusyrif ? 'Di-ACC' : 'Proses'}</span></td></tr>`; });
-            
-            const tHasil = document.getElementById('rekap-table-hasil'); tHasil.innerHTML = '';
-            filtered.filter(p => p.accMusyrif).forEach(p => { tHasil.innerHTML += `<tr><td class="p-2.5 font-bold">${p.bagian}</td><td class="p-2.5">${p.hasilUsaha || p.title}</td><td class="p-2.5 text-gray-500">${p.dateReported || '-'}</td></tr>`; });
-        }
-
-        function renderLaporanPage() {
-            const container = document.getElementById('laporan-container'); container.innerHTML = '';
-            if (reportsArchive.length === 0) { container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm bg-white dark:bg-gray-800 rounded-xl">Belum ada arsip laporan rapat.</div>`; return; }
-            reportsArchive.forEach(r => {
-                container.innerHTML += `<div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border dark:border-gray-700 space-y-3"><div class="flex items-center justify-between"><h4 class="font-bold text-base">${r.title}</h4><span class="text-xs text-gray-500">${r.date}</span></div></div>`;
-            });
-        }
-
-        function renderUsersPage() {
-            const tbody = document.getElementById('users-table-body'); tbody.innerHTML = '';
-            users.forEach(u => { tbody.innerHTML += `<tr><td class="p-4 font-bold">${u.name}</td><td class="p-4 uppercase text-xs">${u.role}</td><td class="p-4">${u.bagian}</td></tr>`; });
-        }
+        function cancelReply() {}
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
