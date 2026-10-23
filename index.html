@@ -34,7 +34,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         
-        /* Custom Scrollbar for clean UI */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -55,7 +54,7 @@
         }
         
         .custom-scrollbar-y {
-            max-height: 320px;
+            max-height: 360px;
             overflow-y: auto;
         }
     </style>
@@ -162,7 +161,6 @@
                     <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-lg text-xs">
                         <span class="text-gray-500 dark:text-gray-400 font-medium pl-1 hidden sm:inline"><i class="fa-solid fa-user-gear mr-1"></i> Mode:</span>
                         <select id="role-switcher" onchange="changeActiveUser(this.value)" class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-semibold py-1 px-2 rounded border border-gray-300 dark:border-gray-600 focus:outline-none text-xs">
-                            <!-- Populated dynamically -->
                         </select>
                     </div>
 
@@ -177,7 +175,7 @@
             <!-- Dynamic Body Pages Container -->
             <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900 relative">
 
-                <!-- 1. BERANDA -->
+                <!-- 1. BERANDA (Layout Atas Bawah) -->
                 <section id="page-beranda" class="page-content space-y-6">
                     <!-- Countdown Banner -->
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
@@ -187,7 +185,6 @@
                                 <h3 id="event-title-display" class="text-2xl font-bold mt-2">Peringatan Hari Besar DCC & Expo Teknologi</h3>
                                 <p id="event-date-display" class="text-blue-100 text-sm mt-1"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: 10 November 2026</p>
                             </div>
-                            <!-- Countdown Timers Table/Grid -->
                             <div class="grid grid-cols-4 gap-2 text-center bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 min-w-[280px]">
                                 <div class="bg-white/10 p-2 rounded-lg">
                                     <div id="cd-days" class="text-2xl font-black">00</div>
@@ -209,58 +206,53 @@
                         </div>
                     </div>
 
-                    <!-- Summary Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Unapproved Work Program Summary -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
-                                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-                                    Status Pelaporan Proker Perbagian
-                                </h4>
-                                <span class="text-xs text-gray-500">Indikasi: Di-ACC Musyrif/Admin</span>
-                            </div>
-                            <div class="overflow-x-auto flex-1">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400">
-                                        <tr>
-                                            <th class="p-3">Bagian</th>
-                                            <th class="p-3 text-center">Total Proker</th>
-                                            <th class="p-3 text-center">Belum Lapor / ACC</th>
-                                            <th class="p-3 text-center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="home-unreported-table" class="divide-y divide-gray-100 dark:divide-gray-700">
-                                        <!-- Dynamic rows -->
-                                    </tbody>
-                                </table>
-                            </div>
+                    <!-- Layout Atas: Status Pelaporan Proker -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                                Status Pelaporan Proker Perbagian
+                            </h4>
+                            <span class="text-xs text-gray-500">Indikasi: Di-ACC Musyrif/Admin</span>
                         </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400">
+                                    <tr>
+                                        <th class="p-3">Bagian</th>
+                                        <th class="p-3 text-center">Total Proker</th>
+                                        <th class="p-3 text-center">Belum Lapor / ACC</th>
+                                        <th class="p-3 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="home-unreported-table" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                        <!-- Ongoing Tasks Summary -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
-                                    <i class="fa-solid fa-list-check text-indigo-500"></i>
-                                    Rekapan Penugasan Sedang Berjalan
-                                </h4>
-                                <button onclick="switchTab('penugasan')" class="text-xs text-blue-600 hover:underline">Lihat Semua</button>
-                            </div>
-                            <div class="overflow-x-auto flex-1">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400">
-                                        <tr>
-                                            <th class="p-3">Tugas</th>
-                                            <th class="p-3">PJ / Bagian</th>
-                                            <th class="p-3">Deadline</th>
-                                            <th class="p-3">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="home-tasks-table" class="divide-y divide-gray-100 dark:divide-gray-700">
-                                        <!-- Dynamic rows -->
-                                    </tbody>
-                                </table>
-                            </div>
+                    <!-- Layout Bawah: Rekapan Penugasan Sedang Berjalan -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-indigo-500"></i>
+                                Rekapan Penugasan Sedang Berjalan
+                            </h4>
+                            <button onclick="switchTab('penugasan')" class="text-xs text-blue-600 hover:underline">Lihat Semua</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400">
+                                    <tr>
+                                        <th class="p-3">Tugas</th>
+                                        <th class="p-3">PJ / Bagian</th>
+                                        <th class="p-3">Deadline</th>
+                                        <th class="p-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="home-tasks-table" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -291,7 +283,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <!-- Dynamic Rows -->
                                 </tbody>
                             </table>
                         </div>
@@ -304,12 +295,11 @@
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold">Pilih Bagian:</label>
                             <select id="proker-bagian-filter" onchange="renderProkerPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm rounded-lg p-2 font-medium">
-                                <!-- Populated dynamically -->
                             </select>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="openProkerModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-plus"></i> Tambah Proker
+                            <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Tambah Proker Minggu Ini
                             </button>
                             <button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif
@@ -324,7 +314,7 @@
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-                                    1. Program Kerja
+                                    1. Program Kerja (Minggu Ini)
                                 </h4>
                                 <span class="text-xs text-gray-400">Klik checklist untuk ACC Musyrif</span>
                             </div>
@@ -390,12 +380,12 @@
                             </div>
                         </div>
 
-                        <!-- Table 4: Solusi -->
+                        <!-- Table 4: Solusi (Diisi Manual Seluruh User) -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-                                    4. Solusi
+                                    4. Solusi (Bisa Diisi Manual Oleh Seluruh User)
                                 </h4>
                             </div>
                             <div class="custom-scrollbar-y">
@@ -404,7 +394,7 @@
                                         <tr>
                                             <th class="p-3">Evaluasi Target</th>
                                             <th class="p-3">Rumusan Solusi</th>
-                                            <th class="p-3 text-right">Aksi Input</th>
+                                            <th class="p-3 text-right">Aksi Input / Edit</th>
                                         </tr>
                                     </thead>
                                     <tbody id="proker-table-4" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
@@ -419,13 +409,17 @@
                                     <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
                                     5. Program Kerja Yang Akan Datang
                                 </h4>
+                                <!-- Fitur Tambah Proker Mendatang -->
+                                <button id="btn-add-proker-future" onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition">
+                                    <i class="fa-solid fa-plus"></i> Tambah Proker Mendatang
+                                </button>
                             </div>
                             <div class="custom-scrollbar-y">
                                 <table class="w-full text-sm text-left">
                                     <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
                                         <tr>
                                             <th class="p-3">Program Kerja Mendatang</th>
-                                            <th class="p-3">Sumber (Solusi/Baru)</th>
+                                            <th class="p-3">Sumber (Solusi / Evaluasi / Input Baru)</th>
                                             <th class="p-3">Rencana Eksekusi</th>
                                         </tr>
                                     </thead>
@@ -436,31 +430,42 @@
                     </div>
                 </section>
 
-                <!-- 4. KEPANITIAAN -->
+                <!-- 4. KEPANITIAAN (Fitur Lengkap: Deskripsi, Target/Rundown, Joblist Flexible & Strikethrough) -->
                 <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
                             <h3 class="text-lg font-bold">Master Program Kepanitiaan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan pelaksanaan kegiatan/event.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat & Master plan pelaksanaan kegiatan/event lengkap dengan Joblist & Rundown.</p>
                         </div>
                         <button onclick="openPanitiaModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
-                            <i class="fa-solid fa-plus"></i> Buat Agenda Kegiatan
+                            <i class="fa-solid fa-plus"></i> Buat Agenda Kegiatan Baru
                         </button>
                     </div>
 
                     <div id="panitia-cards-container" class="grid grid-cols-1 gap-6">
-                        <!-- Dynamic Panitia Event Cards -->
                     </div>
                 </section>
 
-                <!-- 5. RAPAT MINGGUAN -->
+                <!-- 5. RAPAT MINGGUAN (Filter Perbagian, Default: Ketua) -->
                 <section id="page-rapat" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
                             <h3 class="text-lg font-bold">Platform Utama Rapat Mingguan</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Agregasi otomatis dari data Program Kerja seluruh bagian.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Agregasi otomatis dari data Program Kerja per bagian.</p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">Filter Bagian:</label>
+                                <select id="rapat-bagian-filter" onchange="renderRapatPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs font-bold rounded-lg p-2">
+                                    <option value="Ketua" selected>Ketua (Default)</option>
+                                    <option value="Sekretaris">Sekretaris</option>
+                                    <option value="Bendahara">Bendahara</option>
+                                    <option value="Gigabyte">Gigabyte</option>
+                                    <option value="D-Tech">D-Tech</option>
+                                    <option value="Perkap">Perkap</option>
+                                    <option value="ALL">Semua Bagian</option>
+                                </select>
+                            </div>
                             <button id="btn-save-rapat" onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-floppy-disk"></i> Simpan Hasil Rapat (Arsip)
                             </button>
@@ -479,14 +484,13 @@
                             </button>
                         </div>
                         <div id="notulensi-file-list" class="flex flex-wrap gap-2 pt-2">
-                            <!-- List of uploaded files -->
                         </div>
                     </div>
 
                     <!-- Aggregated Tables -->
                     <div class="space-y-6">
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 class="font-bold text-sm mb-3 text-blue-600 dark:text-blue-400">1. Program Kerja Minggu Lalu (Seluruh Bagian)</h4>
+                            <h4 class="font-bold text-sm mb-3 text-blue-600 dark:text-blue-400">1. Program Kerja Minggu Lalu</h4>
                             <div class="custom-scrollbar-y">
                                 <table class="w-full text-xs text-left">
                                     <thead class="bg-gray-50 dark:bg-gray-700">
@@ -538,7 +542,7 @@
                             <div class="custom-scrollbar-y">
                                 <table class="w-full text-xs text-left">
                                     <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr><th class="p-2">Bagian</th><th class="p-2">Program Kerja Mendatang</th><th class="p-2">Rencana</th></tr>
+                                        <tr><th class="p-2">Bagian</th><th class="p-2">Program Kerja Mendatang</th><th class="p-2">Rencana / Sumber</th></tr>
                                     </thead>
                                     <tbody id="rapat-table-5" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
                                 </table>
@@ -549,7 +553,6 @@
 
                 <!-- 6. REKAP -->
                 <section id="page-rekap" class="page-content space-y-6 hidden">
-                    <!-- Filters & Export Header -->
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                         <div class="flex flex-wrap items-center gap-3">
                             <div>
@@ -578,9 +581,7 @@
                         </button>
                     </div>
 
-                    <!-- Two Tables with vertical scroll -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Rekap Program Kerja -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
                             <h4 class="font-bold text-gray-800 dark:text-white mb-3 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-list-check text-blue-500"></i> Rekap Program Kerja
@@ -599,7 +600,6 @@
                             </div>
                         </div>
 
-                        <!-- Rekap Hasil Usaha -->
                         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
                             <h4 class="font-bold text-gray-800 dark:text-white mb-3 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-circle-check text-emerald-500"></i> Rekap Hasil Usaha
@@ -633,13 +633,11 @@
                     </div>
 
                     <div id="laporan-container" class="space-y-4">
-                        <!-- Dynamic saved report archives -->
                     </div>
                 </section>
 
                 <!-- 8. ROOMCHAT -->
                 <section id="page-roomchat" class="page-content h-[calc(100vh-6rem)] hidden flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <!-- Chat Header -->
                     <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
@@ -655,12 +653,9 @@
                         </button>
                     </div>
 
-                    <!-- Chat Messages Area -->
                     <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]">
-                        <!-- Dynamic Messages -->
                     </div>
 
-                    <!-- Reply Indicator Banner -->
                     <div id="reply-banner" class="hidden px-4 py-2 bg-gray-100 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex items-center justify-between text-xs">
                         <div class="flex items-center space-x-2 truncate">
                             <i class="fa-solid fa-reply text-blue-500"></i>
@@ -670,17 +665,13 @@
                         <button onclick="cancelReply()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
-                    <!-- Chat Input Form -->
                     <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                        <!-- Tag Mention Hints Popup -->
                         <div id="tag-suggestions" class="hidden mb-2 p-2 bg-white dark:bg-gray-700 border rounded-lg shadow-lg max-h-32 overflow-y-auto text-xs space-y-1"></div>
 
                         <form id="chat-form" onsubmit="handleSendChat(event)" class="flex items-center space-x-2">
-                            <!-- Emoji Button -->
                             <button type="button" onclick="toggleEmojiPicker()" class="p-2 text-gray-500 hover:text-amber-500">
                                 <i class="fa-regular fa-face-smile text-lg"></i>
                             </button>
-                            <!-- File Attachment Button -->
                             <label class="p-2 text-gray-500 hover:text-blue-500 cursor-pointer">
                                 <i class="fa-solid fa-paperclip text-lg"></i>
                                 <input type="file" id="chat-file-input" class="hidden" onchange="handleChatFileUpload(event)">
@@ -693,7 +684,6 @@
                             </button>
                         </form>
 
-                        <!-- Emoji Quick Picker -->
                         <div id="emoji-picker" class="hidden mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border flex gap-2 text-lg">
                             <span class="cursor-pointer hover:scale-125 transition" onclick="insertEmoji('👍')">👍</span>
                             <span class="cursor-pointer hover:scale-125 transition" onclick="insertEmoji('🙏')">🙏</span>
@@ -705,7 +695,7 @@
                     </div>
                 </section>
 
-                <!-- 9. USER MANAGEMENT (Admin Only) -->
+                <!-- 9. USER MANAGEMENT -->
                 <section id="page-users" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -728,7 +718,6 @@
                                 </tr>
                             </thead>
                             <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Dynamic user rows -->
                             </tbody>
                         </table>
                     </div>
@@ -738,7 +727,7 @@
         </div>
     </div>
 
-    <!-- MODALS CONTAINER -->
+    <!-- MODALS -->
 
     <!-- Task Modal -->
     <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -779,7 +768,8 @@
     <!-- Proker Modal -->
     <div id="modal-proker" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
+            <h3 id="proker-modal-title" class="font-bold text-lg text-gray-900 dark:text-white">Tambah Program Kerja</h3>
+            <input type="hidden" id="proker-target-type" value="minggu_ini">
             <form id="form-proker" onsubmit="saveProker(event)" class="space-y-3 text-xs sm:text-sm">
                 <div>
                     <label class="block font-medium mb-1">Nama Program Kerja</label>
@@ -800,26 +790,26 @@
     <!-- Solution Modal -->
     <div id="modal-solusi" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Input Solusi Evaluasi</h3>
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Rumuskan / Edit Solusi Evaluasi</h3>
             <input type="hidden" id="solusi-eval-id">
             <div>
                 <label class="block font-medium mb-1 text-xs">Hal Evaluasi / Kendala:</label>
                 <div id="solusi-eval-text" class="p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs font-semibold mb-3"></div>
             </div>
             <div>
-                <label class="block font-medium mb-1 text-xs">Rumusan Solusi:</label>
-                <textarea id="solusi-input-text" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-xs dark:border-gray-600" rows="3" placeholder="Masukkan solusi konkret..."></textarea>
+                <label class="block font-medium mb-1 text-xs">Rumusan Solusi (Seluruh User Boleh Mengisi):</label>
+                <textarea id="solusi-input-text" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-xs dark:border-gray-600" rows="3" placeholder="Masukkan rumusan solusi konkret..."></textarea>
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" onclick="closeModal('modal-solusi')" class="px-4 py-2 border rounded-lg text-xs">Batal</button>
-                <button type="button" onclick="saveSolusi()" class="px-4 py-2 bg-amber-600 text-white rounded-lg text-xs">Simpan Solusi</button>
+                <button type="button" onclick="saveSolusi()" class="px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-semibold">Simpan Solusi</button>
             </div>
         </div>
     </div>
 
-    <!-- Kepanitiaan Modal -->
+    <!-- Kepanitiaan Modal (Fitur Lengkap) -->
     <div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 class="font-bold text-lg text-gray-900 dark:text-white">Buat Agenda Kepanitiaan</h3>
             <form id="form-panitia" onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
                 <div>
@@ -827,16 +817,58 @@
                     <input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                 </div>
                 <div>
-                    <label class="block font-medium mb-1">Hari & Tanggal</label>
-                    <input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    <label class="block font-medium mb-1">Deskripsi Kegiatan</label>
+                    <textarea id="panitia-input-deskripsi" placeholder="Sampaikan tujuan & perincian singkat kegiatan..." required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" rows="2"></textarea>
                 </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Hari & Tanggal Pelaksanaan</label>
+                        <input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Target / Deadline Persiapan</label>
+                        <input type="date" id="panitia-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                </div>
+
+                <div class="border-t pt-3 dark:border-gray-700">
+                    <label class="block font-bold text-amber-600 dark:text-amber-400 mb-1">Program Kerja / Joblist Perbagian (Fleksibel):</label>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="font-bold">Ketua:</span>
+                            <input type="text" id="job-Ketua" placeholder="Jobdesk Ketua" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <span class="font-bold">Sekretaris:</span>
+                            <input type="text" id="job-Sekretaris" placeholder="Jobdesk Sekretaris" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <span class="font-bold">Bendahara:</span>
+                            <input type="text" id="job-Bendahara" placeholder="Jobdesk Bendahara" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <span class="font-bold">Gigabyte:</span>
+                            <input type="text" id="job-Gigabyte" placeholder="Jobdesk Gigabyte" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <span class="font-bold">D-Tech:</span>
+                            <input type="text" id="job-D-Tech" placeholder="Jobdesk D-Tech" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <span class="font-bold">Perkap:</span>
+                            <input type="text" id="job-Perkap" placeholder="Jobdesk Perkap" class="w-full p-1.5 border rounded bg-gray-50 dark:bg-gray-700">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block font-medium mb-1">Rundown Acara (Pisahkan dengan koma atau enter)</label>
-                    <textarea id="panitia-input-rundown" placeholder="08.00 Pembukaan&#10;09.00 Sambutan Ketua&#10;10.00 Sesi Utama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" rows="3"></textarea>
+                    <label class="block font-medium mb-1">Rundown / Agenda Persiapan Acara (Satu per baris)</label>
+                    <textarea id="panitia-input-rundown" placeholder="08.00 Pembukaan&#10;09.00 Sambutan Ketua&#10;10.00 Sesi Utama Expo" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600" rows="3"></textarea>
                 </div>
+
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg">Simpan Agenda</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan Agenda Kepanitiaan</button>
                 </div>
             </form>
         </div>
@@ -897,10 +929,9 @@
 
     <!-- JS Logic Application -->
     <script>
-        // --- DATA INITIALIZATION & LOCALSTORAGE ---
         const BAGIAN_LIST = ["Ketua", "Sekretaris", "Bendahara", "Gigabyte", "D-Tech", "Perkap"];
 
-        // Default Users
+        // Users Data
         let users = JSON.parse(localStorage.getItem('dcc_users')) || [
             { id: 'u1', name: 'Admin Utama', role: 'admin', bagian: 'Ketua', avatar: 'https://ui-avatars.com/api/?name=Admin+Utama&background=0284c7&color=fff' },
             { id: 'u2', name: 'Musyrif Divisi', role: 'musyrif', bagian: 'Gigabyte', avatar: 'https://ui-avatars.com/api/?name=Musyrif+Divisi&background=16a34a&color=fff' },
@@ -912,39 +943,41 @@
         let activeTab = 'beranda';
         let replyTargetMessage = null;
 
-        // Default Tasks
+        // Tasks Data
         let tasks = JSON.parse(localStorage.getItem('dcc_tasks')) || [
             { id: 't1', title: 'Menyiapkan Proposal Sponsor', pj: 'Ahmad Member', bagian: 'Sekretaris', deadline: '2026-11-05', status: 'Baru Dikerjakan', history: ['Dibuat pada 2026-10-23'] },
             { id: 't2', title: 'Pemeriksaan Unit Server D-Tech', pj: 'Ahmad Member', bagian: 'D-Tech', deadline: '2026-10-30', status: 'Hampir Selesai', history: ['Dibuat pada 2026-10-22', 'Status diset: Hampir Selesai'] },
             { id: 't3', title: 'Sewa Sound System & panggung', pj: 'Zaid Perkap', bagian: 'Perkap', deadline: '2026-11-02', status: 'Sudah Selesai', history: ['Dibuat pada 2026-10-20', 'Status diset: Sudah Selesai'] }
         ];
 
-        // Default Proker
+        // Proker Data
         let prokerList = JSON.parse(localStorage.getItem('dcc_proker')) || [
-            { id: 'p1', bagian: 'Gigabyte', title: 'Workshop Design & Multimedia', desc: 'Mengadakan pelatihan mingguan untuk anggota', reported: true, accMusyrif: true, hasilUsaha: 'Selesai diselenggarakan batch 1', isHasilDone: true, dateReported: '2026-10-20' },
-            { id: 'p2', bagian: 'D-Tech', title: 'Maintenance Jaringan WiFi Area', desc: 'Optimalisasi router & bandwidth', reported: true, accMusyrif: false, evaluasi: 'Kendala alat mikrotik terbatas', solusi: 'Pengadaan router cadangan', dateReported: '2026-10-21' },
-            { id: 'p3', bagian: 'Ketua', title: 'Evaluasi Bulanan Kinerja', desc: 'Rapat pleno triwulan seluruh pengurus', reported: false, accMusyrif: false, dateReported: '' }
+            { id: 'p1', bagian: 'Gigabyte', title: 'Workshop Design & Multimedia', desc: 'Mengadakan pelatihan mingguan untuk anggota', reported: true, accMusyrif: true, hasilUsaha: 'Selesai diselenggarakan batch 1', isHasilDone: true, dateReported: '2026-10-20', isFutureOnly: false },
+            { id: 'p2', bagian: 'D-Tech', title: 'Maintenance Jaringan WiFi Area', desc: 'Optimalisasi router & bandwidth', reported: true, accMusyrif: false, evaluasi: 'Kendala alat mikrotik terbatas', solusi: 'Pengadaan router cadangan', dateReported: '2026-10-21', isFutureOnly: false },
+            { id: 'p3', bagian: 'Ketua', title: 'Evaluasi Bulanan Kinerja', desc: 'Rapat pleno triwulan seluruh pengurus', reported: false, accMusyrif: false, dateReported: '', isFutureOnly: false }
         ];
 
-        // Default Kepanitiaan Events
+        // Kepanitiaan Data (Lengkap)
         let panitiaList = JSON.parse(localStorage.getItem('dcc_panitia')) || [
             {
                 id: 'k1',
                 nama: 'Peringatan Hari Besar DCC & Expo Teknologi',
+                deskripsi: 'Pameran inovasi teknologi tahunan sekaligus ajang silaturahmi seluruh anggota.',
                 tanggal: '2026-11-10',
+                deadline: '2026-11-08',
                 rundown: ['08:00 Pembukaan Expo', '10:00 Demo Inovasi D-Tech & Gigabyte', '13:00 Pleno Kepengurusan'],
-                joblists: {
-                    'Ketua': 'Pengawasan umum & sambutan',
-                    'Sekretaris': 'Pengurusan surat izin & tempat',
-                    'Bendahara': 'Penyediaan dana konsumsi & operasional',
-                    'Gigabyte': 'Publikasi, dokumentasi & live stream',
-                    'D-Tech': 'Setup live sound & koneksi internet',
-                    'Perkap': 'Penyediaan panggung & perlengkapan'
-                }
+                joblists: [
+                    { id: 'j1', bagian: 'Ketua', task: 'Pengawasan umum & sambutan', done: false },
+                    { id: 'j2', bagian: 'Sekretaris', task: 'Pengurusan surat izin & tempat', done: true },
+                    { id: 'j3', bagian: 'Bendahara', task: 'Penyediaan dana konsumsi & operasional', done: false },
+                    { id: 'j4', bagian: 'Gigabyte', task: 'Publikasi, dokumentasi & live stream', done: false },
+                    { id: 'j5', bagian: 'D-Tech', task: 'Setup live sound & koneksi internet', done: false },
+                    { id: 'j6', bagian: 'Perkap', task: 'Penyediaan panggung & perlengkapan', done: false }
+                ]
             }
         ];
 
-        // Saved Reports Archive
+        // Reports Archive
         let reportsArchive = JSON.parse(localStorage.getItem('dcc_reports')) || [];
 
         // Notulensi files
@@ -958,7 +991,6 @@
             { id: 'c2', senderId: 'u2', senderName: 'Musyrif Divisi', role: 'musyrif', bagian: 'Gigabyte', text: 'Siap, laporan dari bagian Gigabyte sudah di-ACC.', time: '09:15', replies: 'c1', file: null }
         ];
 
-        // Helper Persist
         function saveData() {
             localStorage.setItem('dcc_users', JSON.stringify(users));
             localStorage.setItem('dcc_tasks', JSON.stringify(tasks));
@@ -970,7 +1002,6 @@
             localStorage.setItem('dcc_active_user', activeUserId);
         }
 
-        // --- USER & PERMISSION HELPERS ---
         function getActiveUser() {
             return users.find(u => u.id === activeUserId) || users[0];
         }
@@ -989,7 +1020,6 @@
             document.getElementById('sidebar-userrole').innerText = `${user.role} • ${user.bagian}`;
             document.getElementById('sidebar-avatar').src = user.avatar;
 
-            // Populate Switcher Select
             const select = document.getElementById('role-switcher');
             select.innerHTML = '';
             users.forEach(u => {
@@ -1006,19 +1036,16 @@
             const isAdmin = user.role === 'admin';
             const isMusyrif = user.role === 'musyrif';
 
-            // Admin Menu Sidebar
             const adminMenu = document.getElementById('admin-menu');
             if (isAdmin) adminMenu.classList.remove('hidden');
             else adminMenu.classList.add('hidden');
 
-            // Simpan Hasil Rapat button
             const btnSaveRapat = document.getElementById('btn-save-rapat');
             if (btnSaveRapat) {
                 if (isAdmin || isMusyrif) btnSaveRapat.classList.remove('hidden');
                 else btnSaveRapat.classList.add('hidden');
             }
 
-            // Task Creation Button
             const btnAddTask = document.getElementById('btn-add-task');
             if (btnAddTask) {
                 if (isAdmin || isMusyrif) btnAddTask.classList.remove('hidden');
@@ -1026,7 +1053,6 @@
             }
         }
 
-        // --- NAVIGATION SYSTEM ---
         function switchTab(tabId) {
             activeTab = tabId;
             document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -1056,9 +1082,8 @@
             else if (activeTab === 'users') renderUsersPage();
         }
 
-        // --- 1. BERANDA TAB LOGIC ---
+        // --- 1. BERANDA TAB (Layout Atas Bawah) ---
         function renderBerandaPage() {
-            // Unreported Table
             const tbodyUnreported = document.getElementById('home-unreported-table');
             tbodyUnreported.innerHTML = '';
             BAGIAN_LIST.forEach(bag => {
@@ -1066,8 +1091,8 @@
                 const total = bagProkers.length;
                 const unapproved = bagProkers.filter(p => !p.accMusyrif).length;
                 const statusBadge = unapproved === 0 && total > 0 
-                    ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Lengkap</span>`
-                    : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>`
+                    : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
 
                 tbodyUnreported.innerHTML += `
                     <tr>
@@ -1079,7 +1104,6 @@
                 `;
             });
 
-            // Tasks Summary
             const tbodyTasks = document.getElementById('home-tasks-table');
             tbodyTasks.innerHTML = '';
             tasks.slice(0, 5).forEach(t => {
@@ -1094,7 +1118,6 @@
             });
         }
 
-        // Countdown Timer Loop
         function initCountdown() {
             const targetDate = new Date('2026-11-10T08:00:00').getTime();
             setInterval(() => {
@@ -1115,7 +1138,7 @@
             }, 1000);
         }
 
-        // --- 2. PENUGASAN TAB LOGIC ---
+        // --- 2. PENUGASAN TAB ---
         function renderPenugasanPage() {
             const tbody = document.getElementById('tasks-table-body');
             tbody.innerHTML = '';
@@ -1124,8 +1147,6 @@
             tasks.forEach(t => {
                 const isPJ = t.pj === user.name;
                 const canEditStatus = isPJ || user.role === 'admin' || user.role === 'musyrif';
-
-                const historyHTML = t.history ? t.history.map(h => `• ${h}`).join('<br>') : '';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
@@ -1141,7 +1162,7 @@
                             </select>
                         </td>
                         <td class="p-4 text-center">
-                            <button onclick="alert('Track Record:\\n${t.history.join('\\n')}')" class="text-blue-600 hover:text-blue-800 text-xs font-semibold">
+                            <button onclick="alert('Track Record Log:\\n${t.history.join('\\n')}')" class="text-blue-600 hover:text-blue-800 text-xs font-semibold">
                                 <i class="fa-solid fa-clock-rotate-left mr-1"></i> Lihat Log
                             </button>
                         </td>
@@ -1170,7 +1191,7 @@
                 id: 't' + Date.now(),
                 title, pj, bagian, deadline,
                 status: 'Baru Dikerjakan',
-                history: [`Dibuat pada ${new Date().toISOString().split('T')[0]}`]
+                history: [`Dibuat pada ${newDateString()}`]
             });
 
             saveData();
@@ -1188,9 +1209,8 @@
             }
         }
 
-        // --- 3. PROGRAM KERJA TAB LOGIC ---
+        // --- 3. PROGRAM KERJA TAB ---
         function renderProkerPage() {
-            // Populate filter select
             const filterSelect = document.getElementById('proker-bagian-filter');
             if (filterSelect.children.length === 0) {
                 BAGIAN_LIST.forEach(b => {
@@ -1204,10 +1224,10 @@
 
             const bagProker = prokerList.filter(p => p.bagian === currentBagian);
 
-            // Table 1: Program Kerja
+            // Table 1: Program Kerja Minggu Ini
             const t1 = document.getElementById('proker-table-1');
             t1.innerHTML = '';
-            bagProker.forEach(p => {
+            bagProker.filter(p => !p.isFutureOnly).forEach(p => {
                 t1.innerHTML += `
                     <tr>
                         <td class="p-3">
@@ -1223,10 +1243,10 @@
                 `;
             });
 
-            // Table 2: Hasil Usaha (ACC Prokers)
+            // Table 2: Hasil Usaha (Proker di-ACC)
             const t2 = document.getElementById('proker-table-2');
             t2.innerHTML = '';
-            bagProker.filter(p => p.accMusyrif).forEach(p => {
+            bagProker.filter(p => p.accMusyrif && !p.isFutureOnly).forEach(p => {
                 t2.innerHTML += `
                     <tr>
                         <td class="p-3">
@@ -1239,49 +1259,85 @@
                 `;
             });
 
-            // Table 3: Evaluasi (Unapproved or Unchecked Hasil Usaha)
+            // Table 3: Evaluasi (Otomatis masuk jika belum di-ACC atau hasil usaha durasi/kendala)
             const t3 = document.getElementById('proker-table-3');
             t3.innerHTML = '';
-            bagProker.filter(p => !p.accMusyrif || (p.accMusyrif && !p.isHasilDone)).forEach(p => {
+            const evalList = bagProker.filter(p => (!p.accMusyrif || (p.accMusyrif && !p.isHasilDone)) && !p.isFutureOnly);
+            evalList.forEach(p => {
                 t3.innerHTML += `
                     <tr>
                         <td class="p-3 font-semibold text-rose-600">${p.title}</td>
-                        <td class="p-3 text-xs">${p.evaluasi || 'Menunggu evaluasi/ACC Musyrif'}</td>
-                        <td class="p-3 text-xs"><span class="${p.solusi ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.solusi ? 'Solusi Ditemukan' : 'Perlu Solusi'}</span></td>
+                        <td class="p-3 text-xs">${p.evaluasi || 'Program kerja belum selesai/di-ACC minggu ini'}</td>
+                        <td class="p-3 text-xs"><span class="${p.solusi ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.solusi ? 'Solusi Dirumuskan' : 'Perlu Solusi'}</span></td>
                     </tr>
                 `;
             });
 
-            // Table 4: Solusi
+            // Table 4: Solusi (Dapat Diisi Manual oleh Seluruh User)
             const t4 = document.getElementById('proker-table-4');
             t4.innerHTML = '';
-            bagProker.filter(p => !p.accMusyrif).forEach(p => {
+            evalList.forEach(p => {
                 t4.innerHTML += `
                     <tr>
                         <td class="p-3 font-semibold">${p.title}</td>
-                        <td class="p-3 text-xs">${p.solusi || '<i>Belum ada rumusan solusi</i>'}</td>
+                        <td class="p-3 text-xs font-medium text-amber-700 dark:text-amber-300">${p.solusi || '<i class="text-gray-400">Belum ada solusi (klik tombol untuk mengisi secara manual)</i>'}</td>
                         <td class="p-3 text-right">
-                            <button onclick="openSolusiModal('${p.id}')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] px-2.5 py-1 rounded">Input Solusi</button>
+                            <button onclick="openSolusiModal('${p.id}')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1 rounded-lg font-semibold shadow-sm">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> ${p.solusi ? 'Edit Solusi' : 'Isi Solusi'}
+                            </button>
                         </td>
                     </tr>
                 `;
             });
 
-            // Table 5: Program Kerja Yang Akan Datang
+            // Table 5: Program Kerja Yang Akan Datang (Otomatis duplikasi dari Evaluasi + Proker baru mendatang)
             const t5 = document.getElementById('proker-table-5');
             t5.innerHTML = '';
-            bagProker.filter(p => !p.accMusyrif).forEach(p => {
+
+            // 1. Duplikasi dari Evaluasi
+            evalList.forEach(p => {
                 t5.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-semibold text-indigo-600">${p.title} (Lanjutan)</td>
-                        <td class="p-3 text-xs">${p.solusi ? 'Dari Solusi Evaluasi' : 'Proker Tertunda'}</td>
-                        <td class="p-3 text-xs">Akan dimasukkan ke agenda minggu depan</td>
+                    <tr class="bg-rose-50/30 dark:bg-rose-950/20">
+                        <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${p.title} <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded ml-1">Lanjutan Evaluasi</span></td>
+                        <td class="p-3 text-xs">${p.solusi ? 'Solusi: ' + p.solusi : 'Belum selesai minggu ini'}</td>
+                        <td class="p-3 text-xs text-gray-500">Otomatis dijadwalkan ulang untuk minggu depan</td>
                     </tr>
                 `;
             });
+
+            // 2. Proker khusus Minggu Depan (Yang dibuat manual)
+            bagProker.filter(p => p.isFutureOnly).forEach(p => {
+                t5.innerHTML += `
+                    <tr>
+                        <td class="p-3 font-semibold text-emerald-600">${p.title} <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded ml-1">Agendakan Baru</span></td>
+                        <td class="p-3 text-xs">${p.desc}</td>
+                        <td class="p-3 text-xs text-gray-500">Rencana eksekusi minggu depan</td>
+                    </tr>
+                `;
+            });
+
+            // Aktifkan Fitur Tambah Proker Mendatang jika sudah ada Hasil Usaha / Evaluasi & Solusi
+            const hasActivityCompleted = bagProker.some(p => p.accMusyrif || p.evaluasi || p.solusi);
+            const btnFuture = document.getElementById('btn-add-proker-future');
+            if (btnFuture) {
+                if (hasActivityCompleted) {
+                    btnFuture.disabled = false;
+                    btnFuture.title = "Tambah program kerja baru untuk minggu mendatang";
+                } else {
+                    btnFuture.disabled = true;
+                    btnFuture.title = "Fitur ini aktif setelah ada Hasil Usaha / Evaluasi & Solusi minggu ini.";
+                }
+            }
         }
 
-        function openProkerModal() {
+        function openProkerModal(targetType = 'minggu_ini') {
+            document.getElementById('proker-target-type').value = targetType;
+            const modalTitle = document.getElementById('proker-modal-title');
+            if (targetType === 'minggu_depan') {
+                modalTitle.innerText = "Tambah Program Kerja (Minggu Mendatang)";
+            } else {
+                modalTitle.innerText = "Tambah Program Kerja (Minggu Ini)";
+            }
             document.getElementById('modal-proker').classList.remove('hidden');
         }
 
@@ -1290,6 +1346,7 @@
             const currentBagian = document.getElementById('proker-bagian-filter').value || BAGIAN_LIST[0];
             const title = document.getElementById('proker-input-title').value;
             const desc = document.getElementById('proker-input-desc').value;
+            const targetType = document.getElementById('proker-target-type').value;
 
             prokerList.push({
                 id: 'p' + Date.now(),
@@ -1299,7 +1356,8 @@
                 accMusyrif: false,
                 hasilUsaha: '',
                 isHasilDone: false,
-                dateReported: ''
+                dateReported: '',
+                isFutureOnly: targetType === 'minggu_depan'
             });
 
             saveData();
@@ -1324,6 +1382,8 @@
                 if (p.accMusyrif) {
                     p.hasilUsaha = 'Terlaksana sesuai target awal';
                     p.dateReported = newDateString();
+                } else {
+                    p.evaluasi = 'Proker membutuhkan evaluasi dan penyelesaian ulang';
                 }
                 saveData();
                 renderProkerPage();
@@ -1343,7 +1403,7 @@
             const p = prokerList.find(x => x.id === id);
             if (p) {
                 document.getElementById('solusi-eval-id').value = id;
-                document.getElementById('solusi-eval-text').innerText = p.title + ': ' + (p.evaluasi || 'Membutuhkan solusi penanganan');
+                document.getElementById('solusi-eval-text').innerText = p.title + ': ' + (p.evaluasi || 'Belum di-ACC / kendala usaha');
                 document.getElementById('solusi-input-text').value = p.solusi || '';
                 document.getElementById('modal-solusi').classList.remove('hidden');
             }
@@ -1369,45 +1429,74 @@
             }
         }
 
-        // --- 4. KEPANITIAAN LOGIC ---
+        // --- 4. KEPANITIAAN TAB (Fitur Lengkap: Deskripsi, Target/Rundown, Joblist Flexible & Strikethrough) ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
             container.innerHTML = '';
+            const user = getActiveUser();
+            const canChecklist = user.role === 'admin' || user.role === 'musyrif';
 
             panitiaList.forEach(k => {
                 let joblistHTML = '';
-                BAGIAN_LIST.forEach(bag => {
-                    const job = k.joblists[bag] || 'Belum diisi';
+                k.joblists.forEach((j, index) => {
                     joblistHTML += `
-                        <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg text-xs">
-                            <span class="font-bold text-amber-600 dark:text-amber-400 block">${bag}</span>
-                            <span class="text-gray-600 dark:text-gray-300">${job}</span>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-2.5 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600">
+                            <div>
+                                <span class="font-bold text-amber-600 dark:text-amber-400 block">${j.bagian}</span>
+                                <span class="text-gray-700 dark:text-gray-200 ${j.done ? 'line-through text-gray-400' : ''}">${j.task}</span>
+                            </div>
+                            <input type="checkbox" ${j.done ? 'checked' : ''} ${!canChecklist ? 'disabled' : ''} 
+                                   onchange="togglePanitiaJob('${k.id}', '${j.id}')" 
+                                   class="w-4 h-4 text-amber-600 rounded cursor-pointer" title="${canChecklist ? 'Checklist Joblist' : 'Hanya Admin/Musyrif'}">
                         </div>
                     `;
                 });
 
-                const rundownHTML = k.rundown.map(r => `<li class="text-xs text-gray-600 dark:text-gray-300">${r}</li>`).join('');
+                // Rundown Items (Tercoret jika Joblist yang terkait/semua joblist selesai)
+                const rundownHTML = k.rundown.map((r, i) => {
+                    const isCompleted = k.joblists.length > 0 && k.joblists[i % k.joblists.length]?.done;
+                    return `<li class="text-xs ${isCompleted ? 'line-through text-gray-400 dark:text-gray-500 font-normal' : 'text-gray-700 dark:text-gray-200 font-semibold'}">${r}</li>`;
+                }).join('');
 
                 container.innerHTML += `
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
                         <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
                             <div>
-                                <h4 class="font-bold text-lg text-gray-900 dark:text-white">${k.nama}</h4>
-                                <p class="text-xs text-rose-500 font-semibold"><i class="fa-regular fa-calendar-alt mr-1"></i> ${k.tanggal}</p>
+                                <h4 class="font-bold text-xl text-gray-900 dark:text-white">${k.nama}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${k.deskripsi || 'Tidak ada deskripsi'}</p>
+                                <div class="flex gap-4 mt-2 text-xs font-semibold">
+                                    <span class="text-blue-600"><i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ${k.tanggal}</span>
+                                    <span class="text-rose-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Target Deadline: ${k.deadline}</span>
+                                </div>
                             </div>
-                            <button onclick="deletePanitia('${k.id}')" class="text-xs text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
+                            <button onclick="deletePanitia('${k.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold"><i class="fa-solid fa-trash mr-1"></i> Hapus Agenda</button>
                         </div>
                         <div>
-                            <h5 class="text-xs font-bold text-gray-400 uppercase mb-2">Joblist Perbagian</h5>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">${joblistHTML}</div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h5 class="text-xs font-bold text-gray-400 uppercase">Program Kerja / Joblist Perbagian (Fleksibel)</h5>
+                                <span class="text-[10px] text-gray-400">*Checklist khusus Admin & Musyrif</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">${joblistHTML}</div>
                         </div>
-                        <div>
-                            <h5 class="text-xs font-bold text-gray-400 uppercase mb-1">Rundown Acara</h5>
-                            <ul class="list-disc list-inside space-y-0.5">${rundownHTML}</ul>
+                        <div class="bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+                            <h5 class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase mb-1">Rundown & Jadwal Persiapan Acara</h5>
+                            <ul class="list-disc list-inside space-y-1">${rundownHTML}</ul>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function togglePanitiaJob(eventPanitiaId, jobId) {
+            const eventItem = panitiaList.find(e => e.id === eventPanitiaId);
+            if (eventItem) {
+                const job = eventItem.joblists.find(j => j.id === jobId);
+                if (job) {
+                    job.done = !job.done;
+                    saveData();
+                    renderPanitiaPage();
+                }
+            }
         }
 
         function openPanitiaModal() {
@@ -1417,18 +1506,28 @@
         function savePanitia(e) {
             e.preventDefault();
             const nama = document.getElementById('panitia-input-nama').value;
+            const deskripsi = document.getElementById('panitia-input-deskripsi').value;
             const tanggal = document.getElementById('panitia-input-tanggal').value;
+            const deadline = document.getElementById('panitia-input-deadline').value;
             const rundownRaw = document.getElementById('panitia-input-rundown').value;
             const rundown = rundownRaw.split('\n').filter(r => r.trim().length > 0);
 
-            const joblists = {};
-            BAGIAN_LIST.forEach(bag => {
-                joblists[bag] = `Jobdesk standar untuk ${bag}`;
+            const joblists = [];
+            BAGIAN_LIST.forEach((bag, idx) => {
+                const jobVal = document.getElementById(`job-${bag}`).value;
+                if (jobVal && jobVal.trim() !== '') {
+                    joblists.push({
+                        id: 'j' + Date.now() + idx,
+                        bagian: bag,
+                        task: jobVal,
+                        done: false
+                    });
+                }
             });
 
             panitiaList.push({
                 id: 'k' + Date.now(),
-                nama, tanggal, rundown, joblists
+                nama, deskripsi, tanggal, deadline, rundown, joblists
             });
 
             saveData();
@@ -1444,41 +1543,48 @@
             }
         }
 
-        // --- 5. RAPAT MINGGUAN LOGIC ---
+        // --- 5. RAPAT MINGGUAN TAB (Filter Perbagian, Default: Ketua) ---
         function renderRapatPage() {
-            // Aggregated Table 1: Program Kerja Minggu Lalu
+            const filterBagian = document.getElementById('rapat-bagian-filter').value || 'Ketua';
+            
+            let filteredProker = prokerList;
+            if (filterBagian !== 'ALL') {
+                filteredProker = prokerList.filter(p => p.bagian === filterBagian);
+            }
+
+            // 1. Program Kerja Minggu Lalu
             const t1 = document.getElementById('rapat-table-1');
             t1.innerHTML = '';
-            prokerList.forEach(p => {
-                t1.innerHTML += `<tr><td class="p-2 font-bold">${p.bagian}</td><td class="p-2">${p.title}</td><td class="p-2">${p.desc}</td></tr>`;
+            filteredProker.forEach(p => {
+                t1.innerHTML += `<tr><td class="p-2 font-bold text-blue-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-gray-500">${p.desc}</td></tr>`;
             });
 
-            // Aggregated Table 2: Hasil Usaha
+            // 2. Hasil Usaha
             const t2 = document.getElementById('rapat-table-2');
             t2.innerHTML = '';
-            prokerList.filter(p => p.accMusyrif).forEach(p => {
-                t2.innerHTML += `<tr><td class="p-2 font-bold">${p.bagian}</td><td class="p-2">${p.title}</td><td class="p-2 text-emerald-600">${p.hasilUsaha || 'Terlaksana'}</td></tr>`;
+            filteredProker.filter(p => p.accMusyrif).forEach(p => {
+                t2.innerHTML += `<tr><td class="p-2 font-bold text-emerald-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-emerald-600 font-medium">${p.hasilUsaha || 'Terlaksana'}</td></tr>`;
             });
 
-            // Aggregated Table 3: Evaluasi
+            // 3. Evaluasi
             const t3 = document.getElementById('rapat-table-3');
             t3.innerHTML = '';
-            prokerList.filter(p => !p.accMusyrif).forEach(p => {
-                t3.innerHTML += `<tr><td class="p-2 font-bold">${p.bagian}</td><td class="p-2">${p.title}</td><td class="p-2 text-rose-500">${p.evaluasi || 'Belum di-ACC / perlu penyesuaian'}</td></tr>`;
+            filteredProker.filter(p => !p.accMusyrif).forEach(p => {
+                t3.innerHTML += `<tr><td class="p-2 font-bold text-rose-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-rose-500">${p.evaluasi || 'Perlu evaluasi/ACC Musyrif'}</td></tr>`;
             });
 
-            // Aggregated Table 4: Solusi
+            // 4. Solusi
             const t4 = document.getElementById('rapat-table-4');
             t4.innerHTML = '';
-            prokerList.filter(p => !p.accMusyrif).forEach(p => {
-                t4.innerHTML += `<tr><td class="p-2 font-bold">${p.bagian}</td><td class="p-2">${p.title}</td><td class="p-2 text-amber-600">${p.solusi || 'Belum dirumuskan'}</td></tr>`;
+            filteredProker.filter(p => !p.accMusyrif).forEach(p => {
+                t4.innerHTML += `<tr><td class="p-2 font-bold text-amber-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-amber-600 font-medium">${p.solusi || 'Belum ada rumusan solusi'}</td></tr>`;
             });
 
-            // Aggregated Table 5: Proker Mendatang
+            // 5. Proker Mendatang
             const t5 = document.getElementById('rapat-table-5');
             t5.innerHTML = '';
-            prokerList.filter(p => !p.accMusyrif).forEach(p => {
-                t5.innerHTML += `<tr><td class="p-2 font-bold">${p.bagian}</td><td class="p-2">${p.title} (Lanjutan)</td><td class="p-2">Eksekusi sesi mendatang</td></tr>`;
+            filteredProker.filter(p => !p.accMusyrif || p.isFutureOnly).forEach(p => {
+                t5.innerHTML += `<tr><td class="p-2 font-bold text-indigo-600">${p.bagian}</td><td class="p-2 font-semibold">${p.title}</td><td class="p-2 text-gray-500">${p.solusi ? 'Dari Solusi Evaluasi' : 'Agenda Minggu Mendatang'}</td></tr>`;
             });
 
             // Notulensi files rendering
@@ -1537,22 +1643,18 @@
 
             reportsArchive.unshift(reportData);
             saveData();
-            alert('Hasil Rapat Mingguan berhasil disimpan dan otomatis dipindahkan ke Laporan!');
+            alert('Hasil Rapat Mingguan berhasil disimpan dan otomatis diarsipkan ke Laporan!');
             switchTab('laporan');
         }
 
-        // --- 6. REKAP LOGIC ---
+        // --- 6. REKAP TAB ---
         function renderRekapPage() {
             const bagianFilter = document.getElementById('rekap-filter-bagian').value;
-            const dateStart = document.getElementById('rekap-date-start').value;
-            const dateEnd = document.getElementById('rekap-date-end').value;
-
             let filtered = prokerList;
             if (bagianFilter !== 'ALL') {
                 filtered = filtered.filter(p => p.bagian === bagianFilter);
             }
 
-            // Table Rekap Program Kerja
             const tProker = document.getElementById('rekap-table-proker');
             tProker.innerHTML = '';
             filtered.forEach(p => {
@@ -1565,7 +1667,6 @@
                 `;
             });
 
-            // Table Rekap Hasil Usaha
             const tHasil = document.getElementById('rekap-table-hasil');
             tHasil.innerHTML = '';
             filtered.filter(p => p.accMusyrif).forEach(p => {
@@ -1599,7 +1700,7 @@
             XLSX.writeFile(workbook, `Rekap_Program_Kerja_DCC_${bagianFilter}.xlsx`);
         }
 
-        // --- 7. LAPORAN LOGIC ---
+        // --- 7. LAPORAN TAB ---
         function renderLaporanPage() {
             const container = document.getElementById('laporan-container');
             const search = (document.getElementById('laporan-search-input')?.value || '').toLowerCase();
@@ -1644,7 +1745,7 @@
             });
         }
 
-        // --- 8. ROOMCHAT LOGIC ---
+        // --- 8. ROOMCHAT TAB ---
         function renderRoomchatPage() {
             const container = document.getElementById('chat-messages-container');
             container.innerHTML = '';
@@ -1653,7 +1754,6 @@
             chatMessages.forEach(msg => {
                 const isMe = msg.senderId === user.id;
 
-                // Reply HTML snippet if message is a reply
                 let replySnippet = '';
                 if (msg.replies) {
                     const parent = chatMessages.find(m => m.id === msg.replies);
@@ -1666,7 +1766,6 @@
                     }
                 }
 
-                // File attachment snippet
                 let fileSnippet = '';
                 if (msg.file) {
                     if (msg.file.isImage) {
@@ -1691,7 +1790,6 @@
                             <p>${formatMentions(msg.text)}</p>
                             ${fileSnippet}
 
-                            <!-- Action Buttons on Hover -->
                             <div class="absolute top-1 ${isMe ? '-left-16' : '-right-16'} hidden group-hover:flex items-center gap-1 bg-white dark:bg-gray-800 shadow rounded border px-1 py-0.5 text-gray-500 text-[10px]">
                                 <button onclick="setReplyMessage('${msg.id}')" title="Reply"><i class="fa-solid fa-reply"></i></button>
                                 <button onclick="copyChatText('${msg.text}')" title="Copy"><i class="fa-solid fa-copy"></i></button>
@@ -1751,7 +1849,7 @@
 
         function copyChatText(text) {
             navigator.clipboard.writeText(text);
-            alert('Pesan telah disalin!');
+            alert('Pesan berhasil disalin!');
         }
 
         function editChatMessage(id) {
@@ -1798,7 +1896,7 @@
                 senderName: user.name,
                 role: user.role,
                 bagian: user.bagian,
-                text: `Kirim lampiran file: ${file.name}`,
+                text: `Kirim file: ${file.name}`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 replies: null,
                 file: {
@@ -1852,7 +1950,7 @@
             renderRoomchatPage();
         }
 
-        // --- 9. USER MANAGEMENT LOGIC (Admin Only) ---
+        // --- 9. USER MANAGEMENT TAB ---
         function renderUsersPage() {
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
@@ -1898,7 +1996,7 @@
 
         function deleteUser(id) {
             if (users.length <= 1) {
-                alert('Tidak dapat menghapus user terakhir!');
+                alert('Tidak dapat menghapus pengguna terakhir!');
                 return;
             }
             if (confirm('Hapus pengguna ini?')) {
@@ -1930,7 +2028,6 @@
             return new Date().toISOString().split('T')[0];
         }
 
-        // Sidebar Toggle for Mobile / Small Screens
         document.getElementById('toggle-sidebar').addEventListener('click', () => {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('w-64');
@@ -1938,9 +2035,7 @@
             document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden'));
         });
 
-        // --- INIT APP ---
         window.onload = function() {
-            // Restore theme
             const savedTheme = localStorage.getItem('dcc_theme');
             if (savedTheme === 'dark') document.documentElement.classList.add('dark');
             else document.documentElement.classList.remove('dark');
