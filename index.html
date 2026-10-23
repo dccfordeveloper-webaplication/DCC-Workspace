@@ -228,7 +228,7 @@
                     </div>
                 </section>
 
-                <!-- 2. PENUGASAN (Ditambahkan Filter Bagian/Status & Fitur Hapus) -->
+                <!-- 2. PENUGASAN (Fitur Filter Bagian, Status & Hapus Tugas) -->
                 <section id="page-penugasan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -237,7 +237,6 @@
                         </div>
                         
                         <div class="flex flex-wrap items-center gap-3">
-                            <!-- Filter Bagian -->
                             <div class="flex items-center gap-1.5 text-xs">
                                 <label class="font-semibold text-gray-600 dark:text-gray-300">Bagian:</label>
                                 <select id="task-filter-bagian" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium">
@@ -251,7 +250,6 @@
                                 </select>
                             </div>
 
-                            <!-- Filter Status -->
                             <div class="flex items-center gap-1.5 text-xs">
                                 <label class="font-semibold text-gray-600 dark:text-gray-300">Status:</label>
                                 <select id="task-filter-status" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium">
@@ -271,7 +269,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 uppercase tracking-wider">
                                     <tr>
                                         <th class="p-4">Tugas & Deskripsi</th>
                                         <th class="p-4">Penanggung Jawab (PJ)</th>
@@ -340,7 +338,7 @@
                     </div>
                 </section>
 
-                <!-- 4. KEPANITIAAN (Restriksi Akses Khusus Musyrif/Admin) -->
+                <!-- 4. KEPANITIAAN (Restriksi Akses Edit, Tambah & Buat Agenda Khusus Admin/Musyrif) -->
                 <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                         <div>
@@ -444,7 +442,7 @@
                     <div id="laporan-container" class="space-y-4"></div>
                 </section>
 
-                <!-- 8. ROOMCHAT (Perbaikan Total Berfungsi Fitur WhatsApp Lengkap) -->
+                <!-- 8. ROOMCHAT (Gaya WhatsApp Lengkap dengan Emoji, File, Reply, Copy, Edit, Delete) -->
                 <section id="page-roomchat" class="page-content h-[calc(100vh-6rem)] hidden flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
@@ -454,16 +452,11 @@
                                 <p class="text-[11px] text-green-600 dark:text-green-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> 6 Bagian Aktif</p>
                             </div>
                         </div>
-                        <button onclick="openProfileModal()" class="text-xs bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-gear"></i> Edit Profil
-                        </button>
                     </div>
 
-                    <!-- Container Chat Message -->
                     <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]">
                     </div>
 
-                    <!-- Banner Membalas Chat -->
                     <div id="reply-banner" class="hidden px-4 py-2 bg-gray-100 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex items-center justify-between text-xs">
                         <div class="flex items-center space-x-2 truncate">
                             <i class="fa-solid fa-reply text-blue-500"></i>
@@ -473,7 +466,6 @@
                         <button onclick="cancelReply()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
-                    <!-- Emoji Picker Box -->
                     <div id="emoji-picker" class="hidden p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 grid grid-cols-8 gap-2 text-xl max-h-36 overflow-y-auto">
                         <button onclick="addEmoji('😊')">😊</button><button onclick="addEmoji('😂')">😂</button><button onclick="addEmoji('👍')">👍</button>
                         <button onclick="addEmoji('❤️')">❤️</button><button onclick="addEmoji('🙏')">🙏</button><button onclick="addEmoji('🔥')">🔥</button>
@@ -483,14 +475,11 @@
                         <button onclick="addEmoji('😎')">😎</button>
                     </div>
 
-                    <!-- Input Chat Bar -->
                     <div class="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                         <form id="chat-form" onsubmit="handleSendChat(event)" class="flex items-center space-x-2">
                             <button type="button" onclick="toggleEmojiPicker()" class="p-2 text-gray-500 hover:text-amber-500">
                                 <i class="fa-regular fa-face-smile text-lg"></i>
                             </button>
-                            
-                            <!-- Upload File/Foto/Dokumen -->
                             <label class="p-2 text-gray-500 hover:text-blue-500 cursor-pointer" title="Lampirkan File/Foto/Dokumen">
                                 <i class="fa-solid fa-paperclip text-lg"></i>
                                 <input type="file" id="chat-file-input" class="hidden" onchange="handleChatFileUpload(event)">
@@ -697,14 +686,12 @@
             if (isAdmin) adminMenu.classList.remove('hidden');
             else adminMenu.classList.add('hidden');
 
-            // Tombol Beri Penugasan Baru (Khusus Admin & Musyrif)
             const btnAddTask = document.getElementById('btn-add-task');
             if (btnAddTask) {
                 if (isAdmin || isMusyrif) btnAddTask.classList.remove('hidden');
                 else btnAddTask.classList.add('hidden');
             }
 
-            // Tombol Buat Agenda Kepanitiaan Baru (Khusus Admin & Musyrif)
             const btnAddPanitia = document.getElementById('btn-add-panitia');
             if (btnAddPanitia) {
                 if (isAdmin || isMusyrif) btnAddPanitia.classList.remove('hidden');
@@ -1047,7 +1034,7 @@
             });
         }
 
-        // --- 4. KEPANITIAAN TAB (Restriksi Akses Edit & Tambah Khusus Musyrif / Admin) ---
+        // --- 4. KEPANITIAAN TAB ---
         function renderPanitiaPage() {
             const container = document.getElementById('panitia-cards-container');
             container.innerHTML = '';
@@ -1071,7 +1058,6 @@
                             </div>
                         `;
                     } else {
-                        // Tampilan Read-Only untuk Member Biasa
                         joblistHTML += `
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-xs flex items-center justify-between border dark:border-gray-600">
                                 <div>
@@ -1143,7 +1129,7 @@
             }
         }
 
-        // --- 8. ROOMCHAT TAB (Lengkap Fitur WhatsApp: Reply, Copy, Edit, Delete, File Attachment) ---
+        // --- 8. ROOMCHAT TAB (Fungsionalitas WhatsApp Lengkap) ---
         function renderRoomchatPage() {
             const container = document.getElementById('chat-messages-container');
             container.innerHTML = '';
@@ -1190,7 +1176,6 @@
                             <div>${msg.text}</div>
                             ${fileHTML}
 
-                            <!-- WhatsApp Action Menu Overlay -->
                             <div class="mt-2 pt-1 border-t border-black/10 dark:border-white/10 flex items-center justify-end gap-3 text-xs opacity-80">
                                 <button onclick="setReplyMessage('${msg.id}')" class="hover:underline flex items-center gap-1" title="Balas"><i class="fa-solid fa-reply"></i> Balas</button>
                                 <button onclick="copyChatMessage('${msg.text}')" class="hover:underline flex items-center gap-1" title="Salin"><i class="fa-solid fa-copy"></i> Salin</button>
@@ -1305,7 +1290,7 @@
             }
         }
 
-        // --- GENERAL APP LOGIC ---
+        // --- GENERAL HELPERS ---
         function renderRapatPage() {
             const filterBagian = document.getElementById('rapat-bagian-filter')?.value || 'Ketua';
             let filteredProker = filterBagian !== 'ALL' ? prokerList.filter(p => p.bagian === filterBagian) : prokerList;
