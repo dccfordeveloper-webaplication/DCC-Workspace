@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCC Workspace</title>
-    <!-- Favicon Logo (Disesuaikan dengan nama file bermuatan spasi di GitHub) -->
+    <!-- Favicon Logo -->
     <link rel="icon" href="./logo%20store.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -173,6 +173,7 @@
                     </table></div>
                 </div>
 
+                <!-- TABEL PENUGASAN BERJALAN -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-list-check text-indigo-500"></i> Penugasan yang sedang berjalan</h4>
@@ -181,6 +182,18 @@
                     <div class="overflow-x-auto"><table class="w-full text-sm text-left">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Tugas</th><th class="p-3">PJ / Bagian</th><th class="p-3">Deadline</th><th class="p-3">Status</th></tr></thead>
                         <tbody id="home-tasks-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                    </table></div>
+                </div>
+
+                <!-- TABEL PROGRES KEPANITIAAN DI DASHBOARD (BARU) -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-500"></i> Progres Kesiapan Kepanitiaan</h4>
+                        <button onclick="switchTab('kepanitiaan')" class="text-xs text-blue-600 hover:underline">Kelola kepanitiaan</button>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Kegiatan Agenda</th><th class="p-3">Tanggal Pelaksanaan</th><th class="p-3 text-center">Tugas Selesai</th><th class="p-3">Progres Kesiapan</th></tr></thead>
+                        <tbody id="home-panitia-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
                     </table></div>
                 </div>
             </section>
@@ -366,7 +379,7 @@
     </div>
 </div>
 
-<!-- MODAL PENUGASAN (Bagian kini berbentuk Input Teks/Fleksibel) -->
+<!-- MODAL PENUGASAN -->
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Beri penugasan baru</h3>
@@ -404,7 +417,7 @@
     </div>
 </div>
 
-<!-- MODAL PEMBAGIAN TUGAS (Bagian kini berbentuk Input Teks/Fleksibel) -->
+<!-- MODAL PEMBAGIAN TUGAS -->
 <div id="modal-job" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg">Tambah pembagian tugas</h3>
@@ -764,6 +777,28 @@ function renderBerandaPage() {
         `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
     ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
 
+    // RENDER TABEL PROGRES KEPANITIAAN DI BERANDA
+    const panitias = list('panitia');
+    $('home-panitia-table').innerHTML = panitias.length ? panitias.map(k => {
+        const jobs = k.joblists || [];
+        const done = jobs.filter(j => j.done).length;
+        const total = jobs.length;
+        const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        return `<tr>
+            <td class="p-3 font-medium">${esc(k.nama)}</td>
+            <td class="p-3 text-xs text-blue-600 font-semibold">${esc(k.tanggal)}</td>
+            <td class="p-3 text-center text-xs font-bold">${done} / ${total}</td>
+            <td class="p-3">
+                <div class="flex items-center gap-2">
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                        <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 w-9 text-right">${percent}%</span>
+                </div>
+            </td>
+        </tr>`;
+    }).join('') : emptyRow(4, 'Belum ada agenda kepanitiaan.');
+
     initCountdown();
 }
 
@@ -803,23 +838,17 @@ function renderPenugasanPage() {
     const canManage = isMusyrifOrAdmin();
     $('btn-add-task').style.display = canManage ? 'inline-flex' : 'none';
 
-    // 1. Dapatkan seluruh tugas yang ada
     const allTasks = list('tasks');
-    
-    // 2. Kumpulkan nama bagian unik dari daftar tugas (digabung dengan daftar baku)
     const uniqueBagian = Array.from(new Set([
         ...BAGIAN_LIST, 
         ...allTasks.map(t => t.bagian).filter(Boolean)
     ])).sort();
 
-    // 3. Simpan filter yang sedang dipilih
     const currentSelectedFilter = $('task-filter-bagian').value || 'ALL';
 
-    // 4. Perbarui isi dropdown filter bagian secara dinamis
     $('task-filter-bagian').innerHTML = '<option value="ALL">Semua bagian</option>' + 
         uniqueBagian.map(b => `<option value="${esc(b)}"${b === currentSelectedFilter ? ' selected' : ''}>${esc(b)}</option>`).join('');
 
-    // 5. Filter baris tabel berdasarkan bagian dan status
     const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
     const rows = allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
 
@@ -994,7 +1023,7 @@ async function importLastWeek() {
     toast('Proker minggu lalu berhasil disalin.');
 }
 
-/* ---------- 4. KEPANITIAAN ---------- */
+/* ---------- 4. KEPANITIAAN (Tersedia Progress Bar) ---------- */
 function renderPanitiaPage() {
     const canManage = isMusyrifOrAdmin();
     $('btn-add-panitia').style.display = canManage ? 'inline-flex' : 'none';
@@ -1002,17 +1031,37 @@ function renderPanitiaPage() {
     const events = list('panitia').sort((a, b) => a.tanggal.localeCompare(b.tanggal));
     $('panitia-cards-container').innerHTML = events.length ? events.map(k => {
         const jobs = k.joblists || [];
+        const done = jobs.filter(j => j.done).length;
+        const total = jobs.length;
+        const percent = total > 0 ? Math.round((done / total) * 100) : 0;
         const daysLeft = Math.ceil((new Date(k.tanggal + 'T08:00:00') - Date.now()) / 864e5);
         const when = daysLeft > 0 ? `${daysLeft} hari lagi` : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
+
         return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0"><h4 class="font-bold text-lg">${esc(k.nama)}</h4><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
-                <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div></div>
-                ${canManage ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <h4 class="font-bold text-lg">${esc(k.nama)}</h4>
+                        <span class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800 shrink-0">
+                            ${percent}% Kesiapan
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
+                    <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div>
+                    
+                    <!-- Progress Bar Indikator -->
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden mt-3">
+                        <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
+                    </div>
+                </div>
+                ${canManage ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
+
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
-                <div class="flex items-center justify-between mb-2"><h5 class="text-sm font-semibold">Pembagian tugas (${jobs.filter(j => j.done).length}/${jobs.length} selesai)</h5>
-                ${canManage ? `<button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline"><i class="fa-solid fa-plus"></i> Tambah tugas</button>` : ''}</div>
+                <div class="flex items-center justify-between mb-2">
+                    <h5 class="text-sm font-semibold">Pembagian tugas (${done}/${total} selesai)</h5>
+                    ${canManage ? `<button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline"><i class="fa-solid fa-plus"></i> Tambah tugas</button>` : ''}
+                </div>
                 <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
                     <li class="flex items-center gap-2 text-xs">
                         <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600 cursor-pointer">
@@ -1020,9 +1069,11 @@ function renderPanitiaPage() {
                         <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
                         ${canManage ? `<button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                     </li>`).join('') : '<li class="text-xs text-gray-400">Belum ada pembagian tugas.</li>'}</ul>
-            </div></div>`;
+            </div>
+        </div>`;
     }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda.</div>';
 }
+
 function openPanitiaModal() {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menambah agenda.', 'err');
     openModal('modal-panitia');
