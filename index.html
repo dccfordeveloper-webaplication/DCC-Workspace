@@ -1135,7 +1135,7 @@ function renderPanitiaPage() {
             <!-- Kolom Evaluasi Notepad Manual -->
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1" for="eval-${k.id}">
-                    <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i> Catatan &amp; Evaluasi Pelaksanaan Acara (Notepad Manual):
+                    <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i> Catatan &amp; Evaluasi Pelaksanaan Acara:
                 </label>
                 <textarea id="eval-${k.id}" onblur="savePanitiaEvaluation('${k.id}', this.value)" rows="3" placeholder="Ketik catatan atau evaluasi kegiatan ini di sini..." class="w-full text-xs p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500">${esc(k.evaluation || '')}</textarea>
             </div>
