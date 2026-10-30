@@ -16,6 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html2pdf.js untuk Direct Download PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
@@ -477,6 +479,9 @@ let channel = null;
 let pollTimer = null;
 let authMode = 'login';
 
+// Status filter & sorting per kartu kegiatan kepanitiaan
+let panitiaFilters = {}; // { panitiaId: { bagian: 'ALL', sort: 'bagian_asc' } }
+
 /* ---------- Util ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -778,7 +783,6 @@ function renderBerandaPage() {
         `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
     ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
 
-    // Hanya tampilkan di dashboard jika kepanitiaan BELUM selesai
     const panitias = list('panitia').filter(k => !k.isFinished);
     $('home-panitia-table').innerHTML = panitias.length ? panitias.map(k => {
         const jobs = k.joblists || [];
@@ -805,7 +809,6 @@ function renderBerandaPage() {
 
 function initCountdown() {
     clearInterval(cdTimer); clearInterval(cdRotate);
-    // Hanya hitung kegiatan yang BELUM selesai (isFinished !== true)
     const events = list('panitia').filter(k => !k.isFinished && k.tanggal >= today()).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
     if (!events.length) {
         $('event-title-display').textContent = 'Belum ada kegiatan mendatang';
@@ -1025,17 +1028,41 @@ async function importLastWeek() {
     toast('Proker minggu lalu berhasil disalin.');
 }
 
-/* ---------- 4. KEPANITIAAN (Fitur Baru: Evaluasi Notepad, Selesai, & Download Excel/PDF) ---------- */
+/* ---------- 4. KEPANITIAAN (Filter, Sorting, Direct Download PDF, Notepad Evaluasi) ---------- */
 function renderPanitiaPage() {
     const canManageAgenda = isMusyrifOrAdmin();
     $('btn-add-panitia').style.display = canManageAgenda ? 'inline-flex' : 'none';
 
     const events = list('panitia').sort((a, b) => a.tanggal.localeCompare(b.tanggal));
     $('panitia-cards-container').innerHTML = events.length ? events.map(k => {
-        const jobs = k.joblists || [];
-        const done = jobs.filter(j => j.done).length;
-        const total = jobs.length;
-        const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        if (!panitiaFilters[k.id]) panitiaFilters[k.id] = { bagian: 'ALL', sort: 'bagian_asc' };
+        const fState = panitiaFilters[k.id];
+
+        let jobs = [...(k.joblists || [])];
+        const uniqueBagian = Array.from(new Set(jobs.map(j => j.bagian))).sort();
+
+        // 1. Filter berdasarkan bagian
+        if (fState.bagian !== 'ALL') {
+            jobs = jobs.filter(j => j.bagian === fState.bagian);
+        }
+
+        // 2. Sorting sesuai pilihan
+        jobs.sort((a, b) => {
+            if (fState.sort === 'bagian_asc') {
+                return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
+            } else if (fState.sort === 'bagian_desc') {
+                return (b.bagian || '').localeCompare(a.bagian || '') || (b.task || '').localeCompare(a.task || '');
+            } else if (fState.sort === 'status_selesai') {
+                return (b.done === true) - (a.done === true);
+            } else if (fState.sort === 'status_belum') {
+                return (a.done === true) - (b.done === true);
+            }
+            return 0;
+        });
+
+        const totalAll = (k.joblists || []).length;
+        const doneAll = (k.joblists || []).filter(j => j.done).length;
+        const percent = totalAll > 0 ? Math.round((doneAll / totalAll) * 100) : 0;
         const daysLeft = Math.ceil((new Date(k.tanggal + 'T08:00:00') - Date.now()) / 864e5);
         const when = daysLeft > 0 ? `${daysLeft} hari lagi` : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
         const isFinished = k.isFinished || false;
@@ -1069,10 +1096,30 @@ function renderPanitiaPage() {
                 ${canManageAgenda ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
 
+            <!-- Bagian Filter & Sorting Tugas -->
+            <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold"><i class="fa-solid fa-filter text-blue-500 mr-1"></i> Filter Bagian:</span>
+                    <select onchange="updatePanitiaFilter('${k.id}', 'bagian', this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 font-medium">
+                        <option value="ALL">Semua Bagian</option>
+                        ${uniqueBagian.map(b => `<option value="${esc(b)}" ${fState.bagian === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold"><i class="fa-solid fa-arrow-sort text-indigo-500 mr-1"></i> Urutkan:</span>
+                    <select onchange="updatePanitiaFilter('${k.id}', 'sort', this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 font-medium">
+                        <option value="bagian_asc" ${fState.sort === 'bagian_asc' ? 'selected' : ''}>Bagian (A-Z)</option>
+                        <option value="bagian_desc" ${fState.sort === 'bagian_desc' ? 'selected' : ''}>Bagian (Z-A)</option>
+                        <option value="status_selesai" ${fState.sort === 'status_selesai' ? 'selected' : ''}>Status (Selesai Dulu)</option>
+                        <option value="status_belum" ${fState.sort === 'status_belum' ? 'selected' : ''}>Status (Belum Dulu)</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Pembagian Tugas -->
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <div class="flex items-center justify-between mb-2">
-                    <h5 class="text-sm font-semibold">Pembagian tugas (${done}/${total} selesai)</h5>
+                    <h5 class="text-sm font-semibold">Pembagian tugas (${doneAll}/${totalAll} selesai)</h5>
                     <button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Tambah tugas</button>
                 </div>
                 <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
@@ -1082,7 +1129,7 @@ function renderPanitiaPage() {
                         <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
                         <button onclick="openJobModal('${k.id}', '${j.id}')" aria-label="Edit tugas" class="text-blue-500 hover:text-blue-700 p-1"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark"></i></button>
-                    </li>`).join('') : '<li class="text-xs text-gray-400">Belum ada pembagian tugas.</li>'}</ul>
+                    </li>`).join('') : '<li class="text-xs text-gray-400">Tidak ada tugas yang sesuai filter.</li>'}</ul>
             </div>
 
             <!-- Kolom Evaluasi Notepad Manual -->
@@ -1094,6 +1141,12 @@ function renderPanitiaPage() {
             </div>
         </div>`;
     }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda.</div>';
+}
+
+function updatePanitiaFilter(id, type, val) {
+    if (!panitiaFilters[id]) panitiaFilters[id] = { bagian: 'ALL', sort: 'bagian_asc' };
+    panitiaFilters[id][type] = val;
+    renderPanitiaPage();
 }
 
 function openPanitiaModal() {
@@ -1127,29 +1180,101 @@ async function savePanitiaEvaluation(id, text) {
     }
 }
 
+// Helper untuk mengambil data terurut dan terfilter sesuai tampilan kartu saat diunduh
+function getSortedAndFilteredJobs(k) {
+    let jobs = [...(k.joblists || [])];
+    const fState = panitiaFilters[k.id] || { bagian: 'ALL', sort: 'bagian_asc' };
+
+    if (fState.bagian !== 'ALL') {
+        jobs = jobs.filter(j => j.bagian === fState.bagian);
+    }
+
+    jobs.sort((a, b) => {
+        if (fState.sort === 'bagian_asc') {
+            return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
+        } else if (fState.sort === 'bagian_desc') {
+            return (b.bagian || '').localeCompare(a.bagian || '') || (b.task || '').localeCompare(a.task || '');
+        } else if (fState.sort === 'status_selesai') {
+            return (b.done === true) - (a.done === true);
+        } else if (fState.sort === 'status_belum') {
+            return (a.done === true) - (b.done === true);
+        }
+        return 0;
+    });
+
+    return jobs;
+}
+
 function downloadPanitiaExcel(id) {
     const k = store.panitia.find(x => x.id === id); if (!k) return;
+    const jobs = getSortedAndFilteredJobs(k);
     const wb = XLSX.utils.book_new();
-    const tasksData = (k.joblists || []).map((j, idx) => ({ No: idx + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum Selesai' }));
+    const tasksData = jobs.map((j, idx) => ({ No: idx + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum Selesai' }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tasksData), 'Pembagian Tugas');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 'Nama Kegiatan': k.nama, 'Deskripsi': k.deskripsi, 'Tanggal': k.tanggal, 'Status Selesai': k.isFinished ? 'Ya' : 'Belum', 'Evaluasi / Catatan': k.evaluation }]), 'Detail Kegiatan');
     XLSX.writeFile(wb, `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.xlsx`);
 }
 
+// Unduh PDF Langsung (Direct Download) dalam bentuk Tabel Rapih menggunakan html2pdf.js
 function downloadPanitiaPDF(id) {
     const k = store.panitia.find(x => x.id === id); if (!k) return;
-    const win = window.open('', '_blank');
-    const jobsHtml = (k.joblists || []).map((j, i) => `<tr><td style="border:1px solid #ddd;padding:8px;">${i+1}</td><td style="border:1px solid #ddd;padding:8px;">${esc(j.bagian)}</td><td style="border:1px solid #ddd;padding:8px;">${esc(j.task)}</td><td style="border:1px solid #ddd;padding:8px;">${j.done ? 'Selesai' : 'Belum'}</td></tr>`).join('');
-    win.document.write(`<html><head><title>Laporan Kepanitiaan - ${esc(k.nama)}</title></head><body style="font-family:sans-serif;padding:20px;">
-        <h2>Laporan Kegiatan Kepanitiaan: ${esc(k.nama)}</h2>
-        <p><strong>Deskripsi:</strong> ${esc(k.deskripsi)}</p>
-        <p><strong>Tanggal Pelaksanaan:</strong> ${esc(k.tanggal)}</p>
-        <h3>Pembagian Tugas</h3>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;"><thead><tr style="background:#f3f4f6;"><th style="border:1px solid #ddd;padding:8px;">No</th><th style="border:1px solid #ddd;padding:8px;">Bagian</th><th style="border:1px solid #ddd;padding:8px;">Tugas</th><th style="border:1px solid #ddd;padding:8px;">Status</th></tr></thead><tbody>${jobsHtml || '<tr><td colspan="4" style="text-align:center;padding:10px;">Tidak ada tugas</td></tr>'}</tbody></table>
-        <h3>Catatan & Evaluasi</h3>
-        <p style="background:#f9fafb;padding:12px;border:1px solid #e5e7eb;border-radius:6px;white-space:pre-wrap;">${esc(k.evaluation || 'Belum ada catatan evaluasi.')}</p>
-        <script>window.print();<\/script></body></html>`);
-    win.document.close();
+    const jobs = getSortedAndFilteredJobs(k);
+
+    const container = document.createElement('div');
+    container.style.padding = '20px';
+    container.style.fontFamily = 'Inter, sans-serif';
+    container.style.color = '#1f2937';
+    container.style.backgroundColor = '#ffffff';
+
+    const rowsHtml = jobs.length ? jobs.map((j, idx) => `
+        <tr>
+            <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px;">${idx + 1}</td>
+            <td style="border: 1px solid #d1d5db; padding: 8px; font-weight: bold; font-size: 11px;">${esc(j.bagian)}</td>
+            <td style="border: 1px solid #d1d5db; padding: 8px; font-size: 11px;">${esc(j.task)}</td>
+            <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; color: ${j.done ? '#059669' : '#d97706'};">${j.done ? 'Selesai' : 'Belum'}</td>
+        </tr>
+    `).join('') : `<tr><td colspan="4" style="border: 1px solid #d1d5db; padding: 12px; text-align: center; font-size: 11px; color: #9ca3af;">Tidak ada data tugas</td></tr>`;
+
+    container.innerHTML = `
+        <div style="margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            <h2 style="margin: 0; font-size: 18px; color: #1e3a8a;">Laporan Kegiatan Kepanitiaan</h2>
+            <h3 style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">${esc(k.nama)}</h3>
+        </div>
+        <div style="margin-bottom: 15px; font-size: 12px;">
+            <p style="margin: 3px 0;"><strong>Deskripsi:</strong> ${esc(k.deskripsi)}</p>
+            <p style="margin: 3px 0;"><strong>Tanggal Pelaksanaan:</strong> ${esc(k.tanggal)}</p>
+            <p style="margin: 3px 0;"><strong>Status Acara:</strong> ${k.isFinished ? 'Selesai' : 'Aktif / Berjalan'}</p>
+        </div>
+        <h4 style="margin: 15px 0 8px 0; font-size: 13px; font-weight: bold; color: #374151;">Tabel Pembagian Tugas</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="background-color: #f3f4f6;">
+                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; width: 40px;">No</th>
+                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px; width: 130px;">Bagian</th>
+                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px;">Tugas</th>
+                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; width: 90px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHtml}
+            </tbody>
+        </table>
+        <h4 style="margin: 15px 0 8px 0; font-size: 13px; font-weight: bold; color: #374151;">Catatan & Evaluasi</h4>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 10px; border-radius: 6px; font-size: 11px; white-space: pre-wrap; line-height: 1.4;">${esc(k.evaluation || 'Belum ada catatan evaluasi.')}</div>
+    `;
+
+    const opt = {
+        margin:       10,
+        filename:     `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    toast('Memproses unduhan PDF...');
+    html2pdf().from(container).set(opt).save().then(() => {
+        toast('PDF berhasil diunduh!');
+    });
 }
 
 /* Modifikasi Modal Job (Tambah / Edit Tugas) */
