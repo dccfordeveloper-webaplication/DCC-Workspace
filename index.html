@@ -838,10 +838,9 @@ function initCountdown() {
     if (events.length > 1) cdRotate = setInterval(() => { cdIndex = (cdIndex + 1) % events.length; show(); tick(); }, 8000);
 }
 
-/* ---------- 2. PENUGASAN ---------- */
+/* ---------- 2. PENUGASAN (Akses dibuka untuk Member, Musyrif, Admin) ---------- */
 function renderPenugasanPage() {
-    const canManage = isMusyrifOrAdmin();
-    $('btn-add-task').style.display = canManage ? 'inline-flex' : 'none';
+    $('btn-add-task').style.display = 'inline-flex';
 
     const allTasks = list('tasks');
     const uniqueBagian = Array.from(new Set([
@@ -866,39 +865,46 @@ function renderPenugasanPage() {
             <td class="p-4"><select onchange="setTaskStatus('${t.id}', this.value)" aria-label="Status tugas" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
-            <td class="p-4 text-right">${canManage ? `<button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '-'}</td>
+            <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`).join('') : emptyRow(7, 'Belum ada penugasan.');
 }
 
 function openTaskModal() {
-    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat memberi penugasan.', 'err');
     $('task-input-bagian').value = '';
     openModal('modal-task');
 }
+
 async function saveTask(e) {
     e.preventDefault();
-    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     const t = {
-        id: uid('t'), title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
-        bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value,
-        status: STATUS_LIST[0], history: [`${today()} - Dibuat oleh ${userName()}`], createdAt: Date.now()
+        id: uid('t'), 
+        title: $('task-input-title').value.trim(), 
+        pj: $('task-input-pj').value.trim(),
+        bagian: $('task-input-bagian').value.trim(), 
+        deadline: $('task-input-deadline').value,
+        status: STATUS_LIST[0], 
+        history: [`${today()} - Dibuat oleh ${userName()}`], 
+        createdAt: Date.now()
     };
-    closeModal('modal-task'); e.target.reset();
+    closeModal('modal-task'); 
+    e.target.reset();
     await save('tasks', t);
 }
+
 async function setTaskStatus(id, status) {
     const t = store.tasks.find(x => x.id === id); if (!t || t.status === status) return;
     const upd = { ...t, status, history: [...(t.history || []), `${today()} - Status menjadi “${status}” oleh ${userName()}`] };
     await save('tasks', upd);
 }
+
 function showTaskLog(id) {
     const t = store.tasks.find(x => x.id === id); if (!t) return;
     $('modal-log-title').textContent = t.title;
     $('modal-log-list').innerHTML = (t.history || []).map(h => `<li class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-xs">${esc(h)}</li>`).join('') || '<li class="text-xs text-gray-400">Belum ada riwayat.</li>';
     openModal('modal-log');
 }
+
 async function deleteTask(id) {
-    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus tugas.', 'err');
     if (confirm('Hapus penugasan ini?')) await remove('tasks', id);
 }
 
@@ -1028,7 +1034,7 @@ async function importLastWeek() {
     toast('Proker minggu lalu berhasil disalin.');
 }
 
-/* ---------- 4. KEPANITIAAN (Filter, Sorting, Direct Download PDF, Notepad Evaluasi) ---------- */
+/* ---------- 4. KEPANITIAAN (Selesai Acara Khusus Musyrif & Admin) ---------- */
 function renderPanitiaPage() {
     const canManageAgenda = isMusyrifOrAdmin();
     $('btn-add-panitia').style.display = canManageAgenda ? 'inline-flex' : 'none';
@@ -1076,11 +1082,13 @@ function renderPanitiaPage() {
                             ${isFinished ? '<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Selesai</span>' : ''}
                         </div>
                         
-                        <!-- Aksi Tombol Cepat: Selesai & Download -->
+                        <!-- Aksi Tombol Cepat: Selesai (Khusus Musyrif & Admin) & Download -->
                         <div class="flex items-center gap-2">
-                            <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
-                                <i class="fa-solid ${isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i> ${isFinished ? 'Batalkan Selesai' : 'Selesai Acara'}
-                            </button>
+                            ${canManageAgenda ? `
+                                <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
+                                    <i class="fa-solid ${isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i> ${isFinished ? 'Batalkan Selesai' : 'Selesai Acara'}
+                                </button>
+                            ` : ''}
                             <button onclick="downloadPanitiaExcel('${k.id}')" title="Unduh Excel" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-excel"></i></button>
                             <button onclick="downloadPanitiaPDF('${k.id}')" title="Unduh PDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-pdf"></i></button>
                         </div>
@@ -1166,6 +1174,9 @@ async function deletePanitia(id) {
 }
 
 async function togglePanitiaFinished(id) {
+    if (!isMusyrifOrAdmin()) {
+        return toast('Hanya Musyrif atau Admin yang dapat mengubah status selesai kegiatan.', 'err');
+    }
     const k = store.panitia.find(x => x.id === id); if (!k) return;
     const newStatus = !k.isFinished;
     await save('panitia', { ...k, isFinished: newStatus });
