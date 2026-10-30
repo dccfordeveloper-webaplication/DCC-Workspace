@@ -778,7 +778,8 @@ function renderBerandaPage() {
         `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
     ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
 
-    const panitias = list('panitia');
+    // Hanya tampilkan di dashboard jika kepanitiaan BELUM selesai
+    const panitias = list('panitia').filter(k => !k.isFinished);
     $('home-panitia-table').innerHTML = panitias.length ? panitias.map(k => {
         const jobs = k.joblists || [];
         const done = jobs.filter(j => j.done).length;
@@ -797,14 +798,15 @@ function renderBerandaPage() {
                 </div>
             </td>
         </tr>`;
-    }).join('') : emptyRow(4, 'Belum ada agenda kepanitiaan.');
+    }).join('') : emptyRow(4, 'Belum ada agenda kepanitiaan aktif.');
 
     initCountdown();
 }
 
 function initCountdown() {
     clearInterval(cdTimer); clearInterval(cdRotate);
-    const events = list('panitia').filter(k => k.tanggal >= today()).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    // Hanya hitung kegiatan yang BELUM selesai (isFinished !== true)
+    const events = list('panitia').filter(k => !k.isFinished && k.tanggal >= today()).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
     if (!events.length) {
         $('event-title-display').textContent = 'Belum ada kegiatan mendatang';
         $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Tambahkan agenda di menu Kepanitiaan';
@@ -1023,9 +1025,9 @@ async function importLastWeek() {
     toast('Proker minggu lalu berhasil disalin.');
 }
 
-/* ---------- 4. KEPANITIAAN (Bisa Tambah, Edit, Hapus untuk Semua User) ---------- */
+/* ---------- 4. KEPANITIAAN (Fitur Baru: Evaluasi Notepad, Selesai, & Download Excel/PDF) ---------- */
 function renderPanitiaPage() {
-    const canManageAgenda = isMusyrifOrAdmin(); // Hanya agenda utama yang butuh Musyrif/Admin
+    const canManageAgenda = isMusyrifOrAdmin();
     $('btn-add-panitia').style.display = canManageAgenda ? 'inline-flex' : 'none';
 
     const events = list('panitia').sort((a, b) => a.tanggal.localeCompare(b.tanggal));
@@ -1036,15 +1038,25 @@ function renderPanitiaPage() {
         const percent = total > 0 ? Math.round((done / total) * 100) : 0;
         const daysLeft = Math.ceil((new Date(k.tanggal + 'T08:00:00') - Date.now()) / 864e5);
         const when = daysLeft > 0 ? `${daysLeft} hari lagi` : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
+        const isFinished = k.isFinished || false;
 
-        return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+        return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border ${isFinished ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/20' : 'border-gray-200 dark:border-gray-700'}">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between gap-2">
-                        <h4 class="font-bold text-lg">${esc(k.nama)}</h4>
-                        <span class="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800 shrink-0">
-                            ${percent}% Kesiapan
-                        </span>
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-lg">${esc(k.nama)}</h4>
+                            ${isFinished ? '<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Selesai</span>' : ''}
+                        </div>
+                        
+                        <!-- Aksi Tombol Cepat: Selesai & Download -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
+                                <i class="fa-solid ${isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i> ${isFinished ? 'Batalkan Selesai' : 'Selesai Acara'}
+                            </button>
+                            <button onclick="downloadPanitiaExcel('${k.id}')" title="Unduh Excel" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-excel"></i></button>
+                            <button onclick="downloadPanitiaPDF('${k.id}')" title="Unduh PDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-pdf"></i></button>
+                        </div>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
                     <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div>
@@ -1057,10 +1069,10 @@ function renderPanitiaPage() {
                 ${canManageAgenda ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
 
+            <!-- Pembagian Tugas -->
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <div class="flex items-center justify-between mb-2">
                     <h5 class="text-sm font-semibold">Pembagian tugas (${done}/${total} selesai)</h5>
-                    <!-- Tombol Tambah Tugas Aktif untuk Semua User -->
                     <button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Tambah tugas</button>
                 </div>
                 <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
@@ -1068,10 +1080,17 @@ function renderPanitiaPage() {
                         <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600 cursor-pointer">
                         <span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-semibold">${esc(j.bagian)}</span>
                         <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
-                        <!-- Fitur Edit Teks & Hapus Aktif untuk Semua User -->
                         <button onclick="openJobModal('${k.id}', '${j.id}')" aria-label="Edit tugas" class="text-blue-500 hover:text-blue-700 p-1"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark"></i></button>
                     </li>`).join('') : '<li class="text-xs text-gray-400">Belum ada pembagian tugas.</li>'}</ul>
+            </div>
+
+            <!-- Kolom Evaluasi Notepad Manual -->
+            <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1" for="eval-${k.id}">
+                    <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i> Catatan &amp; Evaluasi Pelaksanaan Acara (Notepad Manual):
+                </label>
+                <textarea id="eval-${k.id}" onblur="savePanitiaEvaluation('${k.id}', this.value)" rows="3" placeholder="Ketik catatan atau evaluasi kegiatan ini di sini..." class="w-full text-xs p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500">${esc(k.evaluation || '')}</textarea>
             </div>
         </div>`;
     }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda.</div>';
@@ -1084,13 +1103,53 @@ function openPanitiaModal() {
 async function savePanitia(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-    const k = { id: uid('k'), nama: $('panitia-input-nama').value.trim(), deskripsi: $('panitia-input-deskripsi').value.trim(), tanggal: $('panitia-input-tanggal').value, joblists: [], createdAt: Date.now() };
+    const k = { id: uid('k'), nama: $('panitia-input-nama').value.trim(), deskripsi: $('panitia-input-deskripsi').value.trim(), tanggal: $('panitia-input-tanggal').value, joblists: [], evaluation: '', isFinished: false, createdAt: Date.now() };
     closeModal('modal-panitia'); e.target.reset();
     await save('panitia', k);
 }
 async function deletePanitia(id) {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus agenda.', 'err');
     if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id);
+}
+
+async function togglePanitiaFinished(id) {
+    const k = store.panitia.find(x => x.id === id); if (!k) return;
+    const newStatus = !k.isFinished;
+    await save('panitia', { ...k, isFinished: newStatus });
+    toast(newStatus ? 'Kegiatan ditandai selesai. Countdown otomatis disembunyikan dari beranda.' : 'Status selesai dibatalkan.');
+}
+
+async function savePanitiaEvaluation(id, text) {
+    const k = store.panitia.find(x => x.id === id); if (!k) return;
+    if (k.evaluation !== text) {
+        await save('panitia', { ...k, evaluation: text });
+        toast('Evaluasi berhasil disimpan otomatis.');
+    }
+}
+
+function downloadPanitiaExcel(id) {
+    const k = store.panitia.find(x => x.id === id); if (!k) return;
+    const wb = XLSX.utils.book_new();
+    const tasksData = (k.joblists || []).map((j, idx) => ({ No: idx + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum Selesai' }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tasksData), 'Pembagian Tugas');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 'Nama Kegiatan': k.nama, 'Deskripsi': k.deskripsi, 'Tanggal': k.tanggal, 'Status Selesai': k.isFinished ? 'Ya' : 'Belum', 'Evaluasi / Catatan': k.evaluation }]), 'Detail Kegiatan');
+    XLSX.writeFile(wb, `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.xlsx`);
+}
+
+function downloadPanitiaPDF(id) {
+    const k = store.panitia.find(x => x.id === id); if (!k) return;
+    const win = window.open('', '_blank');
+    const jobsHtml = (k.joblists || []).map((j, i) => `<tr><td style="border:1px solid #ddd;padding:8px;">${i+1}</td><td style="border:1px solid #ddd;padding:8px;">${esc(j.bagian)}</td><td style="border:1px solid #ddd;padding:8px;">${esc(j.task)}</td><td style="border:1px solid #ddd;padding:8px;">${j.done ? 'Selesai' : 'Belum'}</td></tr>`).join('');
+    win.document.write(`<html><head><title>Laporan Kepanitiaan - ${esc(k.nama)}</title></head><body style="font-family:sans-serif;padding:20px;">
+        <h2>Laporan Kegiatan Kepanitiaan: ${esc(k.nama)}</h2>
+        <p><strong>Deskripsi:</strong> ${esc(k.deskripsi)}</p>
+        <p><strong>Tanggal Pelaksanaan:</strong> ${esc(k.tanggal)}</p>
+        <h3>Pembagian Tugas</h3>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;"><thead><tr style="background:#f3f4f6;"><th style="border:1px solid #ddd;padding:8px;">No</th><th style="border:1px solid #ddd;padding:8px;">Bagian</th><th style="border:1px solid #ddd;padding:8px;">Tugas</th><th style="border:1px solid #ddd;padding:8px;">Status</th></tr></thead><tbody>${jobsHtml || '<tr><td colspan="4" style="text-align:center;padding:10px;">Tidak ada tugas</td></tr>'}</tbody></table>
+        <h3>Catatan & Evaluasi</h3>
+        <p style="background:#f9fafb;padding:12px;border:1px solid #e5e7eb;border-radius:6px;white-space:pre-wrap;">${esc(k.evaluation || 'Belum ada catatan evaluasi.')}</p>
+        <script>window.print();<\/script></body></html>`);
+    win.document.close();
 }
 
 /* Modifikasi Modal Job (Tambah / Edit Tugas) */
@@ -1126,10 +1185,8 @@ async function saveJob(e) {
     let updatedJobs = [...(k.joblists || [])];
 
     if (jid) {
-        // Mode Edit
         updatedJobs = updatedJobs.map(j => j.id === jid ? { ...j, bagian, task } : j);
     } else {
-        // Mode Tambah
         const job = { id: uid('j'), bagian, task, done: false };
         updatedJobs.push(job);
     }
