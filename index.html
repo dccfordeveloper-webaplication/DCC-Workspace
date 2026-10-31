@@ -1433,29 +1433,50 @@ async function deleteNotulensi(id) {
     await remove('notulensi', id);
 }
 
-/* ---------- 6. REKAP ---------- */
+/* ---------- 6. REKAP (Diperbarui Sesuai Permintaan) ---------- */
 function rekapItems() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
     return list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
 }
 function renderRekapPage() {
     const items = rekapItems();
-    $('rekap-table-proker').innerHTML = items.length ? items.map(p => `<tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.title)}</td><td class="p-2.5">${p.accMusyrif ? 'Di-ACC' : (p.reported ? 'Dilaporkan' : 'Draft')}</td></tr>`).join('') : emptyRow(3, 'Belum ada data.');
-    const acc = items.filter(p => p.accMusyrif);
-    $('rekap-table-hasil').innerHTML = acc.length ? acc.map(p => `<tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.hasilUsaha || p.title)}</td><td class="p-2.5">${esc(p.dateReported) || '-'}</td></tr>`).join('') : emptyRow(3, 'Belum ada hasil usaha.');
+    
+    // 1. Rekap Program Kerja: HANYA program kerja yang sudah di-ACC (accMusyrif === true)
+    const validProker = items.filter(p => p.accMusyrif === true);
+    $('rekap-table-proker').innerHTML = validProker.length ? validProker.map(p => `
+        <tr>
+            <td class="p-2.5 font-bold">${esc(p.bagian)}</td>
+            <td class="p-2.5">${esc(p.title)}</td>
+            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Di-ACC</span></td>
+        </tr>`).join('') : emptyRow(3, 'Belum ada program kerja yang Di-ACC.');
+
+    // 2. Rekap Hasil Usaha: HANYA hasil usaha yang sudah diceklis selesai (isHasilDone === true)
+    const validHasilUsaha = items.filter(p => p.isHasilDone === true);
+    $('rekap-table-hasil').innerHTML = validHasilUsaha.length ? validHasilUsaha.map(p => `
+        <tr>
+            <td class="p-2.5 font-bold">${esc(p.bagian)}</td>
+            <td class="p-2.5">${esc(p.hasilUsaha || p.title)}</td>
+            <td class="p-2.5">${esc(p.dateReported) || '-'}</td>
+        </tr>`).join('') : emptyRow(3, 'Belum ada hasil usaha yang selesai/diceklis.');
 }
+
 function downloadRekapExcel() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
     const items = rekapItems();
+    
+    // Gunakan filter yang sama saat mengunduh Excel rekap
+    const validProker = items.filter(p => p.accMusyrif === true);
+    const validHasilUsaha = items.filter(p => p.isHasilDone === true);
+
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(items.map(p => ({
-        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, 'Status Lapor': p.reported ? 'Dilaporkan' : 'Draft',
-        'ACC Musyrif': p.accMusyrif ? 'Ya' : 'Belum', Selesai: p.isHasilDone ? 'Ya' : 'Belum', 'Hasil Usaha': p.hasilUsaha,
-        Kendala: p.evaluasi, Solusi: p.solusi, 'Tanggal Lapor': p.dateReported, 'Rencana Minggu Depan': p.isFutureOnly ? 'Ya' : ''
-    }))), 'Program Kerja');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list('tasks').filter(t => fb === 'ALL' || t.bagian === fb).map(t => ({
-        Tugas: t.title, PJ: t.pj, Bagian: t.bagian, Deadline: t.deadline, Status: t.status
-    }))), 'Penugasan');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validProker.map(p => ({
+        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, 'Status Lapor': 'Di-ACC'
+    }))), 'Rekap Program Kerja');
+
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validHasilUsaha.map(p => ({
+        Bagian: p.bagian, 'Program Kerja': p.title, 'Hasil Usaha / Capaian': p.hasilUsaha, 'Tanggal Lapor': p.dateReported
+    }))), 'Rekap Hasil Usaha');
+
     XLSX.writeFile(wb, `Rekap_DCC_${today()}.xlsx`);
 }
 
