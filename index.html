@@ -983,17 +983,42 @@ function openProkerModal(type) {
     $('modal-proker-title').textContent = type === 'minggu_depan' ? 'Tambah proker minggu depan' : 'Tambah program kerja';
     openModal('modal-proker');
 }
+
+/* Modifikasi saveProker: Otomatis set reported=true jika diinput oleh Musyrif / Admin */
 async function saveProker(e) {
     e.preventDefault();
     const type = $('proker-target-type').value;
+    const isSpecialRole = isMusyrifOrAdmin(); // Cek status role Musyrif / Admin
+
     const p = {
-        id: uid('p'), bagian: $('proker-bagian-filter').value, title: $('proker-input-title').value.trim(),
-        desc: $('proker-input-desc').value.trim(), reported: false, accMusyrif: false, isHasilDone: false,
-        hasilUsaha: '', evaluasi: '', solusi: '', dateReported: '', isFutureOnly: type === 'minggu_depan', createdAt: Date.now()
+        id: uid('p'), 
+        bagian: $('proker-bagian-filter').value, 
+        title: $('proker-input-title').value.trim(),
+        desc: $('proker-input-desc').value.trim(), 
+        // Otomatis dilaporkan jika Musyrif/Admin yang menginput
+        reported: isSpecialRole ? true : false, 
+        accMusyrif: false, 
+        isHasilDone: false,
+        hasilUsaha: '', 
+        evaluasi: '', 
+        solusi: '', 
+        // Otomatis catat tanggal hari ini jika Musyrif/Admin yang menginput
+        dateReported: isSpecialRole ? today() : '', 
+        isFutureOnly: type === 'minggu_depan', 
+        createdAt: Date.now()
     };
-    closeModal('modal-proker'); e.target.reset();
+
+    closeModal('modal-proker'); 
+    e.target.reset();
     await save('proker', p);
+
+    if (isSpecialRole) {
+        toast('Program kerja berhasil ditambahkan dan langsung berstatus dilaporkan.');
+    } else {
+        toast('Program kerja berhasil ditambahkan sebagai draft.');
+    }
 }
+
 const getProker = id => store.proker.find(x => x.id === id);
 async function toggleAccProker(id) {
     if (!isMusyrifOrAdmin()) {
