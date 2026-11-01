@@ -440,15 +440,16 @@
 
 <div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="font-bold text-lg">Buat agenda kepanitiaan baru</h3>
+        <h3 id="modal-panitia-title" class="font-bold text-lg">Buat agenda kepanitiaan baru</h3>
         <form onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
+            <input type="hidden" id="panitia-edit-id" value="">
             <div><label class="block font-medium mb-1" for="panitia-input-nama">Nama kegiatan</label><input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="panitia-input-deskripsi">Deskripsi kegiatan</label><textarea id="panitia-input-deskripsi" required rows="2" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label class="block font-medium mb-1" for="panitia-input-tanggal">Tanggal pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
                 <div><label class="block font-medium mb-1" for="panitia-input-waktu">Jam pelaksanaan</label><input type="time" id="panitia-input-waktu" value="08:00" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             </div>
-            <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan agenda</button></div>
+            <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" id="panitia-submit-btn" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan agenda</button></div>
         </form>
     </div>
 </div>
@@ -596,7 +597,6 @@ async function loadAll() {
     store = fresh;
     writeCache();
     
-    // Verifikasi status keaktifan user yang sedang login
     if (currentUser) {
         const myMeta = store.users_meta.find(u => u.id === currentUser.id);
         if (myMeta && myMeta.status === 'nonaktif') {
@@ -698,7 +698,6 @@ async function handleAuthSubmit(e) {
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
             if (error) throw error;
             
-            // Periksa status user dari koleksi metadata
             const userMeta = store.users_meta.find(u => u.id === data.user.id || u.email === data.user.email);
             if (userMeta && userMeta.status === 'nonaktif') {
                 await sb.auth.signOut();
@@ -833,8 +832,6 @@ function renderUsersTable() {
 async function updateUserRoleAdmin(id, newRole) {
     const u = store.users_meta.find(x => x.id === id);
     if (!u) return;
-    
-    // Simpan role baru ke tabel users_meta di database Supabase
     const updatedUser = { ...u, role: newRole };
     await save('users_meta', updatedUser);
     toast(`Role pengguna ${u.name || u.email} berhasil diubah menjadi ${newRole.toUpperCase()}.`);
@@ -1208,8 +1205,8 @@ async function importLastWeek() {
             ...p, 
             id: uid('p'), 
             reported: true,         
-            accMusyrif: true,       // Di-ACC agar langsung muncul di hasil usaha
-            isHasilDone: false,     // Fitur ceklist aktif, tapi BELUM tercentang & belum masuk rekap
+            accMusyrif: true,       
+            isHasilDone: false,     
             hasilUsaha: p.hasilUsaha || '', 
             dateReported: today(), 
             isFutureOnly: false, 
@@ -1270,6 +1267,7 @@ function renderPanitiaPage() {
                         
                         <div class="flex items-center gap-2">
                             ${canManageAgenda ? `
+                                <button onclick="openPanitiaModal('${k.id}')" title="Edit Agenda" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
                                 <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
                                     <i class="fa-solid ${isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i> ${isFinished ? 'Batalkan Selesai' : 'Selesai Acara'}
                                 </button>
@@ -1338,27 +1336,66 @@ function updatePanitiaFilter(id, type, val) {
     renderPanitiaPage();
 }
 
-function openPanitiaModal() {
-    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menambah agenda.', 'err');
+function openPanitiaModal(id = null) {
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat mengelola agenda.', 'err');
+    
+    $('panitia-edit-id').value = id || '';
+    if (id) {
+        const k = store.panitia.find(x => x.id === id);
+        if (k) {
+            $('modal-panitia-title').textContent = 'Edit agenda kegiatan';
+            $('panitia-input-nama').value = k.nama || '';
+            $('panitia-input-deskripsi').value = k.deskripsi || '';
+            $('panitia-input-tanggal').value = k.tanggal || '';
+            $('panitia-input-waktu').value = k.waktu || '08:00';
+            $('panitia-submit-btn').textContent = 'Perbarui agenda';
+        }
+    } else {
+        $('modal-panitia-title').textContent = 'Buat agenda kegiatan baru';
+        $('panitia-input-nama').value = '';
+        $('panitia-input-deskripsi').value = '';
+        $('panitia-input-tanggal').value = '';
+        $('panitia-input-waktu').value = '08:00';
+        $('panitia-submit-btn').textContent = 'Simpan agenda';
+    }
     openModal('modal-panitia');
 }
+
 async function savePanitia(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-    const k = { 
-        id: uid('k'), 
-        nama: $('panitia-input-nama').value.trim(), 
-        deskripsi: $('panitia-input-deskripsi').value.trim(), 
-        tanggal: $('panitia-input-tanggal').value, 
-        waktu: $('panitia-input-waktu').value || '08:00',
-        joblists: [], 
-        evaluation: '', 
-        isFinished: false, 
-        createdAt: Date.now() 
-    };
-    closeModal('modal-panitia'); e.target.reset();
-    await save('panitia', k);
+    
+    const editId = $('panitia-edit-id').value;
+    const nama = $('panitia-input-nama').value.trim();
+    const deskripsi = $('panitia-input-deskripsi').value.trim();
+    const tanggal = $('panitia-input-tanggal').value;
+    const waktu = $('panitia-input-waktu').value || '08:00';
+
+    if (editId) {
+        const k = store.panitia.find(x => x.id === editId);
+        if (k) {
+            await save('panitia', { ...k, nama, deskripsi, tanggal, waktu });
+            toast('Agenda kegiatan berhasil diperbarui!');
+        }
+    } else {
+        const k = { 
+            id: uid('k'), 
+            nama, 
+            deskripsi, 
+            tanggal, 
+            waktu,
+            joblists: [], 
+            evaluation: '', 
+            isFinished: false, 
+            createdAt: Date.now() 
+        };
+        await save('panitia', k);
+        toast('Agenda kegiatan baru berhasil dibuat!');
+    }
+    closeModal('modal-panitia'); 
+    e.target.reset();
 }
+
 async function deletePanitia(id) {
     if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus agenda.', 'err');
     if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id);
