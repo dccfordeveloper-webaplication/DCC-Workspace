@@ -693,7 +693,16 @@ function renderSidebarUserInfo() {
     $('sidebar-useremail').textContent = currentUser?.email || '';
     $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
 
-    $('btn-manage-users').style.display = isAdmin() ? 'flex' : 'none';
+    const btnManage = $('btn-manage-users');
+    if (btnManage) {
+        if (isAdmin()) {
+            btnManage.classList.remove('hidden');
+            btnManage.style.display = 'flex';
+        } else {
+            btnManage.classList.add('hidden');
+            btnManage.style.display = 'none';
+        }
+    }
 
     const badge = $('sidebar-role-badge');
     badge.textContent = role.toUpperCase();
@@ -1141,11 +1150,6 @@ async function laporMusyrif() {
     toast('Laporan terkirim. Musyrif/Admin dapat memberi ACC sekarang.');
 }
 
-/* 
-  Fitur "Isi Proker Minggu Lalu": 
-  Otomatis berstatus Di-ACC (accMusyrif: true) agar langsung muncul di tabel hasil usaha, 
-  namun checkbox hasil usaha tetap BELUM dicentang (isHasilDone: false) sehingga fitur ceklistnya saja yang aktif.
-*/
 async function importLastWeek() {
     const bag = $('proker-bagian-filter').value;
     const last = [...list('reports')].pop();
@@ -1159,16 +1163,16 @@ async function importLastWeek() {
         await save('proker', { 
             ...p, 
             id: uid('p'), 
-            reported: true,         // Dilaporkan
-            accMusyrif: true,       // Di-ACC agar langsung muncul di tabel hasil usaha
-            isHasilDone: false,     // Checkbox hasil usaha TIDAK otomatis tercentang (hanya aktif fiturnya)
+            reported: true,         
+            accMusyrif: true,       // Di-ACC agar langsung muncul di hasil usaha
+            isHasilDone: false,     // Fitur ceklist aktif, tapi BELUM tercentang & belum masuk rekap
             hasilUsaha: p.hasilUsaha || '', 
             dateReported: today(), 
             isFutureOnly: false, 
             createdAt: Date.now() 
         });
     }
-    toast('Proker minggu lalu berhasil disalin dan langsung berstatus Di-ACC (siap untuk dicentang hasil usahanya).');
+    toast('Proker minggu lalu berhasil disalin dan siap untuk diceklis usahanya.');
 }
 
 function renderPanitiaPage() {
