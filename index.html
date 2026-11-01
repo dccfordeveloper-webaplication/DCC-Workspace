@@ -521,7 +521,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const today = () => new Date().toLocaleDateString('sv-SE');
 const userName = () => currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Pengguna';
-const userRole = () => (currentUser?.user_metadata?.role || 'member').toLowerCase();
+
+// Mendapatkan role pengguna aktif dari data metadata lokal users_meta atau user_metadata sesi
+const userRole = () => {
+    if (!currentUser) return 'member';
+    const localMeta = store.users_meta.find(u => u.id === currentUser.id);
+    return (localMeta?.role || currentUser?.user_metadata?.role || 'member').toLowerCase();
+};
+
 const isAdmin = () => userRole() === 'admin';
 const isMusyrifOrAdmin = () => ['musyrif', 'admin'].includes(userRole());
 
@@ -588,7 +595,19 @@ async function loadAll() {
     data.forEach(r => { if (fresh[r.collection]) fresh[r.collection].push(r.data); });
     store = fresh;
     writeCache();
+    
+    // Verifikasi status keaktifan user yang sedang login
+    if (currentUser) {
+        const myMeta = store.users_meta.find(u => u.id === currentUser.id);
+        if (myMeta && myMeta.status === 'nonaktif') {
+            toast('Akun Anda telah dinonaktifkan.', 'err');
+            await sb.auth.signOut();
+            return false;
+        }
+    }
+    
     setSync('online');
+    renderSidebarUserInfo();
     renderCurrentPage();
     return true;
 }
@@ -622,7 +641,9 @@ function subscribeRealtime() {
             } else if (p.new && store[p.new.collection]) {
                 putLocal(p.new.collection, p.new.data);
             }
-            writeCache(); renderCurrentPage();
+            writeCache(); 
+            renderSidebarUserInfo();
+            renderCurrentPage();
         })
         .subscribe(status => {
             if (status === 'SUBSCRIBED') { setSync('online'); loadAll(); }
@@ -676,8 +697,10 @@ async function handleAuthSubmit(e) {
         } else {
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
             if (error) throw error;
-            const meta = data.user?.user_metadata || {};
-            if (meta.status === 'nonaktif') {
+            
+            // Periksa status user dari koleksi metadata
+            const userMeta = store.users_meta.find(u => u.id === data.user.id || u.email === data.user.email);
+            if (userMeta && userMeta.status === 'nonaktif') {
                 await sb.auth.signOut();
                 throw new Error('Akun Anda telah dinonaktifkan oleh Admin.');
             }
@@ -810,8 +833,13 @@ function renderUsersTable() {
 async function updateUserRoleAdmin(id, newRole) {
     const u = store.users_meta.find(x => x.id === id);
     if (!u) return;
-    await save('users_meta', { ...u, role: newRole });
-    toast('Role pengguna berhasil diperbarui.');
+    
+    // Simpan role baru ke tabel users_meta di database Supabase
+    const updatedUser = { ...u, role: newRole };
+    await save('users_meta', updatedUser);
+    toast(`Role pengguna ${u.name || u.email} berhasil diubah menjadi ${newRole.toUpperCase()}.`);
+    renderSidebarUserInfo();
+    renderCurrentPage();
 }
 
 async function toggleUserStatusAdmin(id) {
@@ -826,7 +854,7 @@ async function toggleUserStatusAdmin(id) {
 async function deleteUserAdmin(id) {
     if (confirm('Hapus data pengguna ini dari daftar workspace?')) {
         await remove('users_meta', id);
-        toast('Pengguna berhasil dihapus.');
+        toast('Pengguna berhasil dihapus dari sistem workspace.');
         renderUsersTable();
     }
 }
@@ -836,7 +864,6 @@ function startSession(user) {
     currentUser = user;
     $('auth-screen').classList.add('hidden');
     $('app').classList.remove('hidden');
-    renderSidebarUserInfo();
     readCache();
     setSync('connecting');
     switchTab('beranda');
@@ -848,6 +875,7 @@ function startSession(user) {
         if (!existing) {
             await save('users_meta', { id: user.id, email: user.email, name: userName(), role: userRole(), status: 'aktif', createdAt: Date.now() });
         }
+        renderSidebarUserInfo();
     }, 1000);
 }
 
@@ -899,14 +927,12 @@ function renderBerandaPage() {
         `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
     ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
 
-    const nowIso = new Date().toISOString().slice(0, 10);
     const panitias = list('panitia').filter(k => !k.isFinished);
     $('home-panitia-table').innerHTML = panitias.length ? panitias.map(k => {
         const jobs = k.joblists || [];
         const done = jobs.filter(j => j.done).length;
         const total = jobs.length;
         const percent = total > 0 ? Math.round((done / total) * 100) : 0;
-        const waktuStr = k.waktu ? ` ${k.waktu}` : ' 08:00';
         return `<tr>
             <td class="p-3 font-medium">${esc(k.nama)}</td>
             <td class="p-3 text-xs text-blue-600 font-semibold">${esc(k.tanggal)} ${esc(k.waktu || '08:00')}</td>
@@ -950,7 +976,7 @@ function initCountdown() {
     const show = () => {
         const ev = events[cdIndex];
         $('event-title-display').textContent = ev.nama;
-        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ' + esc(ev.tanggal) + (ev.stringWaktu || (ev.waktu ? ' Pukul ' + ev.waktu : ''));
+        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ' + esc(ev.tanggal) + ' pukul ' + esc(ev.waktu || '08:00');
         $('countdown-indicator').textContent = events.length > 1 ? `${cdIndex + 1} dari ${events.length} kegiatan` : '';
     };
     const tick = () => {
