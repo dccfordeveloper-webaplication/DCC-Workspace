@@ -110,6 +110,10 @@
             <button onclick="openRoleModal()" class="w-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-user-shield"></i><span class="sidebar-text">Ubah Akses Role</span>
             </button>
+            <!-- Tombol Manajemen Pengguna Khusus Admin -->
+            <button id="btn-manage-users" onclick="openUsersModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 text-xs py-1.5 rounded-lg font-semibold hidden items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-users-gear"></i><span class="sidebar-text">Manajemen Pengguna</span>
+            </button>
             <button onclick="handleLogout()" class="w-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-right-from-bracket"></i><span class="sidebar-text">Keluar</span>
             </button>
@@ -381,6 +385,33 @@
     </div>
 </div>
 
+<!-- MODAL MANAJEMEN PENGGUNA (KHUSUS ADMIN) -->
+<div id="modal-users" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg"><i class="fa-solid fa-users-gear text-indigo-500 mr-2"></i> Manajemen Pengguna Workspace</h3>
+            <button onclick="closeModal('modal-users')" class="text-gray-400 hover:text-gray-600 text-sm font-bold">✕</button>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Daftar akun terdaftar yang tersimpan di sistem.</p>
+        <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700">
+            <table class="w-full text-xs text-left">
+                <thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold">
+                    <tr>
+                        <th class="p-3">Nama / Email</th>
+                        <th class="p-3">Role</th>
+                        <th class="p-3 text-center">Status</th>
+                        <th class="p-3 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+            </table>
+        </div>
+        <div class="flex justify-end pt-2">
+            <button type="button" onclick="closeModal('modal-users')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-xs font-semibold">Tutup</button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL PENUGASAN -->
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
@@ -469,18 +500,17 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const BAGIAN_LIST = ['Ketua', 'Sekretaris', 'Bendahara', 'Gigabyte', 'D-Tech', 'Perkap'];
 const STATUS_LIST = ['Baru Dikerjakan', 'Hampir Selesai', 'Sudah Selesai'];
-const COLLECTIONS = ['tasks', 'proker', 'panitia', 'reports', 'notulensi'];
+const COLLECTIONS = ['tasks', 'proker', 'panitia', 'reports', 'notulensi', 'users_meta'];
 const TITLES = { beranda: 'Beranda', penugasan: 'Penugasan', proker: 'Program Kerja', kepanitiaan: 'Kepanitiaan', rapat: 'Rapat Mingguan', rekap: 'Rekap', laporan: 'Laporan' };
 
-let store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+let store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
 let currentUser = null;
 let activeTab = 'beranda';
 let channel = null;
 let pollTimer = null;
 let authMode = 'login';
 
-// Status filter & sorting per kartu kegiatan kepanitiaan
-let panitiaFilters = {}; // { panitiaId: { bagian: 'ALL', sort: 'bagian_asc' } }
+let panitiaFilters = {};
 
 /* ---------- Util ---------- */
 const $ = id => document.getElementById(id);
@@ -518,7 +548,6 @@ function toggleSidebar(force) {
     document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden', collapse));
 }
 
-/* ---------- Status sinkronisasi ---------- */
 function setSync(state) {
     const map = {
         online: ['Tersinkron', 'bg-emerald-100 text-emerald-700', 'bg-emerald-500'],
@@ -532,9 +561,6 @@ function setSync(state) {
     $('sync-dot').className = 'w-2 h-2 rounded-full ' + dot;
 }
 
-/* =====================================================================
-   LAPISAN DATA (Supabase)
-   ===================================================================== */
 function cacheKey() { return 'dcc_ws_cache_' + (currentUser?.id || 'x'); }
 function writeCache() { try { localStorage.setItem(cacheKey(), JSON.stringify(store)); } catch (e) {} }
 function readCache() {
@@ -555,7 +581,7 @@ async function loadAll() {
         return false;
     }
     $('setup-banner').classList.add('hidden');
-    const fresh = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+    const fresh = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
     data.forEach(r => { if (fresh[r.collection]) fresh[r.collection].push(r.data); });
     store = fresh;
     writeCache();
@@ -606,7 +632,6 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && cu
 window.addEventListener('online', () => { if (currentUser) loadAll(); });
 window.addEventListener('offline', () => setSync('offline'));
 
-/* ---------- File notulensi (Supabase Storage) ---------- */
 async function downloadFile(path, name) {
     if (!path) { toast('File ini tidak punya salinan di server.', 'err'); return; }
     const { data, error } = await sb.storage.from(BUCKET).download(path);
@@ -620,9 +645,6 @@ document.addEventListener('click', e => {
     if (b) downloadFile(b.dataset.dl, b.dataset.name);
 });
 
-/* =====================================================================
-   AUTENTIKASI & MANAJEMEN ROLE
-   ===================================================================== */
 function switchAuthMode(mode) {
     authMode = mode;
     const login = mode === 'login';
@@ -641,13 +663,21 @@ async function handleAuthSubmit(e) {
         if (authMode === 'register') {
             const { data, error } = await sb.auth.signUp({
                 email, password,
-                options: { data: { full_name: name || email.split('@')[0], role: 'member' } }
+                options: { data: { full_name: name || email.split('@')[0], role: 'member', status: 'aktif' } }
             });
             if (error) throw error;
+            if (data.user) {
+                await save('users_meta', { id: data.user.id, email: data.user.email, name: name || email.split('@')[0], role: 'member', status: 'aktif', createdAt: Date.now() });
+            }
             if (!data.session) { toast('Akun dibuat. Cek email untuk konfirmasi, lalu masuk.'); switchAuthMode('login'); }
         } else {
-            const { error } = await sb.auth.signInWithPassword({ email, password });
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
             if (error) throw error;
+            const meta = data.user?.user_metadata || {};
+            if (meta.status === 'nonaktif') {
+                await sb.auth.signOut();
+                throw new Error('Akun Anda telah dinonaktifkan oleh Admin.');
+            }
         }
     } catch (err) {
         toast('Autentikasi gagal: ' + err.message, 'err');
@@ -662,6 +692,8 @@ function renderSidebarUserInfo() {
     $('sidebar-username').textContent = name;
     $('sidebar-useremail').textContent = currentUser?.email || '';
     $('sidebar-avatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0284c7&color=fff';
+
+    $('btn-manage-users').style.display = isAdmin() ? 'flex' : 'none';
 
     const badge = $('sidebar-role-badge');
     badge.textContent = role.toUpperCase();
@@ -711,10 +743,79 @@ async function handleUpgradeRole(e) {
         toast('Gagal memperbarui akses: ' + error.message, 'err');
     } else {
         currentUser = data.user;
+        const existingMeta = store.users_meta.find(u => u.id === currentUser.id);
+        if (existingMeta) {
+            await save('users_meta', { ...existingMeta, role: targetRole });
+        } else {
+            await save('users_meta', { id: currentUser.id, email: currentUser.email, name: userName(), role: targetRole, status: 'aktif', createdAt: Date.now() });
+        }
+
         closeModal('modal-role');
         toast(`Akses berhasil diubah menjadi ${targetRole.toUpperCase()}`);
         renderSidebarUserInfo();
         renderCurrentPage();
+    }
+}
+
+function openUsersModal() {
+    if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
+    renderUsersTable();
+    openModal('modal-users');
+}
+
+function renderUsersTable() {
+    const users = store.users_meta;
+    $('users-table-body').innerHTML = users.length ? users.map(u => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <td class="p-3">
+                <div class="font-semibold">${esc(u.name || 'Pengguna')}</div>
+                <div class="text-[10px] text-gray-400">${esc(u.email)}</div>
+            </td>
+            <td class="p-3">
+                <select onchange="updateUserRoleAdmin('${u.id}', this.value)" class="text-xs font-bold rounded p-1 border bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="member" ${u.role === 'member' ? 'selected' : ''}>Member</option>
+                    <option value="musyrif" ${u.role === 'musyrif' ? 'selected' : ''}>Musyrif</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+            </td>
+            <td class="p-3 text-center">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.status === 'nonaktif' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}">
+                    ${u.status === 'nonaktif' ? 'Nonaktif' : 'Aktif'}
+                </span>
+            </td>
+            <td class="p-3 text-right space-x-2">
+                <button onclick="toggleUserStatusAdmin('${u.id}')" class="text-xs font-semibold px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                    ${u.status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}
+                </button>
+                <button onclick="deleteUserAdmin('${u.id}')" class="text-xs font-semibold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
+                    Hapus
+                </button>
+            </td>
+        </tr>
+    `).join('') : emptyRow(4, 'Belum ada data pengguna tersimpan.');
+}
+
+async function updateUserRoleAdmin(id, newRole) {
+    const u = store.users_meta.find(x => x.id === id);
+    if (!u) return;
+    await save('users_meta', { ...u, role: newRole });
+    toast('Role pengguna berhasil diperbarui.');
+}
+
+async function toggleUserStatusAdmin(id) {
+    const u = store.users_meta.find(x => x.id === id);
+    if (!u) return;
+    const newStatus = u.status === 'nonaktif' ? 'aktif' : 'nonaktif';
+    await save('users_meta', { ...u, status: newStatus });
+    toast(`Status pengguna diubah menjadi ${newStatus}.`);
+    renderUsersTable();
+}
+
+async function deleteUserAdmin(id) {
+    if (confirm('Hapus data pengguna ini dari daftar workspace?')) {
+        await remove('users_meta', id);
+        toast('Pengguna berhasil dihapus.');
+        renderUsersTable();
     }
 }
 
@@ -729,13 +830,20 @@ function startSession(user) {
     switchTab('beranda');
     subscribeRealtime();
     checkLegacy();
+
+    setTimeout(async () => {
+        const existing = store.users_meta.find(u => u.id === user.id);
+        if (!existing) {
+            await save('users_meta', { id: user.id, email: user.email, name: userName(), role: userRole(), status: 'aktif', createdAt: Date.now() });
+        }
+    }, 1000);
 }
 
 function endSession() {
     currentUser = null;
     if (channel) { sb.removeChannel(channel); channel = null; }
     clearInterval(pollTimer);
-    store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [] };
+    store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
     $('app').classList.add('hidden');
     $('auth-screen').classList.remove('hidden');
 }
@@ -744,9 +852,6 @@ sb.auth.onAuthStateChange((event, session) => {
     setTimeout(() => { session?.user ? startSession(session.user) : (currentUser && endSession()); }, 0);
 });
 
-/* =====================================================================
-   NAVIGASI & RENDER
-   ===================================================================== */
 function switchTab(tab) {
     activeTab = tab;
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -764,7 +869,6 @@ function renderCurrentPage() {
     }[activeTab] || (() => {}))();
 }
 
-/* ---------- 1. BERANDA ---------- */
 let cdTimer = null, cdRotate = null, cdIndex = 0;
 
 function renderBerandaPage() {
@@ -838,7 +942,6 @@ function initCountdown() {
     if (events.length > 1) cdRotate = setInterval(() => { cdIndex = (cdIndex + 1) % events.length; show(); tick(); }, 8000);
 }
 
-/* ---------- 2. PENUGASAN (Akses dibuka untuk Member, Musyrif, Admin) ---------- */
 function renderPenugasanPage() {
     $('btn-add-task').style.display = 'inline-flex';
 
@@ -908,7 +1011,6 @@ async function deleteTask(id) {
     if (confirm('Hapus penugasan ini?')) await remove('tasks', id);
 }
 
-/* ---------- 3. PROGRAM KERJA ---------- */
 let textCallback = null;
 function askText(title, value, cb) {
     $('modal-text-title').textContent = title; $('modal-text-input').value = value || '';
@@ -984,25 +1086,22 @@ function openProkerModal(type) {
     openModal('modal-proker');
 }
 
-/* Modifikasi saveProker: Otomatis set reported=true jika diinput oleh Musyrif / Admin */
 async function saveProker(e) {
     e.preventDefault();
     const type = $('proker-target-type').value;
-    const isSpecialRole = isMusyrifOrAdmin(); // Cek status role Musyrif / Admin
+    const isSpecialRole = isMusyrifOrAdmin();
 
     const p = {
         id: uid('p'), 
         bagian: $('proker-bagian-filter').value, 
         title: $('proker-input-title').value.trim(),
         desc: $('proker-input-desc').value.trim(), 
-        // Otomatis dilaporkan jika Musyrif/Admin yang menginput
         reported: isSpecialRole ? true : false, 
         accMusyrif: false, 
         isHasilDone: false,
         hasilUsaha: '', 
         evaluasi: '', 
         solusi: '', 
-        // Otomatis catat tanggal hari ini jika Musyrif/Admin yang menginput
         dateReported: isSpecialRole ? today() : '', 
         isFutureOnly: type === 'minggu_depan', 
         createdAt: Date.now()
@@ -1011,12 +1110,6 @@ async function saveProker(e) {
     closeModal('modal-proker'); 
     e.target.reset();
     await save('proker', p);
-
-    if (isSpecialRole) {
-        toast('Program kerja berhasil ditambahkan dan langsung berstatus dilaporkan.');
-    } else {
-        toast('Program kerja berhasil ditambahkan sebagai draft.');
-    }
 }
 
 const getProker = id => store.proker.find(x => x.id === id);
@@ -1047,6 +1140,12 @@ async function laporMusyrif() {
     for (const p of drafts) await save('proker', { ...p, reported: true, dateReported: today() });
     toast('Laporan terkirim. Musyrif/Admin dapat memberi ACC sekarang.');
 }
+
+/* 
+  Fitur "Isi Proker Minggu Lalu": 
+  Otomatis berstatus Di-ACC (accMusyrif: true) agar langsung muncul di tabel hasil usaha, 
+  namun checkbox hasil usaha tetap BELUM dicentang (isHasilDone: false) sehingga fitur ceklistnya saja yang aktif.
+*/
 async function importLastWeek() {
     const bag = $('proker-bagian-filter').value;
     const last = [...list('reports')].pop();
@@ -1055,11 +1154,23 @@ async function importLastWeek() {
     const src = (last.prokerData || []).filter(p => p.bagian === bag && (p.isFutureOnly || !p.isHasilDone || !p.accMusyrif) && !exist.has(p.title.toLowerCase()));
     if (!src.length) return toast('Tidak ada proker belum selesai dari arsip terakhir untuk bagian ini.');
     if (!confirm(`Salin ${src.length} proker belum selesai dari arsip “${last.title}” ke minggu ini?`)) return;
-    for (const p of src) await save('proker', { ...p, id: uid('p'), reported: false, accMusyrif: false, isHasilDone: false, hasilUsaha: '', dateReported: '', isFutureOnly: false, createdAt: Date.now() });
-    toast('Proker minggu lalu berhasil disalin.');
+    
+    for (const p of src) {
+        await save('proker', { 
+            ...p, 
+            id: uid('p'), 
+            reported: true,         // Dilaporkan
+            accMusyrif: true,       // Di-ACC agar langsung muncul di tabel hasil usaha
+            isHasilDone: false,     // Checkbox hasil usaha TIDAK otomatis tercentang (hanya aktif fiturnya)
+            hasilUsaha: p.hasilUsaha || '', 
+            dateReported: today(), 
+            isFutureOnly: false, 
+            createdAt: Date.now() 
+        });
+    }
+    toast('Proker minggu lalu berhasil disalin dan langsung berstatus Di-ACC (siap untuk dicentang hasil usahanya).');
 }
 
-/* ---------- 4. KEPANITIAAN (Selesai Acara Khusus Musyrif & Admin) ---------- */
 function renderPanitiaPage() {
     const canManageAgenda = isMusyrifOrAdmin();
     $('btn-add-panitia').style.display = canManageAgenda ? 'inline-flex' : 'none';
@@ -1072,12 +1183,10 @@ function renderPanitiaPage() {
         let jobs = [...(k.joblists || [])];
         const uniqueBagian = Array.from(new Set(jobs.map(j => j.bagian))).sort();
 
-        // 1. Filter berdasarkan bagian
         if (fState.bagian !== 'ALL') {
             jobs = jobs.filter(j => j.bagian === fState.bagian);
         }
 
-        // 2. Sorting sesuai pilihan
         jobs.sort((a, b) => {
             if (fState.sort === 'bagian_asc') {
                 return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
@@ -1107,7 +1216,6 @@ function renderPanitiaPage() {
                             ${isFinished ? '<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Selesai</span>' : ''}
                         </div>
                         
-                        <!-- Aksi Tombol Cepat: Selesai (Khusus Musyrif & Admin) & Download -->
                         <div class="flex items-center gap-2">
                             ${canManageAgenda ? `
                                 <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
@@ -1121,7 +1229,6 @@ function renderPanitiaPage() {
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
                     <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div>
                     
-                    <!-- Progress Bar Indikator -->
                     <div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden mt-3">
                         <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
                     </div>
@@ -1129,7 +1236,6 @@ function renderPanitiaPage() {
                 ${canManageAgenda ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
 
-            <!-- Bagian Filter & Sorting Tugas -->
             <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="font-bold"><i class="fa-solid fa-filter text-blue-500 mr-1"></i> Filter Bagian:</span>
@@ -1149,7 +1255,6 @@ function renderPanitiaPage() {
                 </div>
             </div>
 
-            <!-- Pembagian Tugas -->
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <div class="flex items-center justify-between mb-2">
                     <h5 class="text-sm font-semibold">Pembagian tugas (${doneAll}/${totalAll} selesai)</h5>
@@ -1165,7 +1270,6 @@ function renderPanitiaPage() {
                     </li>`).join('') : '<li class="text-xs text-gray-400">Tidak ada tugas yang sesuai filter.</li>'}</ul>
             </div>
 
-            <!-- Kolom Evaluasi Notepad Manual -->
             <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1" for="eval-${k.id}">
                     <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i> Catatan &amp; Evaluasi Pelaksanaan Acara:
@@ -1216,7 +1320,6 @@ async function savePanitiaEvaluation(id, text) {
     }
 }
 
-// Helper untuk mengambil data terurut dan terfilter sesuai tampilan kartu saat diunduh
 function getSortedAndFilteredJobs(k) {
     let jobs = [...(k.joblists || [])];
     const fState = panitiaFilters[k.id] || { bagian: 'ALL', sort: 'bagian_asc' };
@@ -1251,7 +1354,6 @@ function downloadPanitiaExcel(id) {
     XLSX.writeFile(wb, `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.xlsx`);
 }
 
-// Unduh PDF Langsung (Direct Download) dalam bentuk Tabel Rapih menggunakan html2pdf.js
 function downloadPanitiaPDF(id) {
     const k = store.panitia.find(x => x.id === id); if (!k) return;
     const jobs = getSortedAndFilteredJobs(k);
@@ -1313,7 +1415,6 @@ function downloadPanitiaPDF(id) {
     });
 }
 
-/* Modifikasi Modal Job (Tambah / Edit Tugas) */
 function openJobModal(kid, jid = null) {
     $('job-panitia-id').value = kid;
     $('job-edit-id').value = jid || '';
@@ -1368,7 +1469,6 @@ async function deleteJob(kid, jid) {
     }
 }
 
-/* ---------- 5. RAPAT MINGGUAN ---------- */
 function renderRapatPage() {
     const fb = $('rapat-bagian-filter').value || 'Ketua';
     const items = list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
@@ -1433,7 +1533,6 @@ async function deleteNotulensi(id) {
     await remove('notulensi', id);
 }
 
-/* ---------- 6. REKAP (Diperbarui Sesuai Permintaan) ---------- */
 function rekapItems() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
     return list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
@@ -1441,7 +1540,6 @@ function rekapItems() {
 function renderRekapPage() {
     const items = rekapItems();
     
-    // 1. Rekap Program Kerja: HANYA program kerja yang sudah di-ACC (accMusyrif === true)
     const validProker = items.filter(p => p.accMusyrif === true);
     $('rekap-table-proker').innerHTML = validProker.length ? validProker.map(p => `
         <tr>
@@ -1450,7 +1548,6 @@ function renderRekapPage() {
             <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Di-ACC</span></td>
         </tr>`).join('') : emptyRow(3, 'Belum ada program kerja yang Di-ACC.');
 
-    // 2. Rekap Hasil Usaha: HANYA hasil usaha yang sudah diceklis selesai (isHasilDone === true)
     const validHasilUsaha = items.filter(p => p.isHasilDone === true);
     $('rekap-table-hasil').innerHTML = validHasilUsaha.length ? validHasilUsaha.map(p => `
         <tr>
@@ -1464,7 +1561,6 @@ function downloadRekapExcel() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
     const items = rekapItems();
     
-    // Gunakan filter yang sama saat mengunduh Excel rekap
     const validProker = items.filter(p => p.accMusyrif === true);
     const validHasilUsaha = items.filter(p => p.isHasilDone === true);
 
@@ -1480,7 +1576,6 @@ function downloadRekapExcel() {
     XLSX.writeFile(wb, `Rekap_DCC_${today()}.xlsx`);
 }
 
-/* ---------- 7. LAPORAN ---------- */
 function renderLaporanPage() {
     const canDelete = isAdmin();
     const reports = [...list('reports')].reverse();
@@ -1508,9 +1603,6 @@ async function deleteReport(id) {
     if (confirm('Hapus arsip laporan ini?')) await remove('reports', id);
 }
 
-/* =====================================================================
-   IMPOR DATA LAMA (localStorage -> server)
-   ===================================================================== */
 const LEGACY = { tasks: 'dcc_tasks', proker: 'dcc_proker', panitia: 'dcc_panitia', reports: 'dcc_reports', notulensi: 'dcc_notulensi' };
 function legacyData() {
     const out = {};
@@ -1559,9 +1651,6 @@ async function importLegacy() {
     await loadAll();
 }
 
-/* =====================================================================
-   INISIALISASI
-   ===================================================================== */
 (function init() {
     $('task-filter-status').innerHTML = '<option value="ALL">Semua status</option>' + STATUS_LIST.map(s => `<option>${s}</option>`).join('');
     $('proker-bagian-filter').innerHTML = bagianOptions(false);
