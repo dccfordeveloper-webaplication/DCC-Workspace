@@ -1649,8 +1649,18 @@ function renderLaporanPage() {
             : `<span class="text-xs text-gray-400 px-3 py-1.5">${esc(f.name)}</span>`).join('');
         return `<details class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <summary class="cursor-pointer flex items-center justify-between gap-3">
-                <span><span class="font-bold text-lg">${esc(r.title)}</span><span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span></span>
-                ${canDelete ? `<button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                <div class="flex items-center gap-3">
+                    <div>
+                        <span class="font-bold text-lg">${esc(r.title)}</span>
+                        <span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="event.preventDefault(); downloadLaporanPDF('${r.id}')" title="Unduh Laporan PDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+                        <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
+                    </button>
+                    ${canDelete ? `<button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 hover:text-rose-700 text-xs p-1.5 rounded"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
             </summary>
             <div class="mt-4 space-y-3">
                 <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[700px]">
@@ -1660,6 +1670,147 @@ function renderLaporanPage() {
             </div></details>`;
     }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada arsip. Simpan hasil rapat dari menu Rapat Mingguan.</div>';
 }
+
+function downloadLaporanPDF(id) {
+    const r = store.reports.find(x => x.id === id);
+    if (!r) return toast('Arsip laporan tidak ditemukan.', 'err');
+
+    const items = r.prokerData || [];
+    const current = items.filter(p => !p.isFutureOnly);
+    const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
+    const hasilUsahaList = current.filter(p => p.accMusyrif && p.isHasilDone);
+    const futureList = items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
+
+    const makeRows = (arr, fn, cols) => arr.length ? arr.map(fn).join('') : `<tr><td colspan="${cols}" style="border:1px solid #d1d5db; padding:6px; text-align:center; font-size:10px; color:#9ca3af;">Tidak ada data</td></tr>`;
+
+    const table1Rows = makeRows(current, p => `<tr>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.desc)}</td>
+    </tr>`, 3);
+
+    const table2Rows = makeRows(hasilUsahaList, p => `<tr>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px; color:#059669; font-weight:600;">${esc(p.hasilUsaha)}</td>
+    </tr>`, 3);
+
+    const table3Rows = makeRows(open, p => `<tr>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px; color:#dc2626;">${esc(p.title)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.evaluasi) || '-'}</td>
+    </tr>`, 3);
+
+    const table4Rows = makeRows(open, p => `<tr>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px; color:#d97706;">${esc(p.solusi) || '-'}</td>
+    </tr>`, 3);
+
+    const table5Rows = makeRows(futureList, p => `<tr>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px; color:#4f46e5;">${esc(p.title)}</td>
+        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.solusi || p.desc) || '-'}</td>
+    </tr>`, 3);
+
+    const container = document.createElement('div');
+    container.style.padding = '20px';
+    container.style.fontFamily = 'Inter, sans-serif';
+    container.style.color = '#1f2937';
+    container.style.backgroundColor = '#ffffff';
+
+    container.innerHTML = `
+        <div style="border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 16px; color: #1e3a8a;">DCC WORKSPACE - ARSIP LAPORAN RAPAT MINGGUAN</h2>
+            <h3 style="margin: 4px 0 0 0; font-size: 14px; color: #374151;">${esc(r.title)}</h3>
+            <p style="margin: 3px 0 0 0; font-size: 10px; color: #6b7280;">Tanggal Arsip: ${esc(r.date)} | Pengarsip: ${esc(r.by || '-')}</p>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #2563eb;">1. PROGRAM KERJA MINGGU LALU</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Deskripsi / Target</th>
+                    </tr>
+                </thead>
+                <tbody>${table1Rows}</tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #059669;">2. HASIL USAHA</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Capaian Hasil Usaha</th>
+                    </tr>
+                </thead>
+                <tbody>${table2Rows}</tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #dc2626;">3. EVALUASI</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Hal Evaluasi</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Penyebab / Kendala</th>
+                    </tr>
+                </thead>
+                <tbody>${table3Rows}</tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #d97706;">4. SOLUSI</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Evaluasi Target</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Rumusan Solusi</th>
+                    </tr>
+                </thead>
+                <tbody>${table4Rows}</tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #4f46e5;">5. PROGRAM KERJA YANG AKAN DATANG</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f3f4f6;">
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja Mendatang</th>
+                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Rencana / Sumber</th>
+                    </tr>
+                </thead>
+                <tbody>${table5Rows}</tbody>
+            </table>
+        </div>
+    `;
+
+    const opt = {
+        margin:       10,
+        filename:     `Laporan_Rapat_${r.title.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    toast('Memproses unduhan PDF...');
+    html2pdf().from(container).set(opt).save().then(() => {
+        toast('Laporan PDF berhasil diunduh!');
+    });
+}
+
 async function deleteReport(id) {
     if (!isAdmin()) return toast('Hanya Admin yang dapat menghapus arsip laporan.', 'err');
     if (confirm('Hapus arsip laporan ini?')) await remove('reports', id);
