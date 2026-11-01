@@ -198,7 +198,7 @@
                         <button onclick="switchTab('kepanitiaan')" class="text-xs text-blue-600 hover:underline">Kelola kepanitiaan</button>
                     </div>
                     <div class="overflow-x-auto"><table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Kegiatan Agenda</th><th class="p-3">Tanggal Pelaksanaan</th><th class="p-3 text-center">Tugas Selesai</th><th class="p-3">Progres Kesiapan</th></tr></thead>
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Kegiatan Agenda</th><th class="p-3">Waktu Pelaksanaan</th><th class="p-3 text-center">Tugas Selesai</th><th class="p-3">Progres Kesiapan</th></tr></thead>
                         <tbody id="home-panitia-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
                     </table></div>
                 </div>
@@ -444,7 +444,10 @@
         <form onsubmit="savePanitia(event)" class="space-y-3 text-xs sm:text-sm">
             <div><label class="block font-medium mb-1" for="panitia-input-nama">Nama kegiatan</label><input type="text" id="panitia-input-nama" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="panitia-input-deskripsi">Deskripsi kegiatan</label><textarea id="panitia-input-deskripsi" required rows="2" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea></div>
-            <div><label class="block font-medium mb-1" for="panitia-input-tanggal">Tanggal pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label class="block font-medium mb-1" for="panitia-input-tanggal">Tanggal pelaksanaan</label><input type="date" id="panitia-input-tanggal" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+                <div><label class="block font-medium mb-1" for="panitia-input-waktu">Jam pelaksanaan</label><input type="time" id="panitia-input-waktu" value="08:00" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            </div>
             <div class="flex justify-end gap-2 pt-3"><button type="button" onclick="closeModal('modal-panitia')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">Simpan agenda</button></div>
         </form>
     </div>
@@ -896,15 +899,17 @@ function renderBerandaPage() {
         `<tr><td class="p-3 font-medium">${esc(t.title)}</td><td class="p-3 text-xs">${esc(t.pj)} (${esc(t.bagian)})</td><td class="p-3 text-xs text-rose-500 font-semibold">${esc(t.deadline)}</td><td class="p-3"><span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">${esc(t.status)}</span></td></tr>`
     ).join('') : emptyRow(4, 'Tidak ada penugasan yang sedang berjalan.');
 
+    const nowIso = new Date().toISOString().slice(0, 10);
     const panitias = list('panitia').filter(k => !k.isFinished);
     $('home-panitia-table').innerHTML = panitias.length ? panitias.map(k => {
         const jobs = k.joblists || [];
         const done = jobs.filter(j => j.done).length;
         const total = jobs.length;
         const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        const waktuStr = k.waktu ? ` ${k.waktu}` : ' 08:00';
         return `<tr>
             <td class="p-3 font-medium">${esc(k.nama)}</td>
-            <td class="p-3 text-xs text-blue-600 font-semibold">${esc(k.tanggal)}</td>
+            <td class="p-3 text-xs text-blue-600 font-semibold">${esc(k.tanggal)} ${esc(k.waktu || '08:00')}</td>
             <td class="p-3 text-center text-xs font-bold">${done} / ${total}</td>
             <td class="p-3">
                 <div class="flex items-center gap-2">
@@ -922,7 +927,18 @@ function renderBerandaPage() {
 
 function initCountdown() {
     clearInterval(cdTimer); clearInterval(cdRotate);
-    const events = list('panitia').filter(k => !k.isFinished && k.tanggal >= today()).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    const nowTs = Date.now();
+    const events = list('panitia').filter(k => {
+        if (k.isFinished) return false;
+        const timeStr = k.waktu || '08:00';
+        const targetTs = new Date(k.tanggal + 'T' + timeStr + ':00').getTime();
+        return targetTs >= nowTs;
+    }).sort((a, b) => {
+        const tA = new Date(a.tanggal + 'T' + (a.waktu || '08:00') + ':00').getTime();
+        const tB = new Date(b.tanggal + 'T' + (b.waktu || '08:00') + ':00').getTime();
+        return tA - tB;
+    });
+
     if (!events.length) {
         $('event-title-display').textContent = 'Belum ada kegiatan mendatang';
         $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Tambahkan agenda di menu Kepanitiaan';
@@ -934,12 +950,14 @@ function initCountdown() {
     const show = () => {
         const ev = events[cdIndex];
         $('event-title-display').textContent = ev.nama;
-        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ' + esc(ev.tanggal);
+        $('event-date-display').innerHTML = '<i class="fa-regular fa-calendar-check mr-1"></i> Pelaksanaan: ' + esc(ev.tanggal) + (ev.stringWaktu || (ev.waktu ? ' Pukul ' + ev.waktu : ''));
         $('countdown-indicator').textContent = events.length > 1 ? `${cdIndex + 1} dari ${events.length} kegiatan` : '';
     };
     const tick = () => {
         const ev = events[cdIndex]; if (!ev) return;
-        const diff = Math.max(0, new Date(ev.tanggal + 'T08:00:00').getTime() - Date.now());
+        const timeStr = ev.waktu || '08:00';
+        const targetTs = new Date(ev.tanggal + 'T' + timeStr + ':00').getTime();
+        const diff = Math.max(0, targetTs - Date.now());
         const p = n => String(n).padStart(2, '0');
         $('cd-days').textContent = p(Math.floor(diff / 864e5));
         $('cd-hours').textContent = p(Math.floor(diff % 864e5 / 36e5));
@@ -1207,8 +1225,12 @@ function renderPanitiaPage() {
         const totalAll = (k.joblists || []).length;
         const doneAll = (k.joblists || []).filter(j => j.done).length;
         const percent = totalAll > 0 ? Math.round((doneAll / totalAll) * 100) : 0;
-        const daysLeft = Math.ceil((new Date(k.tanggal + 'T08:00:00') - Date.now()) / 864e5);
-        const when = daysLeft > 0 ? `${daysLeft} hari lagi` : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
+        
+        const timeStr = k.waktu || '08:00';
+        const targetTs = new Date(k.tanggal + 'T' + timeStr + ':00').getTime();
+        const diffMs = targetTs - Date.now();
+        const daysLeft = Math.ceil(diffMs / 864e5);
+        const when = diffMs > 0 ? (daysLeft > 1 ? `${daysLeft} hari lagi` : 'Kurang dari 1 hari') : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
         const isFinished = k.isFinished || false;
 
         return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border ${isFinished ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/20' : 'border-gray-200 dark:border-gray-700'}">
@@ -1231,7 +1253,7 @@ function renderPanitiaPage() {
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
-                    <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} (${when})</div>
+                    <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} pukul ${esc(k.waktu || '08:00')} (${when})</div>
                     
                     <div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden mt-3">
                         <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
@@ -1297,7 +1319,17 @@ function openPanitiaModal() {
 async function savePanitia(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-    const k = { id: uid('k'), nama: $('panitia-input-nama').value.trim(), deskripsi: $('panitia-input-deskripsi').value.trim(), tanggal: $('panitia-input-tanggal').value, joblists: [], evaluation: '', isFinished: false, createdAt: Date.now() };
+    const k = { 
+        id: uid('k'), 
+        nama: $('panitia-input-nama').value.trim(), 
+        deskripsi: $('panitia-input-deskripsi').value.trim(), 
+        tanggal: $('panitia-input-tanggal').value, 
+        waktu: $('panitia-input-waktu').value || '08:00',
+        joblists: [], 
+        evaluation: '', 
+        isFinished: false, 
+        createdAt: Date.now() 
+    };
     closeModal('modal-panitia'); e.target.reset();
     await save('panitia', k);
 }
@@ -1354,7 +1386,7 @@ function downloadPanitiaExcel(id) {
     const wb = XLSX.utils.book_new();
     const tasksData = jobs.map((j, idx) => ({ No: idx + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum Selesai' }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tasksData), 'Pembagian Tugas');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 'Nama Kegiatan': k.nama, 'Deskripsi': k.deskripsi, 'Tanggal': k.tanggal, 'Status Selesai': k.isFinished ? 'Ya' : 'Belum', 'Evaluasi / Catatan': k.evaluation }]), 'Detail Kegiatan');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 'Nama Kegiatan': k.nama, 'Deskripsi': k.deskripsi, 'Tanggal': k.tanggal, 'Waktu': k.waktu || '08:00', 'Status Selesai': k.isFinished ? 'Ya' : 'Belum', 'Evaluasi / Catatan': k.evaluation }]), 'Detail Kegiatan');
     XLSX.writeFile(wb, `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.xlsx`);
 }
 
@@ -1384,7 +1416,7 @@ function downloadPanitiaPDF(id) {
         </div>
         <div style="margin-bottom: 15px; font-size: 12px;">
             <p style="margin: 3px 0;"><strong>Deskripsi:</strong> ${esc(k.deskripsi)}</p>
-            <p style="margin: 3px 0;"><strong>Tanggal Pelaksanaan:</strong> ${esc(k.tanggal)}</p>
+            <p style="margin: 3px 0;"><strong>Waktu Pelaksanaan:</strong> ${esc(k.tanggal)} pukul ${esc(k.waktu || '08:00')}</p>
             <p style="margin: 3px 0;"><strong>Status Acara:</strong> ${k.isFinished ? 'Selesai' : 'Aktif / Berjalan'}</p>
         </div>
         <h4 style="margin: 15px 0 8px 0; font-size: 13px; font-weight: bold; color: #374151;">Tabel Pembagian Tugas</h4>
