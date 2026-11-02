@@ -216,6 +216,10 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Kelola dan pantau progres tugas anggota.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="search" id="task-search-pj" oninput="renderPenugasanPage()" placeholder="Cari nama penanggung jawab..." aria-label="Cari nama penanggung jawab" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 pl-8 pr-3 text-xs font-medium w-56">
+                        </div>
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Bagian
                             <select id="task-filter-bagian" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium"></select>
                         </label>
@@ -242,9 +246,25 @@
                         <h3 class="text-lg font-bold">Pembagian Tugas Staf DCC</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Manajemen tugas khusus staf di bawah pengawasan musyrif dan admin.</p>
                     </div>
-                    <button onclick="openStafTaskModal()" class="bg-orange-600 hover:bg-orange-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Bagi penugasan
-                    </button>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="search" id="staf-search-pj" oninput="renderStafDccPage()" placeholder="Cari nama PJ..." aria-label="Cari nama penanggung jawab" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 pl-8 pr-3 text-xs font-medium w-48">
+                        </div>
+                        <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Filter PJ
+                            <select id="staf-filter-pj" onchange="renderStafDccPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium max-w-[170px]"></select>
+                        </label>
+                        <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Urutkan
+                            <select id="staf-sort-pj" onchange="renderStafDccPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium">
+                                <option value="DEFAULT">Default</option>
+                                <option value="ASC">Nama PJ (A-Z)</option>
+                                <option value="DESC">Nama PJ (Z-A)</option>
+                            </select>
+                        </label>
+                        <button onclick="openStafTaskModal()" class="bg-orange-600 hover:bg-orange-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Bagi penugasan
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -1072,6 +1092,15 @@ function initCountdown() {
     if (events.length > 1) cdRotate = setInterval(() => { cdIndex = (cdIndex + 1) % events.length; show(); tick(); }, 8000);
 }
 
+/* ---- Helper nama PJ: gelar "Al-Ustadz"/"Ustadz" diabaikan untuk search, filter & urutan ---- */
+function cleanPJName(name) {
+    return String(name || '')
+        .replace(/^\s*(al[\s\-\u2010-\u2015]*)?ustadz(ah)?\b[\s.\-:,]*/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+function normalizePJ(name) { return cleanPJName(name).toLowerCase(); }
+
 function renderPenugasanPage() {
     $('btn-add-task').style.display = 'inline-flex';
 
@@ -1087,7 +1116,8 @@ function renderPenugasanPage() {
         uniqueBagian.map(b => `<option value="${esc(b)}"${b === currentSelectedFilter ? ' selected' : ''}>${esc(b)}</option>`).join('');
 
     const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
-    const rows = allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs));
+    const q = normalizePJ($('task-search-pj').value);
+    const rows = allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs) && (!q || normalizePJ(t.pj).includes(q)));
 
     $('tasks-table-body').innerHTML = rows.length ? rows.map(t => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
@@ -1099,7 +1129,7 @@ function renderPenugasanPage() {
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
             <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>`).join('') : emptyRow(7, 'Belum ada penugasan.');
+        </tr>`).join('') : emptyRow(7, (q || fb !== 'ALL' || fs !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan.');
 }
 
 /* =====================================================================
@@ -1107,7 +1137,32 @@ function renderPenugasanPage() {
    ===================================================================== */
 function renderStafDccPage() {
     if (!isMusyrifOrAdmin()) return;
-    const stafTasks = list('staf_tasks');
+    const allStaf = list('staf_tasks');
+
+    // Opsi filter PJ (tanpa "Al-Ustadz"), unik & terurut abjad
+    const pjMap = new Map();
+    allStaf.forEach(t => { const c = cleanPJName(t.pj); if (c) pjMap.set(c.toLowerCase(), c); });
+    const pjOptions = Array.from(pjMap.values()).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+    const filterEl = $('staf-filter-pj');
+    const prevPJ = filterEl.value || 'ALL';
+    filterEl.innerHTML = '<option value="ALL">Semua PJ</option>' +
+        pjOptions.map(n => `<option value="${esc(n.toLowerCase())}">${esc(n)}</option>`).join('');
+    filterEl.value = pjMap.has(prevPJ) ? prevPJ : 'ALL';
+
+    const fpj = filterEl.value;
+    const q = normalizePJ($('staf-search-pj').value);
+    const sort = $('staf-sort-pj').value;
+
+    const stafTasks = allStaf.filter(t => {
+        const n = normalizePJ(t.pj);
+        return (fpj === 'ALL' || n === fpj) && (!q || n.includes(q));
+    });
+    if (sort !== 'DEFAULT') {
+        stafTasks.sort((a, b) => {
+            const r = cleanPJName(a.pj).localeCompare(cleanPJName(b.pj), 'id', { sensitivity: 'base' });
+            return sort === 'ASC' ? r : -r;
+        });
+    }
 
     $('staf-tasks-table-body').innerHTML = stafTasks.length ? stafTasks.map(t => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
@@ -1127,7 +1182,7 @@ function renderStafDccPage() {
                 <button onclick="deleteStafTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>
-    `).join('') : emptyRow(6, 'Belum ada penugasan staf DCC.');
+    `).join('') : emptyRow(6, (q || fpj !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan staf DCC.');
 }
 
 function openStafTaskModal(id = null) {
