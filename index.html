@@ -89,6 +89,10 @@
         <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="nav-list">
             <button onclick="switchTab('beranda')"     id="nav-beranda"     class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-chart-line w-5 text-center text-blue-500"></i><span class="sidebar-text">Beranda</span></button>
             <button onclick="switchTab('penugasan')"   id="nav-penugasan"   class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-list-check w-5 text-center text-indigo-500"></i><span class="sidebar-text">Penugasan</span></button>
+            
+            <!-- MENU KHUSUS MUSYRIF & ADMIN -->
+            <button onclick="switchTab('staf_dcc')"    id="nav-staf_dcc"    class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hidden"><i class="fa-solid fa-user-tie w-5 text-center text-orange-500"></i><span class="sidebar-text">Pembagian Tugas Staf DCC</span></button>
+
             <button onclick="switchTab('proker')"      id="nav-proker"      class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-bars-progress w-5 text-center text-emerald-500"></i><span class="sidebar-text">Program Kerja</span></button>
             <button onclick="switchTab('kepanitiaan')" id="nav-kepanitiaan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-users-gear w-5 text-center text-amber-500"></i><span class="sidebar-text">Kepanitiaan</span></button>
             <button onclick="switchTab('rapat')"       id="nav-rapat"       class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-comments w-5 text-center text-purple-500"></i><span class="sidebar-text">Rapat Mingguan</span></button>
@@ -231,7 +235,37 @@
                 </div>
             </section>
 
-            <!-- 3. PROGRAM KERJA -->
+            <!-- 3. PEMBAGIAN TUGAS STAF DCC (KHUSUS MUSYRIF & ADMIN) -->
+            <section id="page-staf_dcc" class="page-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-lg font-bold">Pembagian Tugas Staf DCC</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Manajemen tugas khusus staf di bawah pengawasan musyrif dan admin.</p>
+                    </div>
+                    <button onclick="openStafTaskModal()" class="bg-orange-600 hover:bg-orange-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Bagi penugasan
+                    </button>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left min-w-[760px]">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
+                                <tr>
+                                    <th class="p-4">Tugas</th>
+                                    <th class="p-4">Nama PJ</th>
+                                    <th class="p-4">Deadline</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4">Keterangan</th>
+                                    <th class="p-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staf-tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PROGRAM KERJA -->
             <section id="page-proker" class="page-content space-y-6 hidden">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <label class="flex items-center gap-3 text-sm font-semibold">Pilih bagian
@@ -269,7 +303,7 @@
                 </div>
             </section>
 
-            <!-- 4. KEPANITIAAN -->
+            <!-- 5. KEPANITIAAN -->
             <section id="page-kepanitiaan" class="page-content space-y-6 hidden">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div>
@@ -281,7 +315,7 @@
                 <div id="panitia-cards-container" class="grid grid-cols-1 gap-6"></div>
             </section>
 
-            <!-- 5. RAPAT MINGGUAN -->
+            <!-- 6. RAPAT MINGGUAN -->
             <section id="page-rapat" class="page-content space-y-6 hidden">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div>
@@ -327,7 +361,7 @@
                 </div>
             </section>
 
-            <!-- 6. REKAP -->
+            <!-- 7. REKAP -->
             <section id="page-rekap" class="page-content space-y-6 hidden">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                     <label class="text-xs text-gray-500 block">Filter bagian
@@ -347,7 +381,7 @@
                 </div>
             </section>
 
-            <!-- 7. LAPORAN -->
+            <!-- 8. LAPORAN -->
             <section id="page-laporan" class="page-content space-y-6 hidden">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-bold">Arsip laporan rapat mingguan</h3>
@@ -422,6 +456,36 @@
             <div><label class="block font-medium mb-1" for="task-input-bagian">Bagian</label><input type="text" id="task-input-bagian" required placeholder="Ketik nama bagian/tim..." class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-deadline">Deadline</label><input type="date" id="task-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan penugasan</button></div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL PEMBAGIAN TUGAS STAF DCC -->
+<div id="modal-staf-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 id="modal-staf-title" class="font-bold text-lg">Bagi penugasan staf DCC</h3>
+        <form onsubmit="saveStafTask(event)" class="space-y-3 text-xs sm:text-sm">
+            <input type="hidden" id="staf-task-edit-id" value="">
+            <div>
+                <label class="block font-medium mb-1" for="staf-input-title">Judul tugas</label>
+                <input type="text" id="staf-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block font-medium mb-1" for="staf-input-pj">Penanggung jawab (PJ)</label>
+                <input type="text" id="staf-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block font-medium mb-1" for="staf-input-deadline">Deadline</label>
+                <input type="date" id="staf-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block font-medium mb-1" for="staf-input-desc">Deskripsi</label>
+                <textarea id="staf-input-desc" required rows="3" placeholder="Detail deskripsi tugas..." class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('modal-staf-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-lg">Simpan tugas</button>
+            </div>
         </form>
     </div>
 </div>
@@ -504,10 +568,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const BAGIAN_LIST = ['Ketua', 'Sekretaris', 'Bendahara', 'Gigabyte', 'D-Tech', 'Perkap'];
 const STATUS_LIST = ['Baru Dikerjakan', 'Hampir Selesai', 'Sudah Selesai'];
-const COLLECTIONS = ['tasks', 'proker', 'panitia', 'reports', 'notulensi', 'users_meta'];
-const TITLES = { beranda: 'Beranda', penugasan: 'Penugasan', proker: 'Program Kerja', kepanitiaan: 'Kepanitiaan', rapat: 'Rapat Mingguan', rekap: 'Rekap', laporan: 'Laporan' };
+const STAF_STATUS_LIST = ['Baru Mulai', 'Belum Selesai', 'Selesai'];
+const COLLECTIONS = ['tasks', 'proker', 'panitia', 'reports', 'notulensi', 'users_meta', 'staf_tasks'];
+const TITLES = { beranda: 'Beranda', penugasan: 'Penugasan', staf_dcc: 'Pembagian Tugas Staf DCC', proker: 'Program Kerja', kepanitiaan: 'Kepanitiaan', rapat: 'Rapat Mingguan', rekap: 'Rekap', laporan: 'Laporan' };
 
-let store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
+let store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [], staf_tasks: [] };
 let currentUser = null;
 let activeTab = 'beranda';
 let channel = null;
@@ -523,7 +588,6 @@ const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(
 const today = () => new Date().toLocaleDateString('sv-SE');
 const userName = () => currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Pengguna';
 
-// Mendapatkan role pengguna aktif dari data metadata lokal users_meta atau user_metadata sesi
 const userRole = () => {
     if (!currentUser) return 'member';
     const localMeta = store.users_meta.find(u => u.id === currentUser.id);
@@ -592,7 +656,7 @@ async function loadAll() {
         return false;
     }
     $('setup-banner').classList.add('hidden');
-    const fresh = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
+    const fresh = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [], staf_tasks: [] };
     data.forEach(r => { if (fresh[r.collection]) fresh[r.collection].push(r.data); });
     store = fresh;
     writeCache();
@@ -726,6 +790,18 @@ function renderSidebarUserInfo() {
         } else {
             btnManage.classList.add('hidden');
             btnManage.style.display = 'none';
+        }
+    }
+
+    const navStaf = $('nav-staf_dcc');
+    if (navStaf) {
+        if (isMusyrifOrAdmin()) {
+            navStaf.classList.remove('hidden');
+            navStaf.style.display = 'flex';
+        } else {
+            navStaf.classList.add('hidden');
+            navStaf.style.display = 'none';
+            if (activeTab === 'staf_dcc') switchTab('beranda');
         }
     }
 
@@ -880,7 +956,7 @@ function endSession() {
     currentUser = null;
     if (channel) { sb.removeChannel(channel); channel = null; }
     clearInterval(pollTimer);
-    store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [] };
+    store = { tasks: [], proker: [], panitia: [], reports: [], notulensi: [], users_meta: [], staf_tasks: [] };
     $('app').classList.add('hidden');
     $('auth-screen').classList.remove('hidden');
 }
@@ -890,6 +966,10 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 function switchTab(tab) {
+    if (tab === 'staf_dcc' && !isMusyrifOrAdmin()) {
+        toast('Akses ditolak. Hanya Musyrif dan Admin.', 'err');
+        return;
+    }
     activeTab = tab;
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     $('page-' + tab)?.classList.remove('hidden');
@@ -901,7 +981,7 @@ function switchTab(tab) {
 
 function renderCurrentPage() {
     ({
-        beranda: renderBerandaPage, penugasan: renderPenugasanPage, proker: renderProkerPage,
+        beranda: renderBerandaPage, penugasan: renderPenugasanPage, staf_dcc: renderStafDccPage, proker: renderProkerPage,
         kepanitiaan: renderPanitiaPage, rapat: renderRapatPage, rekap: renderRekapPage, laporan: renderLaporanPage
     }[activeTab] || (() => {}))();
 }
@@ -1020,6 +1100,119 @@ function renderPenugasanPage() {
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
             <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`).join('') : emptyRow(7, 'Belum ada penugasan.');
+}
+
+/* =====================================================================
+   RENDER & LOGIC HALAMAN PEMBAGIAN TUGAS STAF DCC
+   ===================================================================== */
+function renderStafDccPage() {
+    if (!isMusyrifOrAdmin()) return;
+    const stafTasks = list('staf_tasks');
+
+    $('staf-tasks-table-body').innerHTML = stafTasks.length ? stafTasks.map(t => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <td class="p-4 font-semibold cursor-pointer text-blue-600 dark:text-blue-400 hover:underline" onclick="showStafDesc('${t.id}')">
+                ${esc(t.title)}
+            </td>
+            <td class="p-4 text-xs font-bold">${esc(t.pj)}</td>
+            <td class="p-4 text-xs text-rose-500 font-bold">${esc(t.deadline)}</td>
+            <td class="p-4">
+                <select onchange="updateStafStatus('${t.id}', this.value)" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                    ${STAF_STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}
+                </select>
+            </td>
+            <td class="p-4 text-xs text-gray-600 dark:text-gray-300">${esc(t.keterangan || '-')}</td>
+            <td class="p-4 text-right space-x-2">
+                <button onclick="openStafTaskModal('${t.id}')" class="text-blue-500 text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="deleteStafTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('') : emptyRow(6, 'Belum ada penugasan staf DCC.');
+}
+
+function openStafTaskModal(id = null) {
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
+    $('staf-task-edit-id').value = id || '';
+    if (id) {
+        const t = store.staf_tasks.find(x => x.id === id);
+        if (t) {
+            $('modal-staf-title').textContent = 'Edit penugasan staf DCC';
+            $('staf-input-title').value = t.title || '';
+            $('staf-input-pj').value = t.pj || '';
+            $('staf-input-deadline').value = t.deadline || '';
+            $('staf-input-desc').value = t.desc || '';
+        }
+    } else {
+        $('modal-staf-title').textContent = 'Bagi penugasan staf DCC';
+        $('staf-input-title').value = '';
+        $('staf-input-pj').value = 'Al-Ustadz ';
+        $('staf-input-deadline').value = '';
+        $('staf-input-desc').value = '';
+    }
+    openModal('modal-staf-task');
+}
+
+async function saveStafTask(e) {
+    e.preventDefault();
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
+
+    const editId = $('staf-task-edit-id').value;
+    const title = $('staf-input-title').value.trim();
+    const pj = $('staf-input-pj').value.trim();
+    const deadline = $('staf-input-deadline').value;
+    const desc = $('staf-input-desc').value.trim();
+
+    if (editId) {
+        const t = store.staf_tasks.find(x => x.id === editId);
+        if (t) {
+            await save('staf_tasks', { ...t, title, pj, deadline, desc });
+            toast('Penugasan staf berhasil diperbarui!');
+        }
+    } else {
+        const t = {
+            id: uid('st'),
+            title,
+            pj,
+            deadline,
+            desc,
+            status: 'Baru Mulai',
+            keterangan: '',
+            createdAt: Date.now()
+        };
+        await save('staf_tasks', t);
+        toast('Penugasan staf baru berhasil dibagikan!');
+    }
+    closeModal('modal-staf-task');
+    e.target.reset();
+}
+
+function showStafDesc(id) {
+    const t = store.staf_tasks.find(x => x.id === id);
+    if (!t) return;
+    askText(`Deskripsi Tugas: ${t.title}`, t.desc, async (newDesc) => {
+        if (newDesc !== null) {
+            await save('staf_tasks', { ...t, desc: newDesc });
+            toast('Deskripsi tugas diperbarui.');
+        }
+    });
+}
+
+async function updateStafStatus(id, newStatus) {
+    const t = store.staf_tasks.find(x => x.id === id);
+    if (!t || t.status === newStatus) return;
+
+    askText(`Isi Keterangan untuk status: ${newStatus}`, t.keterangan || '', async (ket) => {
+        await save('staf_tasks', { ...t, status: newStatus, keterangan: ket || '' });
+        toast('Status dan keterangan diperbarui.');
+    });
+}
+
+async function deleteStafTask(id) {
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
+    if (confirm('Hapus penugasan staf ini?')) {
+        await remove('staf_tasks', id);
+        toast('Penugasan staf berhasil dihapus.');
+    }
 }
 
 function openTaskModal() {
