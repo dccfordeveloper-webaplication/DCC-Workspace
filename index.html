@@ -232,7 +232,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="overflow-x-auto"><table class="w-full text-sm text-left min-w-[760px]">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr>
-                            <th class="p-4">Tugas</th><th class="p-4">Penanggung jawab</th><th class="p-4">Bagian</th><th class="p-4">Deadline</th><th class="p-4">Status</th><th class="p-4 text-center">Riwayat</th><th class="p-4 text-right">Aksi</th>
+                            <th class="p-4 w-10 text-center" title="Centang setelah status selesai"><i class="fa-solid fa-check-double"></i></th><th class="p-4">Tugas</th><th class="p-4">Penanggung jawab</th><th class="p-4">Bagian</th><th class="p-4">Deadline</th><th class="p-4">Status</th><th class="p-4 text-center">Riwayat</th><th class="p-4 text-right">Aksi</th>
                         </tr></thead>
                         <tbody id="tasks-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
                     </table></div>
@@ -271,6 +271,7 @@
                         <table class="w-full text-sm text-left min-w-[760px]">
                             <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500">
                                 <tr>
+                                    <th class="p-4 w-10 text-center" title="Centang setelah status selesai"><i class="fa-solid fa-check-double"></i></th>
                                     <th class="p-4">Tugas</th>
                                     <th class="p-4">Nama PJ</th>
                                     <th class="p-4">Deadline</th>
@@ -1101,6 +1102,26 @@ function cleanPJName(name) {
 }
 function normalizePJ(name) { return cleanPJName(name).toLowerCase(); }
 
+/* ---- Centang selesai: aktif hanya bila status sudah selesai; tugas tercentang turun ke bawah ---- */
+const isTaskDone = t => t.status === 'Sudah Selesai';
+const isStafDone = t => t.status === 'Selesai';
+const checkedLast = arr => [...arr.filter(x => !x.checked), ...arr.filter(x => x.checked)];
+const doneCheckbox = (t, isDone, fn) => `<td class="p-4 text-center">
+    <input type="checkbox" ${t.checked ? 'checked' : ''} ${isDone(t) ? '' : 'disabled'} onchange="${fn}('${t.id}', this.checked)"
+        aria-label="Tandai tugas selesai" title="${isDone(t) ? 'Centang untuk menandai tugas tuntas' : 'Ubah status menjadi selesai terlebih dahulu'}"
+        class="w-4 h-4 accent-emerald-600 ${isDone(t) ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'}"></td>`;
+
+async function toggleTaskDone(id, checked) {
+    const t = store.tasks.find(x => x.id === id); if (!t) return;
+    if (checked && !isTaskDone(t)) return toast('Ubah status menjadi "Sudah Selesai" terlebih dahulu.', 'err');
+    await save('tasks', { ...t, checked, history: [...(t.history || []), `${today()} - Tugas ${checked ? 'dicentang selesai' : 'dibuka kembali'} oleh ${userName()}`] });
+}
+async function toggleStafDone(id, checked) {
+    const t = store.staf_tasks.find(x => x.id === id); if (!t) return;
+    if (checked && !isStafDone(t)) return toast('Ubah status menjadi "Selesai" terlebih dahulu.', 'err');
+    await save('staf_tasks', { ...t, checked });
+}
+
 function renderPenugasanPage() {
     $('btn-add-task').style.display = 'inline-flex';
 
@@ -1117,10 +1138,11 @@ function renderPenugasanPage() {
 
     const fb = $('task-filter-bagian').value || 'ALL', fs = $('task-filter-status').value || 'ALL';
     const q = normalizePJ($('task-search-pj').value);
-    const rows = allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs) && (!q || normalizePJ(t.pj).includes(q)));
+    const rows = checkedLast(allTasks.filter(t => (fb === 'ALL' || t.bagian === fb) && (fs === 'ALL' || t.status === fs) && (!q || normalizePJ(t.pj).includes(q))));
 
     $('tasks-table-body').innerHTML = rows.length ? rows.map(t => `
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 ${t.checked ? 'opacity-60 line-through' : ''}">
+            ${doneCheckbox(t, isTaskDone, 'toggleTaskDone')}
             <td class="p-4 font-semibold">${esc(t.title)}</td>
             <td class="p-4 text-xs font-bold">${esc(t.pj)}</td>
             <td class="p-4 text-xs"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${esc(t.bagian)}</span></td>
@@ -1129,7 +1151,7 @@ function renderPenugasanPage() {
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
             <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>`).join('') : emptyRow(7, (q || fb !== 'ALL' || fs !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan.');
+        </tr>`).join('') : emptyRow(8, (q || fb !== 'ALL' || fs !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan.');
 }
 
 /* =====================================================================
@@ -1153,7 +1175,7 @@ function renderStafDccPage() {
     const q = normalizePJ($('staf-search-pj').value);
     const sort = $('staf-sort-pj').value;
 
-    const stafTasks = allStaf.filter(t => {
+    let stafTasks = allStaf.filter(t => {
         const n = normalizePJ(t.pj);
         return (fpj === 'ALL' || n === fpj) && (!q || n.includes(q));
     });
@@ -1163,9 +1185,11 @@ function renderStafDccPage() {
             return sort === 'ASC' ? r : -r;
         });
     }
+    stafTasks = checkedLast(stafTasks);
 
     $('staf-tasks-table-body').innerHTML = stafTasks.length ? stafTasks.map(t => `
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 ${t.checked ? 'opacity-60 line-through' : ''}">
+            ${doneCheckbox(t, isStafDone, 'toggleStafDone')}
             <td class="p-4 font-semibold cursor-pointer text-blue-600 dark:text-blue-400 hover:underline" onclick="showStafDesc('${t.id}')">
                 ${esc(t.title)}
             </td>
@@ -1182,7 +1206,7 @@ function renderStafDccPage() {
                 <button onclick="deleteStafTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>
-    `).join('') : emptyRow(6, (q || fpj !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan staf DCC.');
+    `).join('') : emptyRow(7, (q || fpj !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan staf DCC.');
 }
 
 function openStafTaskModal(id = null) {
@@ -1257,7 +1281,7 @@ async function updateStafStatus(id, newStatus) {
     if (!t || t.status === newStatus) return;
 
     askText(`Isi Keterangan untuk status: ${newStatus}`, t.keterangan || '', async (ket) => {
-        await save('staf_tasks', { ...t, status: newStatus, keterangan: ket || '' });
+        await save('staf_tasks', { ...t, status: newStatus, keterangan: ket || '', checked: newStatus === 'Selesai' ? !!t.checked : false });
         toast('Status dan keterangan diperbarui.');
     });
 }
@@ -1294,7 +1318,7 @@ async function saveTask(e) {
 
 async function setTaskStatus(id, status) {
     const t = store.tasks.find(x => x.id === id); if (!t || t.status === status) return;
-    const upd = { ...t, status, history: [...(t.history || []), `${today()} - Status menjadi “${status}” oleh ${userName()}`] };
+    const upd = { ...t, status, checked: status === 'Sudah Selesai' ? !!t.checked : false, history: [...(t.history || []), `${today()} - Status menjadi “${status}” oleh ${userName()}`] };
     await save('tasks', upd);
 }
 
