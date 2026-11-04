@@ -2,7 +2,7 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>DCC Workspace</title>
     <!-- Favicon Logo -->
     <link rel="icon" href="./logo%20store.png" type="image/png">
@@ -32,6 +32,34 @@
         #toast-box > div { animation: toastIn .25s ease-out; }
         @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         @media (prefers-reduced-motion: reduce) { #toast-box > div { animation: none; } }
+
+        /* ===== MOBILE: navigasi di bawah ===== */
+        #bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .bnav-btn { -webkit-tap-highlight-color: transparent; }
+        .bnav-btn .bnav-ico { transition: background-color .15s, color .15s; }
+        .bnav-btn.is-active { color: #2563eb; font-weight: 700; }
+        .bnav-btn.is-active .bnav-ico { background: #dbeafe; }
+        .dark .bnav-btn.is-active { color: #93c5fd; }
+        .dark .bnav-btn.is-active .bnav-ico { background: rgba(59,130,246,.25); }
+        @media (max-width: 767px) {
+            /* tinggi aplikasi mengikuti area layar yang benar-benar terlihat (bukan 100vh) */
+            #app { height: 100vh; height: 100dvh; }
+            /* sidebar berubah menjadi sheet dari bawah, dibuka lewat tombol "Lainnya" */
+            #sidebar {
+                position: fixed; left: 0; right: 0; bottom: 0;
+                width: 100% !important; max-height: 85vh; max-height: 85dvh;
+                border-right: 0; border-top: 1px solid rgba(156,163,175,.35);
+                border-top-left-radius: 1.25rem; border-top-right-radius: 1.25rem;
+                box-shadow: 0 -12px 40px rgba(0,0,0,.28);
+                z-index: 45; padding-bottom: env(safe-area-inset-bottom, 0px);
+                transform: translateY(105%); visibility: hidden;
+                transition: transform .25s ease, visibility 0s linear .25s;
+            }
+            #sidebar.sheet-open { transform: none; visibility: visible; transition: transform .25s ease, visibility 0s; }
+            #toggle-sidebar { display: none; }
+            #toast-box { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important; left: 1rem; right: 1rem !important; max-width: none !important; }
+        }
+        @media (prefers-reduced-motion: reduce) { #sidebar { transition: none !important; } }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased min-h-screen">
@@ -69,6 +97,7 @@
 <!-- ============ APLIKASI ============ -->
 <div id="app" class="flex h-screen overflow-hidden hidden">
     <aside id="sidebar" class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-200 z-30 shrink-0">
+        <div class="md:hidden flex justify-center pt-2.5 shrink-0"><span class="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span></div>
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center space-x-3 min-w-0">
                 <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0">DCC</div>
@@ -78,6 +107,7 @@
                 </div>
             </div>
             <button id="toggle-sidebar" onclick="toggleSidebar()" aria-label="Ciutkan menu" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white p-1 rounded-lg"><i class="fa-solid fa-bars"></i></button>
+            <button type="button" onclick="closeMobileMenu()" aria-label="Tutup menu" class="md:hidden w-9 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 rounded-lg bg-gray-100 dark:bg-gray-700"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-950/30">
@@ -124,6 +154,8 @@
         </div>
     </aside>
 
+    <div id="sheet-backdrop" onclick="closeMobileMenu()" class="hidden md:hidden fixed inset-0 bg-black/45 z-40"></div>
+
     <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 flex items-center justify-between z-20 shrink-0">
             <h2 id="page-title" class="text-xl font-bold text-gray-800 dark:text-white">Beranda</h2>
@@ -137,7 +169,7 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
+        <main id="main-scroll" class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900">
 
             <div id="setup-banner" class="hidden mb-4 p-4 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/40 dark:border-rose-800 text-sm text-rose-800 dark:text-rose-200">
                 <b>Database belum siap.</b> Jalankan file <code class="font-mono">supabase_setup.sql</code> di Supabase (SQL Editor), lalu muat ulang halaman ini.
@@ -411,6 +443,17 @@
                 <div id="laporan-container" class="space-y-4"></div>
             </section>
         </main>
+
+        <!-- NAVIGASI BAWAH (mobile) -->
+        <nav id="bottom-nav" aria-label="Navigasi utama" class="md:hidden shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-20">
+            <div class="grid grid-cols-5">
+                <button type="button" onclick="switchTab('beranda')"     id="bnav-beranda"     class="bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-chart-line text-base"></i></span><span>Beranda</span></button>
+                <button type="button" onclick="switchTab('penugasan')"   id="bnav-penugasan"   class="bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-list-check text-base"></i></span><span>Tugas</span></button>
+                <button type="button" onclick="switchTab('proker')"      id="bnav-proker"      class="bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-bars-progress text-base"></i></span><span>Proker</span></button>
+                <button type="button" onclick="switchTab('kepanitiaan')" id="bnav-kepanitiaan" class="bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-users-gear text-base"></i></span><span>Panitia</span></button>
+                <button type="button" onclick="openMobileMenu()"         id="bnav-more"        class="bnav-btn flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400" aria-haspopup="dialog"><span class="bnav-ico w-12 h-7 rounded-full flex items-center justify-center"><i class="fa-solid fa-ellipsis text-base"></i></span><span>Lainnya</span></button>
+            </div>
+        </nav>
     </div>
 </div>
 
@@ -635,6 +678,24 @@ function closeModal(id) { const m = $(id); m.classList.add('hidden'); m.classLis
 function toggleTheme() {
     const dark = document.documentElement.classList.toggle('dark');
     try { localStorage.setItem('dcc_ws_theme', dark ? 'dark' : 'light'); } catch (e) {}
+}
+const BNAV_MAIN = ['beranda', 'penugasan', 'proker', 'kepanitiaan'];
+function openMobileMenu() {
+    toggleSidebar(false); // pastikan menu tampil lengkap (tidak dalam mode ciut)
+    $('sidebar').classList.add('sheet-open');
+    $('sheet-backdrop').classList.remove('hidden');
+    updateBottomNav();
+}
+function closeMobileMenu() {
+    $('sidebar').classList.remove('sheet-open');
+    $('sheet-backdrop').classList.add('hidden');
+    updateBottomNav();
+}
+function updateBottomNav() {
+    const sheetOpen = $('sidebar').classList.contains('sheet-open');
+    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('is-active'));
+    if (sheetOpen || !BNAV_MAIN.includes(activeTab)) $('bnav-more')?.classList.add('is-active');
+    else $('bnav-' + activeTab)?.classList.add('is-active');
 }
 function toggleSidebar(force) {
     const sb_ = $('sidebar');
@@ -997,6 +1058,8 @@ function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold'));
     $('nav-' + tab)?.classList.add('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'font-bold');
     $('page-title').textContent = TITLES[tab] || tab;
+    closeMobileMenu();
+    $('main-scroll')?.scrollTo({ top: 0 });
     renderCurrentPage();
 }
 
@@ -2173,13 +2236,14 @@ async function importLegacy() {
     await loadAll();
 }
 
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileMenu(); });
+
 (function init() {
     $('task-filter-status').innerHTML = '<option value="ALL">Semua status</option>' + STATUS_LIST.map(s => `<option>${s}</option>`).join('');
     $('proker-bagian-filter').innerHTML = bagianOptions(false);
     $('rapat-bagian-filter').innerHTML = bagianOptions(true);
     $('rapat-bagian-filter').value = 'Ketua';
     $('rekap-filter-bagian').innerHTML = bagianOptions(true);
-    if (window.innerWidth < 768) toggleSidebar(true);
     sb.auth.getSession().then(({ data }) => { if (data.session?.user) startSession(data.session.user); });
 })();
 </script>
