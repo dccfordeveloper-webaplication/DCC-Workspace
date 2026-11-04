@@ -40,20 +40,16 @@
         .page-content { max-width: 1680px; margin-left: auto; margin-right: auto; } /* tidak melar di monitor lebar */
         .scroll-y { max-height: 380px; max-height: clamp(240px, 52dvh, 720px); }    /* area tabel mengikuti tinggi layar */
         [class*="max-h-[90vh]"] { max-height: 90vh; max-height: 90dvh; }            /* modal tidak terpotong toolbar HP */
-        table[class*="min-w-["] { min-width: 0 !important; }       /* tabel menyesuaikan lebar, tanpa geser samping */
+        /* tabel: di desktop memenuhi lebar, di HP tetap selebar minimumnya dan digeser ke samping */
         main table { table-layout: auto; width: 100%; }
-        main th, main td { overflow-wrap: anywhere; word-break: normal; }
+        main th, main td { overflow-wrap: break-word; word-break: normal; }
+        main thead th { white-space: nowrap; }
+        .scroll-y { overflow: auto; }
+        .scroll-y, .overflow-x-auto { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
         main img, main video, main canvas { max-width: 100%; height: auto; }
         @media (max-width: 479px) { html { font-size: 15px; } }
         @media (min-width: 1920px) { html { font-size: 17px; } }
         @media (min-width: 2560px) { html { font-size: 19px; } }
-        @media (max-width: 767px) {
-            main table { font-size: 12px; }
-            main th, main td { padding: .5rem .45rem !important; }
-            main th[class*=" w-"], main th[class^="w-"] { width: auto !important; }
-            main td button { white-space: normal; }
-        }
-
         /* ===== MOBILE: navigasi di bawah ===== */
         #bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
         .bnav-btn { -webkit-tap-highlight-color: transparent; }
