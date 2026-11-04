@@ -33,6 +33,27 @@
         @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         @media (prefers-reduced-motion: reduce) { #toast-box > div { animation: none; } }
 
+        /* ===== AUTO FIT: desktop & mobile ===== */
+        html { -webkit-text-size-adjust: 100%; }
+        body { overflow-wrap: break-word; }
+        #app { height: 100vh; height: 100dvh; }                    /* pas dengan layar yang terlihat */
+        .page-content { max-width: 1680px; margin-left: auto; margin-right: auto; } /* tidak melar di monitor lebar */
+        .scroll-y { max-height: 380px; max-height: clamp(240px, 52dvh, 720px); }    /* area tabel mengikuti tinggi layar */
+        [class*="max-h-[90vh]"] { max-height: 90vh; max-height: 90dvh; }            /* modal tidak terpotong toolbar HP */
+        table[class*="min-w-["] { min-width: 0 !important; }       /* tabel menyesuaikan lebar, tanpa geser samping */
+        main table { table-layout: auto; width: 100%; }
+        main th, main td { overflow-wrap: anywhere; word-break: normal; }
+        main img, main video, main canvas { max-width: 100%; height: auto; }
+        @media (max-width: 479px) { html { font-size: 15px; } }
+        @media (min-width: 1920px) { html { font-size: 17px; } }
+        @media (min-width: 2560px) { html { font-size: 19px; } }
+        @media (max-width: 767px) {
+            main table { font-size: 12px; }
+            main th, main td { padding: .5rem .45rem !important; }
+            main th[class*=" w-"], main th[class^="w-"] { width: auto !important; }
+            main td button { white-space: normal; }
+        }
+
         /* ===== MOBILE: navigasi di bawah ===== */
         #bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
         .bnav-btn { -webkit-tap-highlight-color: transparent; }
