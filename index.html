@@ -275,7 +275,7 @@
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">Status
                             <select id="task-filter-status" onchange="renderPenugasanPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 font-medium"></select>
                         </label>
-                        <button id="btn-add-task" onclick="openTaskModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Beri penugasan baru</button>
+                        <button id="btn-add-task" onclick="openTaskModal('')" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus"></i> Beri penugasan baru</button>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -442,7 +442,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
                         <h4 class="font-bold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-list-check text-blue-500"></i> Rekap program kerja</h4>
-                        <div class="scroll-y"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Program kerja</th><th class="p-2.5">Status</th></tr></thead><tbody id="rekap-table-proker" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
+                        <div class="scroll-y"><table class="w-full text-xs text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-gray-500"><tr><th class="p-2.5">Bagian</th><th class="p-2.5">Program kerja</th><th class="p-2.5">Pekan</th><th class="p-2.5">Status</th></tr></thead><tbody id="rekap-table-proker" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
                         <h4 class="font-bold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Rekap hasil usaha</h4>
@@ -530,13 +530,14 @@
 <!-- MODAL PENUGASAN -->
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h3 class="font-bold text-lg">Beri penugasan baru</h3>
+        <h3 class="font-bold text-lg" id="modal-task-title">Beri penugasan baru</h3>
         <form onsubmit="saveTask(event)" class="space-y-3 text-xs sm:text-sm">
+            <input type="hidden" id="task-edit-id" value="">
             <div><label class="block font-medium mb-1" for="task-input-title">Judul tugas</label><input type="text" id="task-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-pj">Penanggung jawab (PJ)</label><input type="text" id="task-input-pj" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-bagian">Bagian</label><input type="text" id="task-input-bagian" required placeholder="Ketik nama bagian/tim..." class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
             <div><label class="block font-medium mb-1" for="task-input-deadline">Deadline</label><input type="date" id="task-input-deadline" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
-            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan penugasan</button></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-task')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" id="modal-task-submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan penugasan</button></div>
         </form>
     </div>
 </div>
@@ -1230,7 +1231,7 @@ function renderPenugasanPage() {
             <td class="p-4"><select onchange="setTaskStatus('${t.id}', this.value)" aria-label="Status tugas" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
-            <td class="p-4 text-right"><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
+            <td class="p-4 text-right whitespace-nowrap"><button onclick="openTaskModal('${t.id}')" aria-label="Edit tugas" title="Edit" class="text-blue-600 text-xs font-bold mr-3"><i class="fa-solid fa-pen"></i></button><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" title="Hapus" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`).join('') : emptyRow(8, (q || fb !== 'ALL' || fs !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan.');
 }
 
@@ -1374,13 +1375,35 @@ async function deleteStafTask(id) {
     }
 }
 
-function openTaskModal() {
-    $('task-input-bagian').value = '';
+function openTaskModal(id) {
+    const t = id ? store.tasks.find(x => x.id === id) : null;
+    $('task-edit-id').value = t ? t.id : '';
+    $('modal-task-title').textContent = t ? 'Edit penugasan' : 'Beri penugasan baru';
+    $('modal-task-submit').textContent = t ? 'Simpan perubahan' : 'Simpan penugasan';
+    $('task-input-title').value = t ? t.title : '';
+    $('task-input-pj').value = t ? t.pj : '';
+    $('task-input-bagian').value = t ? t.bagian : '';
+    $('task-input-deadline').value = t ? t.deadline : '';
     openModal('modal-task');
 }
 
 async function saveTask(e) {
     e.preventDefault();
+    const editId = $('task-edit-id').value;
+    if (editId) {
+        const old = store.tasks.find(x => x.id === editId);
+        if (!old) { closeModal('modal-task'); return toast('Penugasan tidak ditemukan.', 'err'); }
+        const nv = {
+            title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
+            bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value
+        };
+        const labels = { title: 'judul', pj: 'PJ', bagian: 'bagian', deadline: 'deadline' };
+        const changed = Object.keys(nv).filter(k => nv[k] !== old[k]).map(k => labels[k]);
+        closeModal('modal-task'); e.target.reset(); $('task-edit-id').value = '';
+        if (!changed.length) return toast('Tidak ada perubahan.');
+        await save('tasks', { ...old, ...nv, history: [...(old.history || []), `${today()} - Diedit oleh ${userName()} (${changed.join(', ')})`] });
+        return toast('Penugasan diperbarui.');
+    }
     const t = {
         id: uid('t'), 
         title: $('task-input-title').value.trim(), 
@@ -1432,7 +1455,7 @@ function renderProkerPage() {
     const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
     const canAcc = isMusyrifOrAdmin();
 
-    const unreportedCount = store.proker.filter(p => p.bagian === bag && !p.reported && !p.isFutureOnly).length;
+    const unreportedCount = store.proker.filter(p => p.bagian === bag && !p.reported && !p.accMusyrif && !p.isFutureOnly).length;
     const pendingAccCount = store.proker.filter(p => p.bagian === bag && p.reported && !p.accMusyrif).length;
 
     let laporHtml = '';
@@ -1450,7 +1473,7 @@ function renderProkerPage() {
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
         <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
         <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
-        <td class="p-3 text-xs text-center"><span class="${p.reported ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.reported ? 'Dilaporkan' : 'Draft'}</span></td>
+        <td class="p-3 text-xs text-center"><span class="${(p.reported || p.accMusyrif) ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${(p.reported || p.accMusyrif) ? 'Dilaporkan' : 'Draft'}</span></td>
         <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
         : emptyRow(5, 'Belum ada program kerja untuk bagian ini.');
 
@@ -1521,7 +1544,12 @@ async function toggleAccProker(id) {
         return renderProkerPage();
     }
     const p = getProker(id);
-    if (p) await save('proker', { ...p, accMusyrif: !p.accMusyrif });
+    if (!p) return;
+    const acc = !p.accMusyrif;
+    // Saat di-ACC Musyrif/Admin, status otomatis "Dilaporkan" tanpa menunggu member menekan Lapor Musyrif
+    const upd = { ...p, accMusyrif: acc };
+    if (acc && !p.reported) { upd.reported = true; upd.dateReported = p.dateReported || today(); }
+    await save('proker', upd);
 }
 function toggleHasilDone(id) {
     const p = getProker(id); if (!p) return;
@@ -1536,7 +1564,7 @@ function editField(id, field) {
 }
 async function laporMusyrif() {
     const bag = $('proker-bagian-filter').value;
-    const drafts = store.proker.filter(p => p.bagian === bag && !p.reported && !p.isFutureOnly);
+    const drafts = store.proker.filter(p => p.bagian === bag && !p.reported && !p.accMusyrif && !p.isFutureOnly);
     if (!drafts.length) return toast('Tidak ada proker berstatus draft untuk dilaporkan.');
     if (!confirm(`Laporkan ${drafts.length} proker bagian ${bag} ke Musyrif?`)) return;
     for (const p of drafts) await save('proker', { ...p, reported: true, dateReported: today() });
@@ -1984,20 +2012,41 @@ async function deleteNotulensi(id) {
     await remove('notulensi', id);
 }
 
+/* Rekap menggabungkan pekan berjalan + seluruh arsip rapat mingguan (bukan hanya pekan ini) */
 function rekapItems() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
-    return list('proker').filter(p => fb === 'ALL' || p.bagian === fb);
+    const seen = new Set(), all = [];
+    const add = (p, pekan, order) => {
+        if (!p || seen.has(p.id)) return;
+        seen.add(p.id);
+        all.push({ ...p, _pekan: pekan, _order: order });
+    };
+    list('proker').forEach(p => { if (!p.isFutureOnly) add(p, 'Pekan berjalan', Infinity); });
+    [...list('reports')].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(r =>
+        (r.prokerData || []).forEach(p => { if (!p.isFutureOnly) add(p, r.date || r.title || 'Arsip', r.createdAt || 0); }));
+    return all.filter(p => fb === 'ALL' || p.bagian === fb)
+              .sort((a, b) => b._order - a._order);
+}
+// Proker Di-ACC dari semua pekan; proker yang sama (hasil salin antar pekan) hanya dihitung sekali
+function rekapProkerAcc(items) {
+    const seen = new Set();
+    return items.filter(p => p.accMusyrif === true).filter(p => {
+        const k = (p.bagian + '|' + p.title).trim().toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+    });
 }
 function renderRekapPage() {
     const items = rekapItems();
-    
-    const validProker = items.filter(p => p.accMusyrif === true);
+
+    const validProker = rekapProkerAcc(items);
     $('rekap-table-proker').innerHTML = validProker.length ? validProker.map(p => `
         <tr>
             <td class="p-2.5 font-bold">${esc(p.bagian)}</td>
             <td class="p-2.5">${esc(p.title)}</td>
+            <td class="p-2.5 text-gray-500">${esc(p._pekan)}</td>
             <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Di-ACC</span></td>
-        </tr>`).join('') : emptyRow(3, 'Belum ada program kerja yang Di-ACC.');
+        </tr>`).join('') : emptyRow(4, 'Belum ada program kerja yang Di-ACC.');
 
     const validHasilUsaha = items.filter(p => p.isHasilDone === true);
     $('rekap-table-hasil').innerHTML = validHasilUsaha.length ? validHasilUsaha.map(p => `
@@ -2009,19 +2058,17 @@ function renderRekapPage() {
 }
 
 function downloadRekapExcel() {
-    const fb = $('rekap-filter-bagian').value || 'ALL';
     const items = rekapItems();
-    
-    const validProker = items.filter(p => p.accMusyrif === true);
+    const validProker = rekapProkerAcc(items);
     const validHasilUsaha = items.filter(p => p.isHasilDone === true);
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validProker.map(p => ({
-        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, 'Status Lapor': 'Di-ACC'
+        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, Pekan: p._pekan, 'Status Lapor': 'Di-ACC'
     }))), 'Rekap Program Kerja');
 
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validHasilUsaha.map(p => ({
-        Bagian: p.bagian, 'Program Kerja': p.title, 'Hasil Usaha / Capaian': p.hasilUsaha, 'Tanggal Lapor': p.dateReported
+        Bagian: p.bagian, 'Program Kerja': p.title, 'Hasil Usaha / Capaian': p.hasilUsaha, Pekan: p._pekan, 'Tanggal Lapor': p.dateReported
     }))), 'Rekap Hasil Usaha');
 
     XLSX.writeFile(wb, `Rekap_DCC_${today()}.xlsx`);
