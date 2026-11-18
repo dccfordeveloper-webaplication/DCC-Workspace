@@ -349,20 +349,21 @@
                     </label>
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="importLastWeek()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-file-arrow-down"></i> Isi proker minggu lalu</button>
-                        <button onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-calendar-plus"></i> Tambah proker minggu depan</button>
-                        <button onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah proker</button>
+                        <button id="btn-add-proker-depan" onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-calendar-plus"></i> Tambah proker minggu depan</button>
+                        <button id="btn-add-proker" onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah proker</button>
                         <div id="proker-lapor-container"></div>
+                        <div id="proker-admin-toggle"></div>
                     </div>
                 </div>
 
                 <div class="space-y-6">
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 1. Program kerja (minggu ini)</h4>
-                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-14 text-center">ACC</th><th class="p-3">Nama program kerja</th><th class="p-3">Target / deskripsi</th><th class="p-3 w-28 text-center">Status lapor</th><th class="p-3 w-16 text-right">Aksi</th></tr></thead><tbody id="proker-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-14 text-center">ACC</th><th class="p-3">Nama program kerja</th><th class="p-3">Target / deskripsi</th><th class="p-3 w-32 text-center">Status</th><th class="p-3 w-16 text-right">Aksi</th></tr></thead><tbody id="proker-table-1" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 2. Hasil usaha (proker yang di-ACC)</h4>
-                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-20 text-center">Selesai</th><th class="p-3">Program kerja</th><th class="p-3">Capaian hasil usaha</th><th class="p-3 w-32 text-center">Tanggal lapor</th></tr></thead><tbody id="proker-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
+                        <div class="scroll-y overflow-x-auto"><table class="w-full text-sm text-left min-w-[700px]"><thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3 w-20 text-center">Selesai</th><th class="p-3">Program kerja</th><th class="p-3">Capaian hasil usaha</th><th class="p-3 w-32 text-center">Tanggal dibuat</th></tr></thead><tbody id="proker-table-2" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody></table></div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <h4 class="font-bold mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 3. Evaluasi</h4>
@@ -401,6 +402,7 @@
                     <div class="flex items-center gap-3">
                         <select id="rapat-bagian-filter" onchange="renderRapatPage()" aria-label="Filter bagian" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-xs font-bold rounded-lg p-2"></select>
                         <button onclick="simpanHasilRapat()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><i class="fa-solid fa-floppy-disk"></i> Simpan hasil rapat (arsip)</button>
+                        <button id="btn-pulihkan-rapat" onclick="openPulihkanModal()" style="display:none" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-lg items-center gap-2 shadow-sm"><i class="fa-solid fa-clock-rotate-left"></i> Pulihkan</button>
                     </div>
                 </div>
 
@@ -590,6 +592,50 @@
     </div>
 </div>
 
+<div id="modal-arsip" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h3 class="font-bold text-lg">Simpan hasil rapat (arsip)</h3>
+        <form onsubmit="submitArsip(event)" class="space-y-3 text-xs sm:text-sm">
+            <div><label class="block font-medium mb-1" for="arsip-input-date">Tanggal rapat</label><input type="date" id="arsip-input-date" required onchange="syncArsipTitle('arsip-input-date','arsip-input-title')" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <div><label class="block font-medium mb-1" for="arsip-input-title">Judul arsip</label><input type="text" id="arsip-input-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Setelah disimpan, halaman Program Kerja dikosongkan lalu otomatis terisi dari “Program kerja yang akan datang” (poin 5 rapat).</p>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('modal-arsip')" class="px-4 py-2 border rounded-lg dark:border-gray-600">Batal</button><button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg">Simpan arsip</button></div>
+        </form>
+    </div>
+</div>
+
+<div id="modal-pulihkan" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-5 max-h-[90vh] overflow-y-auto text-xs sm:text-sm">
+        <div class="flex items-start justify-between gap-3">
+            <div><h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Pulihkan hasil rapat</h3><p class="text-xs text-gray-500 dark:text-gray-400">Khusus Admin.</p></div>
+            <button type="button" onclick="closeModal('modal-pulihkan')" aria-label="Tutup" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+
+        <form onsubmit="catatRapatTerlewat(event)" class="space-y-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h4 class="font-bold">1. Catat rapat yang belum tercatat</h4>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Membuat arsip bertanggal tertentu dari data Program Kerja yang ada sekarang. Halaman Program Kerja tidak dikosongkan.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label class="block font-medium mb-1" for="pulih-date">Tanggal rapat</label><input type="date" id="pulih-date" required onchange="syncArsipTitle('pulih-date','pulih-title')" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+                <div><label class="block font-medium mb-1" for="pulih-title">Judul arsip</label><input type="text" id="pulih-title" required class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></div>
+            </div>
+            <label class="flex items-center gap-2"><input type="checkbox" id="pulih-files" class="w-4 h-4"> Sertakan file notulensi yang sedang terunggah</label>
+            <div class="flex justify-end"><button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium">Catat sebagai arsip</button></div>
+        </form>
+
+        <div class="space-y-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h4 class="font-bold">2. Kembalikan proker dari arsip</h4>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Menyalin proker dari arsip rapat terpilih kembali ke halaman Program Kerja (yang sudah ada tidak digandakan).</p>
+            <select id="pulih-archive-select" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+            <div class="flex justify-end"><button type="button" onclick="kembalikanDariArsip()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium">Kembalikan ke Program Kerja</button></div>
+        </div>
+
+        <div class="space-y-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h4 class="font-bold">3. Arsip yang terhapus</h4>
+            <div id="pulih-deleted-list" class="space-y-2"></div>
+        </div>
+    </div>
+</div>
+
 <div id="modal-panitia" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <h3 id="modal-panitia-title" class="font-bold text-lg">Buat agenda kepanitiaan baru</h3>
@@ -683,6 +729,13 @@ const userRole = () => {
 };
 
 const isAdmin = () => userRole() === 'admin';
+
+/* Pengaturan aplikasi (disimpan di koleksi users_meta dengan id khusus agar tidak perlu ubah skema database) */
+const APP_SETTINGS_ID = 'app_settings';
+const getSettings = () => store.users_meta.find(u => u.id === APP_SETTINGS_ID) || {};
+const prokerAddEnabled = () => getSettings().prokerAddEnabled !== false;
+const canAddProker = () => isAdmin() || prokerAddEnabled();
+const activeReports = () => list('reports').filter(r => !r.deletedAt);
 const isMusyrifOrAdmin = () => ['musyrif', 'admin'].includes(userRole());
 
 const list = col => [...store[col]].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -980,7 +1033,7 @@ function openUsersModal() {
 }
 
 function renderUsersTable() {
-    const users = store.users_meta;
+    const users = store.users_meta.filter(u => u.id !== APP_SETTINGS_ID);
     $('users-table-body').innerHTML = users.length ? users.map(u => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
             <td class="p-3">
@@ -1461,25 +1514,42 @@ function renderProkerPage() {
     const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
     const canAcc = isMusyrifOrAdmin();
 
-    const unreportedCount = store.proker.filter(p => p.bagian === bag && !p.reported && !p.accMusyrif && !p.isFutureOnly).length;
-    const pendingAccCount = store.proker.filter(p => p.bagian === bag && p.reported && !p.accMusyrif).length;
-
-    let laporHtml = '';
+    // Status tombol tambah proker (bisa dimatikan Admin)
+    const addOk = canAddProker();
+    ['btn-add-proker', 'btn-add-proker-depan'].forEach(id => {
+        const b = $(id); if (!b) return;
+        b.disabled = !addOk;
+        b.classList.toggle('opacity-50', !addOk);
+        b.classList.toggle('cursor-not-allowed', !addOk);
+        b.title = addOk ? '' : 'Fitur tambah proker dinonaktifkan oleh Admin';
+    });
+    // Info: jumlah proker menunggu ACC (Musyrif/Admin) atau pemberitahuan fitur dimatikan (member)
+    const pendingAccCount = store.proker.filter(p => p.bagian === bag && !p.accMusyrif).length;
+    let infoHtml = '';
     if (isMusyrifOrAdmin()) {
-        laporHtml = `<div class="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-amber-300 dark:border-amber-700">
-            <i class="fa-solid fa-bell text-amber-600"></i> ${pendingAccCount} Laporan Menunggu ACC
+        infoHtml = `<div class="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-amber-300 dark:border-amber-700">
+            <i class="fa-solid fa-bell text-amber-600"></i> ${pendingAccCount} Proker Menunggu ACC
         </div>`;
-    } else {
-        laporHtml = `<button onclick="laporMusyrif()" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-paper-plane"></i> Lapor Musyrif (${unreportedCount})
-        </button>`;
+    } else if (!addOk) {
+        infoHtml = `<div class="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-gray-300 dark:border-gray-600">
+            <i class="fa-solid fa-lock"></i> Tambah proker dinonaktifkan Admin
+        </div>`;
     }
-    $('proker-lapor-container').innerHTML = laporHtml;
+    $('proker-lapor-container').innerHTML = infoHtml;
+    // Saklar khusus Admin
+    $('proker-admin-toggle').innerHTML = isAdmin() ? `
+        <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+            <span>Fitur tambah proker</span>
+            <button type="button" role="switch" aria-checked="${addOk}" aria-label="Aktif/nonaktifkan fitur tambah proker" onclick="toggleProkerAdd()" class="relative inline-flex w-10 h-5 rounded-full transition ${addOk ? 'bg-emerald-500' : 'bg-gray-400'}">
+                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${addOk ? 'translate-x-5' : ''}"></span>
+            </button>
+            <span class="${addOk ? 'text-emerald-600' : 'text-gray-500'}">${addOk ? 'Aktif' : 'Nonaktif'}</span>
+        </div>` : '';
 
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
         <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
         <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
-        <td class="p-3 text-xs text-center"><span class="${(p.reported || p.accMusyrif) ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${(p.reported || p.accMusyrif) ? 'Dilaporkan' : 'Draft'}</span></td>
+        <td class="p-3 text-xs text-center"><span class="${p.accMusyrif ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.accMusyrif ? 'Di-ACC' : 'Menunggu ACC'}</span></td>
         <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
         : emptyRow(5, 'Belum ada program kerja untuk bagian ini.');
 
@@ -1511,7 +1581,16 @@ function renderProkerPage() {
         : emptyRow(4, 'Belum ada rencana mendatang.');
 }
 
+async function toggleProkerAdd() {
+    if (!isAdmin()) return toast('Hanya Admin yang dapat mengatur fitur ini.', 'err');
+    const s = getSettings();
+    const on = !prokerAddEnabled();
+    await save('users_meta', { ...s, id: APP_SETTINGS_ID, isSettings: true, prokerAddEnabled: on, updatedBy: userName(), createdAt: s.createdAt || Date.now() });
+    toast(on ? 'Fitur tambah proker DIAKTIFKAN untuk semua pengguna.' : 'Fitur tambah proker DINONAKTIFKAN. Hanya Admin yang masih bisa menambah proker.');
+}
+
 function openProkerModal(type) {
+    if (!canAddProker()) return toast('Fitur tambah proker sedang dinonaktifkan oleh Admin.', 'err');
     $('proker-target-type').value = type;
     $('modal-proker-title').textContent = type === 'minggu_depan' ? 'Tambah proker minggu depan' : 'Tambah program kerja';
     openModal('modal-proker');
@@ -1519,26 +1598,27 @@ function openProkerModal(type) {
 
 async function saveProker(e) {
     e.preventDefault();
+    if (!canAddProker()) { closeModal('modal-proker'); return toast('Fitur tambah proker sedang dinonaktifkan oleh Admin.', 'err'); }
     const type = $('proker-target-type').value;
-    const isSpecialRole = isMusyrifOrAdmin();
 
+    // Tanpa tahap "lapor": proker langsung masuk dan checklist ACC aktif untuk Musyrif/Admin
     const p = {
-        id: uid('p'), 
-        bagian: $('proker-bagian-filter').value, 
+        id: uid('p'),
+        bagian: $('proker-bagian-filter').value,
         title: $('proker-input-title').value.trim(),
-        desc: $('proker-input-desc').value.trim(), 
-        reported: isSpecialRole ? true : false, 
-        accMusyrif: false, 
+        desc: $('proker-input-desc').value.trim(),
+        reported: true,
+        accMusyrif: false,
         isHasilDone: false,
-        hasilUsaha: '', 
-        evaluasi: '', 
-        solusi: '', 
-        dateReported: isSpecialRole ? today() : '', 
-        isFutureOnly: type === 'minggu_depan', 
+        hasilUsaha: '',
+        evaluasi: '',
+        solusi: '',
+        dateReported: today(),
+        isFutureOnly: type === 'minggu_depan',
         createdAt: Date.now()
     };
 
-    closeModal('modal-proker'); 
+    closeModal('modal-proker');
     e.target.reset();
     await save('proker', p);
 }
@@ -1552,9 +1632,9 @@ async function toggleAccProker(id) {
     const p = getProker(id);
     if (!p) return;
     const acc = !p.accMusyrif;
-    // Saat di-ACC Musyrif/Admin, status otomatis "Dilaporkan" tanpa menunggu member menekan Lapor Musyrif
+    // ACC langsung aktif untuk Musyrif/Admin begitu proker dibuat, tanpa tahap lapor
     const upd = { ...p, accMusyrif: acc };
-    if (acc && !p.reported) { upd.reported = true; upd.dateReported = p.dateReported || today(); }
+    upd.reported = true; upd.dateReported = p.dateReported || today();
     await save('proker', upd);
 }
 function toggleHasilDone(id) {
@@ -1568,18 +1648,9 @@ function editField(id, field) {
     const p = getProker(id); if (!p) return;
     askText(field === 'evaluasi' ? 'Kendala: ' + p.title : (p.isFutureOnly ? 'Rencana: ' + p.title : 'Solusi: ' + p.title), p[field] || p.desc, v => save('proker', { ...p, [field]: v }));
 }
-async function laporMusyrif() {
-    const bag = $('proker-bagian-filter').value;
-    const drafts = store.proker.filter(p => p.bagian === bag && !p.reported && !p.accMusyrif && !p.isFutureOnly);
-    if (!drafts.length) return toast('Tidak ada proker berstatus draft untuk dilaporkan.');
-    if (!confirm(`Laporkan ${drafts.length} proker bagian ${bag} ke Musyrif?`)) return;
-    for (const p of drafts) await save('proker', { ...p, reported: true, dateReported: today() });
-    toast('Laporan terkirim. Musyrif/Admin dapat memberi ACC sekarang.');
-}
-
 async function importLastWeek() {
     const bag = $('proker-bagian-filter').value;
-    const last = [...list('reports')].pop();
+    const last = [...activeReports()].pop();
     if (!last) return toast('Belum ada arsip rapat untuk dijadikan acuan.');
     const exist = new Set(store.proker.filter(p => p.bagian === bag && !p.isFutureOnly).map(p => p.title.toLowerCase()));
     const src = (last.prokerData || []).filter(p => p.bagian === bag && (p.isFutureOnly || !p.isHasilDone || !p.accMusyrif) && !exist.has(p.title.toLowerCase()));
@@ -1966,29 +2037,124 @@ function renderRapatPage() {
     fill('rapat-table-3', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-rose-500">${esc(p.evaluasi) || '-'}</td></tr>`);
     fill('rapat-table-4', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-amber-600">${esc(p.solusi) || '-'}</td></tr>`);
     fill('rapat-table-5', items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif), 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3">${esc(p.solusi || p.desc) || '-'}</td></tr>`);
+    const bp = $('btn-pulihkan-rapat'); if (bp) bp.style.display = isAdmin() ? 'inline-flex' : 'none';
     renderNotulensiFileList();
 }
 
+const dateToTs = d => d === today() ? Date.now() : new Date(d + 'T12:00:00').getTime();
+function syncArsipTitle(dateId, titleId) {
+    const t = $(titleId);
+    if (/^Rapat Mingguan - \d{4}-\d{2}-\d{2}$/.test(t.value)) t.value = `Rapat Mingguan - ${$(dateId).value}`;
+}
+function buildReport({ title, date, prokerData, includeFiles = true, restored = false }) {
+    return {
+        id: uid('r'), title, date, by: userName(), createdAt: dateToTs(date),
+        prokerData: JSON.parse(JSON.stringify(prokerData)),
+        notulensiFiles: includeFiles ? list('notulensi').map(f => ({ name: f.name, path: f.path })) : [],
+        ...(restored ? { restored: true, restoredAt: Date.now() } : {})
+    };
+}
+
 function simpanHasilRapat() {
-    askText('Judul arsip rapat', `Rapat Mingguan - ${today()}`, async title => {
-        if (!title) return;
-        
-        const currentProker = list('proker');
-        const r = {
-            id: uid('r'), title, date: today(), by: userName(), createdAt: Date.now(),
-            prokerData: JSON.parse(JSON.stringify(currentProker)),
-            notulensiFiles: list('notulensi').map(f => ({ name: f.name, path: f.path }))
-        };
-        
-        const saved = await save('reports', r);
-        if (saved) {
-            const prokerIds = currentProker.map(p => p.id);
-            for (const id of prokerIds) {
-                await remove('proker', id);
-            }
-            toast('Hasil rapat diarsipkan dan halaman Program Kerja telah direset/dikosongkan.');
-        }
-    });
+    $('arsip-input-date').value = today();
+    $('arsip-input-date').max = today();
+    $('arsip-input-title').value = `Rapat Mingguan - ${today()}`;
+    openModal('modal-arsip');
+}
+
+async function submitArsip(e) {
+    e.preventDefault();
+    const date = $('arsip-input-date').value, title = $('arsip-input-title').value.trim();
+    if (!date || !title) return toast('Tanggal dan judul wajib diisi.', 'err');
+    closeModal('modal-arsip');
+
+    const currentProker = list('proker');
+    const r = buildReport({ title, date, prokerData: currentProker });
+    const saved = await save('reports', r);
+    if (!saved) return;
+
+    // "Program kerja yang akan datang" (poin 5) otomatis menjadi proker minggu ini
+    const carry = currentProker.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
+    for (const p of currentProker) await remove('proker', p.id);
+    let i = 0;
+    for (const p of carry) {
+        await save('proker', {
+            id: uid('p'), bagian: p.bagian, title: p.title,
+            desc: p.solusi || p.desc || '',
+            reported: true,
+            accMusyrif: p.isFutureOnly ? false : !!p.accMusyrif,
+            isHasilDone: false, hasilUsaha: '', evaluasi: '', solusi: '',
+            dateReported: today(), isFutureOnly: false, carriedFrom: r.id,
+            createdAt: Date.now() + (i++)
+        });
+    }
+    toast(carry.length
+        ? `Hasil rapat diarsipkan. ${carry.length} proker yang akan datang otomatis mengisi Program Kerja minggu ini.`
+        : 'Hasil rapat diarsipkan. Tidak ada proker mendatang untuk dipindahkan.');
+}
+
+/* ---------- Pulihkan (khusus Admin) ---------- */
+function openPulihkanModal() {
+    if (!isAdmin()) return toast('Hanya Admin yang dapat memulihkan hasil rapat.', 'err');
+    $('pulih-date').value = today();
+    $('pulih-date').max = today();
+    $('pulih-title').value = `Rapat Mingguan - ${today()}`;
+    $('pulih-files').checked = false;
+    renderPulihkanModal();
+    openModal('modal-pulihkan');
+}
+function renderPulihkanModal() {
+    if ($('modal-pulihkan').classList.contains('hidden')) return;
+    const reps = [...activeReports()].reverse();
+    $('pulih-archive-select').innerHTML = reps.length
+        ? reps.map(r => `<option value="${esc(r.id)}">${esc(r.date)} — ${esc(r.title)} (${(r.prokerData || []).length} proker)</option>`).join('')
+        : '<option value="">Belum ada arsip</option>';
+    const del = store.reports.filter(r => r.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+    $('pulih-deleted-list').innerHTML = del.length ? del.map(r => `
+        <div class="flex items-center justify-between gap-2 p-2 border rounded-lg border-gray-200 dark:border-gray-700">
+            <div class="min-w-0"><div class="font-semibold truncate">${esc(r.title)}</div>
+            <div class="text-[10px] text-gray-400">Rapat ${esc(r.date)} · dihapus ${esc(new Date(r.deletedAt).toLocaleDateString('sv-SE'))}</div></div>
+            <div class="flex gap-1 shrink-0">
+                <button type="button" onclick="restoreDeletedReport('${r.id}')" class="bg-emerald-600 text-white text-xs px-2.5 py-1 rounded">Pulihkan</button>
+                <button type="button" onclick="purgeReport('${r.id}')" class="bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 text-xs px-2.5 py-1 rounded">Hapus permanen</button>
+            </div>
+        </div>`).join('') : '<p class="text-xs text-gray-400">Tidak ada arsip terhapus.</p>';
+}
+async function catatRapatTerlewat(e) {
+    e.preventDefault();
+    if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
+    const date = $('pulih-date').value, title = $('pulih-title').value.trim();
+    if (!date || !title) return toast('Tanggal dan judul wajib diisi.', 'err');
+    const cur = list('proker');
+    if (!cur.length) return toast('Halaman Program Kerja sedang kosong. Gunakan opsi 2 untuk mengembalikan proker dari arsip dahulu.', 'err');
+    if (activeReports().some(r => r.date === date) && !confirm(`Sudah ada arsip bertanggal ${date}. Tetap buat arsip baru?`)) return;
+    const r = buildReport({ title, date, prokerData: cur, includeFiles: $('pulih-files').checked, restored: true });
+    if (await save('reports', r)) { closeModal('modal-pulihkan'); toast(`Rapat tanggal ${date} berhasil dicatat ke arsip.`); }
+}
+async function kembalikanDariArsip() {
+    if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
+    const r = activeReports().find(x => x.id === $('pulih-archive-select').value);
+    if (!r) return toast('Pilih arsip terlebih dahulu.', 'err');
+    const key = p => (p.bagian + '|' + p.title).trim().toLowerCase();
+    const exist = new Set(store.proker.map(key));
+    const src = (r.prokerData || []).filter(p => !exist.has(key(p)));
+    if (!src.length) return toast('Semua proker dari arsip ini sudah ada di halaman Program Kerja.');
+    if (!confirm(`Kembalikan ${src.length} proker dari arsip “${r.title}” ke halaman Program Kerja?`)) return;
+    let i = 0;
+    for (const p of src) await save('proker', { ...p, id: uid('p'), restoredFrom: r.id, createdAt: Date.now() + (i++) });
+    closeModal('modal-pulihkan');
+    toast(`${src.length} proker berhasil dikembalikan ke halaman Program Kerja.`);
+}
+async function restoreDeletedReport(id) {
+    if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
+    const r = store.reports.find(x => x.id === id); if (!r) return;
+    const { deletedAt, deletedBy, ...rest } = r;
+    if (await save('reports', rest)) { toast('Arsip berhasil dipulihkan.'); renderPulihkanModal(); }
+}
+async function purgeReport(id) {
+    if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
+    if (!confirm('Hapus permanen arsip ini? Tindakan ini tidak bisa dibatalkan.')) return;
+    await remove('reports', id); renderPulihkanModal();
 }
 
 async function uploadNotulensiFile() {
@@ -2028,7 +2194,7 @@ function rekapItems() {
         all.push({ ...p, _pekan: pekan, _order: order });
     };
     list('proker').forEach(p => { if (!p.isFutureOnly) add(p, 'Pekan berjalan', Infinity); });
-    [...list('reports')].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(r =>
+    [...activeReports()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(r =>
         (r.prokerData || []).forEach(p => { if (!p.isFutureOnly) add(p, r.date || r.title || 'Arsip', r.createdAt || 0); }));
     return all.filter(p => fb === 'ALL' || p.bagian === fb)
               .sort((a, b) => b._order - a._order);
@@ -2082,7 +2248,7 @@ function downloadRekapExcel() {
 
 function renderLaporanPage() {
     const canDelete = isAdmin();
-    const reports = [...list('reports')].reverse();
+    const reports = [...activeReports()].reverse();
     $('laporan-container').innerHTML = reports.length ? reports.map(r => {
         const rows = (r.prokerData || []).map(p => `<tr><td class="p-2 font-bold">${esc(p.bagian)}</td><td class="p-2">${esc(p.title)}</td>
             <td class="p-2">${p.accMusyrif ? 'Di-ACC' : 'Belum ACC'}${p.isHasilDone ? ', selesai' : ''}</td><td class="p-2">${esc(p.hasilUsaha) || '-'}</td><td class="p-2">${esc(p.evaluasi) || '-'}</td><td class="p-2">${esc(p.solusi) || '-'}</td></tr>`).join('');
@@ -2093,7 +2259,7 @@ function renderLaporanPage() {
             <summary class="cursor-pointer flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <div>
-                        <span class="font-bold text-lg">${esc(r.title)}</span>
+                        <span class="font-bold text-lg">${esc(r.title)}</span>${r.restored ? ' <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full align-middle">Dipulihkan</span>' : ''}
                         <span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span>
                     </div>
                 </div>
@@ -2255,7 +2421,11 @@ function downloadLaporanPDF(id) {
 
 async function deleteReport(id) {
     if (!isAdmin()) return toast('Hanya Admin yang dapat menghapus arsip laporan.', 'err');
-    if (confirm('Hapus arsip laporan ini?')) await remove('reports', id);
+    const r = store.reports.find(x => x.id === id); if (!r) return;
+    if (confirm('Hapus arsip laporan ini? Arsip masih bisa dipulihkan lewat tombol Pulihkan di Rapat Mingguan.')) {
+        await save('reports', { ...r, deletedAt: Date.now(), deletedBy: userName() });
+        toast('Arsip dipindahkan ke daftar terhapus (dapat dipulihkan).');
+    }
 }
 
 const LEGACY = { tasks: 'dcc_tasks', proker: 'dcc_proker', panitia: 'dcc_panitia', reports: 'dcc_reports', notulensi: 'dcc_notulensi' };
