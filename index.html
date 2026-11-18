@@ -39,14 +39,24 @@
         @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         @media (prefers-reduced-motion: reduce) { #toast-box > div { animation: none; } }
 
+        /* Animasi Tombol Setting Aktif/Nonaktif yang Menarik */
+        .toggle-switch-track {
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+        }
+        .toggle-switch-thumb {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+        }
+        .toggle-switch-track:active .toggle-switch-thumb {
+            transform: scale(0.9);
+        }
+
         /* ===== AUTO FIT: desktop & mobile ===== */
         html { -webkit-text-size-adjust: 100%; }
         body { overflow-wrap: break-word; }
-        #app { height: 100vh; height: 100dvh; }                    /* pas dengan layar yang terlihat */
-        .page-content { max-width: 1680px; margin-left: auto; margin-right: auto; } /* tidak melar di monitor lebar */
-        .scroll-y { max-height: 380px; max-height: clamp(240px, 52dvh, 720px); }    /* area tabel mengikuti tinggi layar */
-        [class*="max-h-[90vh]"] { max-height: 90vh; max-height: 90dvh; }            /* modal tidak terpotong toolbar HP */
-        /* tabel: di desktop memenuhi lebar, di HP tetap selebar minimumnya dan digeser ke samping */
+        #app { height: 100vh; height: 100dvh; }                    
+        .page-content { max-width: 1680px; margin-left: auto; margin-right: auto; } 
+        .scroll-y { max-height: 380px; max-height: clamp(240px, 52dvh, 720px); }    
+        [class*="max-h-[90vh]"] { max-height: 90vh; max-height: 90dvh; }            
         main table { table-layout: auto; width: 100%; }
         main th, main td { overflow-wrap: break-word; word-break: normal; }
         main thead th { white-space: nowrap; }
@@ -56,7 +66,7 @@
         @media (max-width: 479px) { html { font-size: 15px; } }
         @media (min-width: 1920px) { html { font-size: 17px; } }
         @media (min-width: 2560px) { html { font-size: 19px; } }
-        /* ===== MOBILE: navigasi di bawah ===== */
+        
         #bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
         .bnav-btn { -webkit-tap-highlight-color: transparent; }
         .bnav-btn .bnav-ico { transition: background-color .15s, color .15s; }
@@ -65,9 +75,7 @@
         .dark .bnav-btn.is-active { color: #93c5fd; }
         .dark .bnav-btn.is-active .bnav-ico { background: rgba(59,130,246,.25); }
         @media (max-width: 767px) {
-            /* tinggi aplikasi mengikuti area layar yang benar-benar terlihat (bukan 100vh) */
             #app { height: 100vh; height: 100dvh; }
-            /* sidebar berubah menjadi sheet dari bawah, dibuka lewat tombol "Lainnya" */
             #sidebar {
                 position: fixed; left: 0; right: 0; bottom: 0;
                 width: 100% !important; max-height: 85vh; max-height: 85dvh;
@@ -143,7 +151,6 @@
             <button onclick="switchTab('beranda')"     id="nav-beranda"     class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-chart-line w-5 text-center text-blue-500"></i><span class="sidebar-text">Beranda</span></button>
             <button onclick="switchTab('penugasan')"   id="nav-penugasan"   class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-list-check w-5 text-center text-indigo-500"></i><span class="sidebar-text">Penugasan</span></button>
             
-            <!-- MENU KHUSUS MUSYRIF & ADMIN -->
             <button onclick="switchTab('staf_dcc')"    id="nav-staf_dcc"    class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hidden"><i class="fa-solid fa-user-tie w-5 text-center text-orange-500"></i><span class="sidebar-text">Pembagian Tugas</span></button>
 
             <button onclick="switchTab('proker')"      id="nav-proker"      class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-bars-progress w-5 text-center text-emerald-500"></i><span class="sidebar-text">Program Kerja</span></button>
@@ -167,7 +174,6 @@
             <button onclick="openRoleModal()" class="w-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 text-xs py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-user-shield"></i><span class="sidebar-text">Ubah Akses Role</span>
             </button>
-            <!-- Tombol Manajemen Pengguna Khusus Admin -->
             <button id="btn-manage-users" onclick="openUsersModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 text-xs py-1.5 rounded-lg font-semibold hidden items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-users-gear"></i><span class="sidebar-text">Manajemen Pengguna</span>
             </button>
@@ -238,7 +244,6 @@
                     </table></div>
                 </div>
 
-                <!-- TABEL PENUGASAN BERJALAN -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-list-check text-indigo-500"></i> Penugasan yang sedang berjalan</h4>
@@ -250,7 +255,6 @@
                     </table></div>
                 </div>
 
-                <!-- TABEL PROGRES KEPANITIAAN DI DASHBOARD -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-users-gear text-amber-500"></i> Progres Kesiapan Kepanitiaan</h4>
@@ -294,7 +298,7 @@
                 </div>
             </section>
 
-            <!-- 3. PEMBAGIAN TUGAS STAF DCC (KHUSUS MUSYRIF & ADMIN) -->
+            <!-- 3. PEMBAGIAN TUGAS STAF DCC -->
             <section id="page-staf_dcc" class="page-content space-y-6 hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div>
@@ -508,7 +512,6 @@
     </div>
 </div>
 
-<!-- MODAL MANAJEMEN PENGGUNA (KHUSUS ADMIN) -->
 <div id="modal-users" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between">
@@ -535,7 +538,6 @@
     </div>
 </div>
 
-<!-- MODAL PENUGASAN -->
 <div id="modal-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-lg" id="modal-task-title">Beri penugasan baru</h3>
@@ -550,7 +552,6 @@
     </div>
 </div>
 
-<!-- MODAL PEMBAGIAN TUGAS STAF DCC -->
 <div id="modal-staf-task" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 id="modal-staf-title" class="font-bold text-lg">Bagi penugasan staf DCC</h3>
@@ -604,6 +605,7 @@
     </div>
 </div>
 
+<!-- MODAL PEMULIHAN (PULIHKAN & SELECT ARSIP) -->
 <div id="modal-pulihkan" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl p-6 space-y-5 max-h-[90vh] overflow-y-auto text-xs sm:text-sm">
         <div class="flex items-start justify-between gap-3">
@@ -623,9 +625,9 @@
         </form>
 
         <div class="space-y-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-            <h4 class="font-bold">2. Kembalikan proker dari arsip</h4>
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Menyalin proker dari arsip rapat terpilih kembali ke halaman Program Kerja (yang sudah ada tidak digandakan).</p>
-            <select id="pulih-archive-select" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600"></select>
+            <h4 class="font-bold">2. Kembalikan proker dari arsip (Select Arsip)</h4>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Pilih arsip hasil rapat mingguan yang ingin dipulihkan atau diambil kembali datanya ke Program Kerja.</p>
+            <select id="pulih-archive-select" class="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 font-medium"></select>
             <div class="flex justify-end"><button type="button" onclick="kembalikanDariArsip()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium">Kembalikan ke Program Kerja</button></div>
         </div>
 
@@ -652,7 +654,6 @@
     </div>
 </div>
 
-<!-- MODAL PEMBAGIAN TUGAS (TAMBAH / EDIT) -->
 <div id="modal-job" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 id="modal-job-title" class="font-bold text-lg">Tambah pembagian tugas</h3>
@@ -691,7 +692,7 @@
    KONFIGURASI SUPABASE
    ===================================================================== */
 const SUPABASE_URL = 'https://rdwgtohoizmgzcmarybj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkd2d0b2hvaXptZ3pjbWFyeWJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzYzNTYsImV4cCI6MjEwNzkxMjM1Nn0._uxw-rNIysobQATHIOTha5Zhfk0HtYNwq4wQiejhlW8';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkd2d0b2hvaXptZ3pjbWFyeWJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzYzTSJ9._uxw-rNIysobQATHIOTha5Zhfk0HtYNwq4wQiejhlW8';
 const TABLE = 'dcc_ws_records';
 const BUCKET = 'dcc-notulensi';
 const MAX_FILE_MB = 10;
@@ -712,10 +713,8 @@ let activeTab = 'beranda';
 let channel = null;
 let pollTimer = null;
 let authMode = 'login';
-
 let panitiaFilters = {};
 
-/* ---------- Util ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -729,8 +728,6 @@ const userRole = () => {
 };
 
 const isAdmin = () => userRole() === 'admin';
-
-/* Pengaturan aplikasi (disimpan di koleksi users_meta dengan id khusus agar tidak perlu ubah skema database) */
 const APP_SETTINGS_ID = 'app_settings';
 const getSettings = () => store.users_meta.find(u => u.id === APP_SETTINGS_ID) || {};
 const prokerAddEnabled = () => getSettings().prokerAddEnabled !== false;
@@ -758,7 +755,7 @@ function toggleTheme() {
 }
 const BNAV_MAIN = ['beranda', 'penugasan', 'proker', 'kepanitiaan'];
 function openMobileMenu() {
-    toggleSidebar(false); // pastikan menu tampil lengkap (tidak dalam mode ciut)
+    toggleSidebar(false);
     $('sidebar').classList.add('sheet-open');
     $('sheet-backdrop').classList.remove('hidden');
     updateBottomNav();
@@ -811,7 +808,6 @@ async function loadAll() {
         const missing = error.code === '42P01' || /relation|does not exist|schema cache/i.test(error.message || '');
         $('setup-banner').classList.toggle('hidden', !missing);
         setSync('offline');
-        if (!missing) toast('Gagal memuat data: ' + error.message, 'err');
         return false;
     }
     $('setup-banner').classList.add('hidden');
@@ -943,25 +939,15 @@ function renderSidebarUserInfo() {
 
     const btnManage = $('btn-manage-users');
     if (btnManage) {
-        if (isAdmin()) {
-            btnManage.classList.remove('hidden');
-            btnManage.style.display = 'flex';
-        } else {
-            btnManage.classList.add('hidden');
-            btnManage.style.display = 'none';
-        }
+        btnManage.classList.toggle('hidden', !isAdmin());
+        btnManage.style.display = isAdmin() ? 'flex' : 'none';
     }
 
     const navStaf = $('nav-staf_dcc');
     if (navStaf) {
-        if (isMusyrifOrAdmin()) {
-            navStaf.classList.remove('hidden');
-            navStaf.style.display = 'flex';
-        } else {
-            navStaf.classList.add('hidden');
-            navStaf.style.display = 'none';
-            if (activeTab === 'staf_dcc') switchTab('beranda');
-        }
+        navStaf.classList.toggle('hidden', !isMusyrifOrAdmin());
+        navStaf.style.display = isMusyrifOrAdmin() ? 'flex' : 'none';
+        if (!isMusyrifOrAdmin() && activeTab === 'staf_dcc') switchTab('beranda');
     }
 
     const badge = $('sidebar-role-badge');
@@ -984,12 +970,8 @@ function openRoleModal() {
 function toggleRoleKeyInput() {
     const sel = $('role-select').value;
     const container = $('role-key-container');
-    if (sel === 'musyrif' || sel === 'admin') {
-        container.classList.remove('hidden');
-        $('role-key-input').value = '';
-    } else {
-        container.classList.add('hidden');
-    }
+    container.classList.toggle('hidden', sel !== 'musyrif' && sel !== 'admin');
+    if (sel === 'musyrif' || sel === 'admin') $('role-key-input').value = '';
 }
 
 async function handleUpgradeRole(e) {
@@ -997,17 +979,10 @@ async function handleUpgradeRole(e) {
     const targetRole = $('role-select').value;
     const key = $('role-key-input').value.trim();
 
-    if (targetRole === 'admin' && key !== 'dcc2026') {
-        return toast('Kata kunci Akses Admin salah!', 'err');
-    }
-    if (targetRole === 'musyrif' && key !== 'stafdcc') {
-        return toast('Kata kunci Akses Musyrif salah!', 'err');
-    }
+    if (targetRole === 'admin' && key !== 'dcc2026') return toast('Kata kunci Akses Admin salah!', 'err');
+    if (targetRole === 'musyrif' && key !== 'stafdcc') return toast('Kata kunci Akses Musyrif salah!', 'err');
 
-    const { data, error } = await sb.auth.updateUser({
-        data: { role: targetRole }
-    });
-
+    const { data, error } = await sb.auth.updateUser({ data: { role: targetRole } });
     if (error) {
         toast('Gagal memperbarui akses: ' + error.message, 'err');
     } else {
@@ -1018,7 +993,6 @@ async function handleUpgradeRole(e) {
         } else {
             await save('users_meta', { id: currentUser.id, email: currentUser.email, name: userName(), role: targetRole, status: 'aktif', createdAt: Date.now() });
         }
-
         closeModal('modal-role');
         toast(`Akses berhasil diubah menjadi ${targetRole.toUpperCase()}`);
         renderSidebarUserInfo();
@@ -1056,9 +1030,7 @@ function renderUsersTable() {
                 <button onclick="toggleUserStatusAdmin('${u.id}')" class="text-xs font-semibold px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
                     ${u.status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}
                 </button>
-                <button onclick="deleteUserAdmin('${u.id}')" class="text-xs font-semibold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
-                    Hapus
-                </button>
+                <button onclick="deleteUserAdmin('${u.id}')" class="text-xs font-semibold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">Hapus</button>
             </td>
         </tr>
     `).join('') : emptyRow(4, 'Belum ada data pengguna tersimpan.');
@@ -1067,9 +1039,8 @@ function renderUsersTable() {
 async function updateUserRoleAdmin(id, newRole) {
     const u = store.users_meta.find(x => x.id === id);
     if (!u) return;
-    const updatedUser = { ...u, role: newRole };
-    await save('users_meta', updatedUser);
-    toast(`Role pengguna ${u.name || u.email} berhasil diubah menjadi ${newRole.toUpperCase()}.`);
+    await save('users_meta', { ...u, role: newRole });
+    toast(`Role pengguna ${u.name || u.email} diubah menjadi ${newRole.toUpperCase()}.`);
     renderSidebarUserInfo();
     renderCurrentPage();
 }
@@ -1086,7 +1057,7 @@ async function toggleUserStatusAdmin(id) {
 async function deleteUserAdmin(id) {
     if (confirm('Hapus data pengguna ini dari daftar workspace?')) {
         await remove('users_meta', id);
-        toast('Pengguna berhasil dihapus dari sistem workspace.');
+        toast('Pengguna berhasil dihapus.');
         renderUsersTable();
     }
 }
@@ -1125,10 +1096,7 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 function switchTab(tab) {
-    if (tab === 'staf_dcc' && !isMusyrifOrAdmin()) {
-        toast('Akses ditolak. Hanya Musyrif dan Admin.', 'err');
-        return;
-    }
+    if (tab === 'staf_dcc' && !isMusyrifOrAdmin()) return toast('Akses ditolak. Hanya Musyrif dan Admin.', 'err');
     activeTab = tab;
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     $('page-' + tab)?.classList.remove('hidden');
@@ -1233,16 +1201,11 @@ function initCountdown() {
     if (events.length > 1) cdRotate = setInterval(() => { cdIndex = (cdIndex + 1) % events.length; show(); tick(); }, 8000);
 }
 
-/* ---- Helper nama PJ: gelar "Al-Ustadz"/"Ustadz" diabaikan untuk search, filter & urutan ---- */
 function cleanPJName(name) {
-    return String(name || '')
-        .replace(/^\s*(al[\s\-\u2010-\u2015]*)?ustadz(ah)?\b[\s.\-:,]*/i, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+    return String(name || '').replace(/^\s*(al[\s\-\u2010-\u2015]*)?ustadz(ah)?\b[\s.\-:,]*/i, '').replace(/\s+/g, ' ').trim();
 }
 function normalizePJ(name) { return cleanPJName(name).toLowerCase(); }
 
-/* ---- Centang selesai: aktif hanya bila status sudah selesai; tugas tercentang turun ke bawah ---- */
 const isTaskDone = t => t.status === 'Sudah Selesai';
 const isStafDone = t => t.status === 'Selesai';
 const checkedLast = arr => [...arr.filter(x => !x.checked), ...arr.filter(x => x.checked)];
@@ -1264,13 +1227,8 @@ async function toggleStafDone(id, checked) {
 
 function renderPenugasanPage() {
     $('btn-add-task').style.display = 'inline-flex';
-
     const allTasks = list('tasks');
-    const uniqueBagian = Array.from(new Set([
-        ...BAGIAN_LIST, 
-        ...allTasks.map(t => t.bagian).filter(Boolean)
-    ])).sort();
-
+    const uniqueBagian = Array.from(new Set([...BAGIAN_LIST, ...allTasks.map(t => t.bagian).filter(Boolean)])).sort();
     const currentSelectedFilter = $('task-filter-bagian').value || 'ALL';
 
     $('task-filter-bagian').innerHTML = '<option value="ALL">Semua bagian</option>' + 
@@ -1290,35 +1248,23 @@ function renderPenugasanPage() {
             <td class="p-4"><select onchange="setTaskStatus('${t.id}', this.value)" aria-label="Status tugas" class="text-xs font-bold rounded-lg p-1.5 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 ${STATUS_LIST.map(s => `<option ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
             <td class="p-4 text-center"><button onclick="showTaskLog('${t.id}')" class="text-blue-600 text-xs hover:underline">Lihat riwayat</button></td>
-            <td class="p-4 text-right whitespace-nowrap"><button onclick="openTaskModal('${t.id}')" aria-label="Edit tugas" title="Edit" class="text-blue-600 text-xs font-bold mr-3"><i class="fa-solid fa-pen"></i></button><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" title="Hapus" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>`).join('') : emptyRow(8, (q || fb !== 'ALL' || fs !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan.');
+            <td class="p-4 text-right whitespace-nowrap"><button onclick="openTaskModal('${t.id}')" aria-label="Edit tugas" class="text-blue-600 text-xs font-bold mr-3"><i class="fa-solid fa-pen"></i></button><button onclick="deleteTask('${t.id}')" aria-label="Hapus tugas" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>`).join('') : emptyRow(8, 'Belum ada penugasan.');
 }
 
-/* =====================================================================
-   RENDER & LOGIC HALAMAN PEMBAGIAN TUGAS STAF DCC
-   ===================================================================== */
 function renderStafDccPage() {
     if (!isMusyrifOrAdmin()) return;
     const allStaf = list('staf_tasks');
-
-    // Opsi filter PJ (tanpa "Al-Ustadz"), unik & terurut abjad
     const pjMap = new Map();
     allStaf.forEach(t => { const c = cleanPJName(t.pj); if (c) pjMap.set(c.toLowerCase(), c); });
     const pjOptions = Array.from(pjMap.values()).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
     const filterEl = $('staf-filter-pj');
     const prevPJ = filterEl.value || 'ALL';
-    filterEl.innerHTML = '<option value="ALL">Semua PJ</option>' +
-        pjOptions.map(n => `<option value="${esc(n.toLowerCase())}">${esc(n)}</option>`).join('');
+    filterEl.innerHTML = '<option value="ALL">Semua PJ</option>' + pjOptions.map(n => `<option value="${esc(n.toLowerCase())}">${esc(n)}</option>`).join('');
     filterEl.value = pjMap.has(prevPJ) ? prevPJ : 'ALL';
 
-    const fpj = filterEl.value;
-    const q = normalizePJ($('staf-search-pj').value);
-    const sort = $('staf-sort-pj').value;
-
-    let stafTasks = allStaf.filter(t => {
-        const n = normalizePJ(t.pj);
-        return (fpj === 'ALL' || n === fpj) && (!q || n.includes(q));
-    });
+    const fpj = filterEl.value, q = normalizePJ($('staf-search-pj').value), sort = $('staf-sort-pj').value;
+    let stafTasks = allStaf.filter(t => { const n = normalizePJ(t.pj); return (fpj === 'ALL' || n === fpj) && (!q || n.includes(q)); });
     if (sort !== 'DEFAULT') {
         stafTasks.sort((a, b) => {
             const r = cleanPJName(a.pj).localeCompare(cleanPJName(b.pj), 'id', { sensitivity: 'base' });
@@ -1330,9 +1276,7 @@ function renderStafDccPage() {
     $('staf-tasks-table-body').innerHTML = stafTasks.length ? stafTasks.map(t => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 ${t.checked ? 'opacity-60 line-through' : ''}">
             ${doneCheckbox(t, isStafDone, 'toggleStafDone')}
-            <td class="p-4 font-semibold cursor-pointer text-blue-600 dark:text-blue-400 hover:underline" onclick="showStafDesc('${t.id}')">
-                ${esc(t.title)}
-            </td>
+            <td class="p-4 font-semibold cursor-pointer text-blue-600 dark:text-blue-400 hover:underline" onclick="showStafDesc('${t.id}')">${esc(t.title)}</td>
             <td class="p-4 text-xs font-bold">${esc(t.pj)}</td>
             <td class="p-4 text-xs text-rose-500 font-bold">${esc(t.deadline)}</td>
             <td class="p-4">
@@ -1346,7 +1290,7 @@ function renderStafDccPage() {
                 <button onclick="deleteStafTask('${t.id}')" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>
-    `).join('') : emptyRow(7, (q || fpj !== 'ALL') ? 'Tidak ada penugasan yang cocok dengan pencarian/filter.' : 'Belum ada penugasan staf DCC.');
+    `).join('') : emptyRow(7, 'Belum ada penugasan staf DCC.');
 }
 
 function openStafTaskModal(id = null) {
@@ -1374,31 +1318,16 @@ function openStafTaskModal(id = null) {
 async function saveStafTask(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-
     const editId = $('staf-task-edit-id').value;
-    const title = $('staf-input-title').value.trim();
-    const pj = $('staf-input-pj').value.trim();
-    const deadline = $('staf-input-deadline').value;
-    const desc = $('staf-input-desc').value.trim();
+    const title = $('staf-input-title').value.trim(), pj = $('staf-input-pj').value.trim();
+    const deadline = $('staf-input-deadline').value, desc = $('staf-input-desc').value.trim();
 
     if (editId) {
         const t = store.staf_tasks.find(x => x.id === editId);
-        if (t) {
-            await save('staf_tasks', { ...t, title, pj, deadline, desc });
-            toast('Penugasan staf berhasil diperbarui!');
-        }
+        if (t) await save('staf_tasks', { ...t, title, pj, deadline, desc });
+        toast('Penugasan staf diperbarui!');
     } else {
-        const t = {
-            id: uid('st'),
-            title,
-            pj,
-            deadline,
-            desc,
-            status: 'Baru Mulai',
-            keterangan: '',
-            createdAt: Date.now()
-        };
-        await save('staf_tasks', t);
+        await save('staf_tasks', { id: uid('st'), title, pj, deadline, desc, status: 'Baru Mulai', keterangan: '', createdAt: Date.now() });
         toast('Penugasan staf baru berhasil dibagikan!');
     }
     closeModal('modal-staf-task');
@@ -1409,17 +1338,13 @@ function showStafDesc(id) {
     const t = store.staf_tasks.find(x => x.id === id);
     if (!t) return;
     askText(`Deskripsi Tugas: ${t.title}`, t.desc, async (newDesc) => {
-        if (newDesc !== null) {
-            await save('staf_tasks', { ...t, desc: newDesc });
-            toast('Deskripsi tugas diperbarui.');
-        }
+        if (newDesc !== null) { await save('staf_tasks', { ...t, desc: newDesc }); toast('Deskripsi diperbarui.'); }
     });
 }
 
 async function updateStafStatus(id, newStatus) {
     const t = store.staf_tasks.find(x => x.id === id);
     if (!t || t.status === newStatus) return;
-
     askText(`Isi Keterangan untuk status: ${newStatus}`, t.keterangan || '', async (ket) => {
         await save('staf_tasks', { ...t, status: newStatus, keterangan: ket || '', checked: newStatus === 'Selesai' ? !!t.checked : false });
         toast('Status dan keterangan diperbarui.');
@@ -1428,10 +1353,7 @@ async function updateStafStatus(id, newStatus) {
 
 async function deleteStafTask(id) {
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-    if (confirm('Hapus penugasan staf ini?')) {
-        await remove('staf_tasks', id);
-        toast('Penugasan staf berhasil dihapus.');
-    }
+    if (confirm('Hapus penugasan staf ini?')) { await remove('staf_tasks', id); toast('Penugasan dihapus.'); }
 }
 
 function openTaskModal(id) {
@@ -1451,37 +1373,23 @@ async function saveTask(e) {
     const editId = $('task-edit-id').value;
     if (editId) {
         const old = store.tasks.find(x => x.id === editId);
-        if (!old) { closeModal('modal-task'); return toast('Penugasan tidak ditemukan.', 'err'); }
-        const nv = {
-            title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
-            bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value
-        };
-        const labels = { title: 'judul', pj: 'PJ', bagian: 'bagian', deadline: 'deadline' };
-        const changed = Object.keys(nv).filter(k => nv[k] !== old[k]).map(k => labels[k]);
+        if (!old) { closeModal('modal-task'); return toast('Tidak ditemukan.', 'err'); }
+        const nv = { title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(), bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value };
         closeModal('modal-task'); e.target.reset(); $('task-edit-id').value = '';
-        if (!changed.length) return toast('Tidak ada perubahan.');
-        await save('tasks', { ...old, ...nv, history: [...(old.history || []), `${today()} - Diedit oleh ${userName()} (${changed.join(', ')})`] });
+        await save('tasks', { ...old, ...nv, history: [...(old.history || []), `${today()} - Diedit oleh ${userName()}`] });
         return toast('Penugasan diperbarui.');
     }
-    const t = {
-        id: uid('t'), 
-        title: $('task-input-title').value.trim(), 
-        pj: $('task-input-pj').value.trim(),
-        bagian: $('task-input-bagian').value.trim(), 
-        deadline: $('task-input-deadline').value,
-        status: STATUS_LIST[0], 
-        history: [`${today()} - Dibuat oleh ${userName()}`], 
-        createdAt: Date.now()
-    };
-    closeModal('modal-task'); 
-    e.target.reset();
-    await save('tasks', t);
+    await save('tasks', {
+        id: uid('t'), title: $('task-input-title').value.trim(), pj: $('task-input-pj').value.trim(),
+        bagian: $('task-input-bagian').value.trim(), deadline: $('task-input-deadline').value,
+        status: STATUS_LIST[0], history: [`${today()} - Dibuat oleh ${userName()}`], createdAt: Date.now()
+    });
+    closeModal('modal-task'); e.target.reset();
 }
 
 async function setTaskStatus(id, status) {
     const t = store.tasks.find(x => x.id === id); if (!t || t.status === status) return;
-    const upd = { ...t, status, checked: status === 'Sudah Selesai' ? !!t.checked : false, history: [...(t.history || []), `${today()} - Status menjadi “${status}” oleh ${userName()}`] };
-    await save('tasks', upd);
+    await save('tasks', { ...t, status, checked: status === 'Sudah Selesai' ? !!t.checked : false, history: [...(t.history || []), `${today()} - Status menjadi “${status}”`] });
 }
 
 function showTaskLog(id) {
@@ -1491,9 +1399,7 @@ function showTaskLog(id) {
     openModal('modal-log');
 }
 
-async function deleteTask(id) {
-    if (confirm('Hapus penugasan ini?')) await remove('tasks', id);
-}
+async function deleteTask(id) { if (confirm('Hapus penugasan ini?')) await remove('tasks', id); }
 
 let textCallback = null;
 function askText(title, value, cb) {
@@ -1514,7 +1420,6 @@ function renderProkerPage() {
     const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
     const canAcc = isMusyrifOrAdmin();
 
-    // Status tombol tambah proker (bisa dimatikan Admin)
     const addOk = canAddProker();
     ['btn-add-proker', 'btn-add-proker-depan'].forEach(id => {
         const b = $(id); if (!b) return;
@@ -1523,7 +1428,7 @@ function renderProkerPage() {
         b.classList.toggle('cursor-not-allowed', !addOk);
         b.title = addOk ? '' : 'Fitur tambah proker dinonaktifkan oleh Admin';
     });
-    // Info: jumlah proker menunggu ACC (Musyrif/Admin) atau pemberitahuan fitur dimatikan (member)
+
     const pendingAccCount = store.proker.filter(p => p.bagian === bag && !p.accMusyrif).length;
     let infoHtml = '';
     if (isMusyrifOrAdmin()) {
@@ -1536,22 +1441,23 @@ function renderProkerPage() {
         </div>`;
     }
     $('proker-lapor-container').innerHTML = infoHtml;
-    // Saklar khusus Admin
+
+    // Saklar Khusus Admin dengan Animasi Halus
     $('proker-admin-toggle').innerHTML = isAdmin() ? `
         <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
             <span>Fitur tambah proker</span>
-            <button type="button" role="switch" aria-checked="${addOk}" aria-label="Aktif/nonaktifkan fitur tambah proker" onclick="toggleProkerAdd()" class="relative inline-flex w-10 h-5 rounded-full transition ${addOk ? 'bg-emerald-500' : 'bg-gray-400'}">
-                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${addOk ? 'translate-x-5' : ''}"></span>
+            <button type="button" role="switch" aria-checked="${addOk}" aria-label="Aktif/nonaktifkan fitur tambah proker" onclick="toggleProkerAdd()" class="toggle-switch-track relative inline-flex w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none ${addOk ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-gray-400 dark:bg-gray-600'}">
+                <span class="toggle-switch-thumb absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${addOk ? 'translate-x-5' : 'translate-x-0'}"></span>
             </button>
-            <span class="${addOk ? 'text-emerald-600' : 'text-gray-500'}">${addOk ? 'Aktif' : 'Nonaktif'}</span>
+            <span class="${addOk ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-500'}">${addOk ? 'Aktif' : 'Nonaktif'}</span>
         </div>` : '';
 
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
-        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
+        <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
         <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
         <td class="p-3 text-xs text-center"><span class="${p.accMusyrif ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.accMusyrif ? 'Di-ACC' : 'Menunggu ACC'}</span></td>
         <td class="p-3 text-right"><button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
-        : emptyRow(5, 'Belum ada program kerja untuk bagian ini.');
+        : emptyRow(5, 'Belum ada program kerja.');
 
     const acc = current.filter(p => p.accMusyrif);
     $('proker-table-2').innerHTML = acc.length ? acc.map(p => `
@@ -1568,7 +1474,7 @@ function renderProkerPage() {
     $('proker-table-4').innerHTML = open.length ? open.map(p => `
         <tr><td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-amber-700 dark:text-amber-300">${esc(p.solusi) || 'Belum ada solusi'}</td>
         <td class="p-3 text-right"><button onclick="editField('${p.id}','solusi')" class="bg-amber-500 text-white text-xs px-3 py-1 rounded">Edit solusi</button></td></tr>`).join('')
-        : emptyRow(3, 'Tidak ada solusi yang perlu dirumuskan.');
+        : emptyRow(3, 'Tidak ada solusi.');
 
     const future = items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
     $('proker-table-5').innerHTML = future.length ? future.map(p => `
@@ -1576,7 +1482,7 @@ function renderProkerPage() {
         <td class="p-3 text-xs">${p.isFutureOnly ? 'Rencana minggu depan' : 'Otomatis dari evaluasi'}</td><td class="p-3 text-xs">${esc(p.solusi || p.desc) || '-'}</td>
         <td class="p-3 text-right flex items-center justify-end gap-2">
             <button onclick="editField('${p.id}','solusi')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 hover:text-rose-700 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+            <button onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
         </td></tr>`).join('')
         : emptyRow(4, 'Belum ada rencana mendatang.');
 }
@@ -1586,7 +1492,7 @@ async function toggleProkerAdd() {
     const s = getSettings();
     const on = !prokerAddEnabled();
     await save('users_meta', { ...s, id: APP_SETTINGS_ID, isSettings: true, prokerAddEnabled: on, updatedBy: userName(), createdAt: s.createdAt || Date.now() });
-    toast(on ? 'Fitur tambah proker DIAKTIFKAN untuk semua pengguna.' : 'Fitur tambah proker DINONAKTIFKAN. Hanya Admin yang masih bisa menambah proker.');
+    toast(on ? 'Fitur tambah proker DIAKTIFKAN.' : 'Fitur tambah proker DINONAKTIFKAN.');
 }
 
 function openProkerModal(type) {
@@ -1598,79 +1504,48 @@ function openProkerModal(type) {
 
 async function saveProker(e) {
     e.preventDefault();
-    if (!canAddProker()) { closeModal('modal-proker'); return toast('Fitur tambah proker sedang dinonaktifkan oleh Admin.', 'err'); }
+    if (!canAddProker()) { closeModal('modal-proker'); return toast('Fitur tambah proker dinonaktifkan.', 'err'); }
     const type = $('proker-target-type').value;
-
-    // Tanpa tahap "lapor": proker langsung masuk dan checklist ACC aktif untuk Musyrif/Admin
     const p = {
-        id: uid('p'),
-        bagian: $('proker-bagian-filter').value,
-        title: $('proker-input-title').value.trim(),
-        desc: $('proker-input-desc').value.trim(),
-        reported: true,
-        accMusyrif: false,
-        isHasilDone: false,
-        hasilUsaha: '',
-        evaluasi: '',
-        solusi: '',
-        dateReported: today(),
-        isFutureOnly: type === 'minggu_depan',
-        createdAt: Date.now()
+        id: uid('p'), bagian: $('proker-bagian-filter').value,
+        title: $('proker-input-title').value.trim(), desc: $('proker-input-desc').value.trim(),
+        reported: true, accMusyrif: false, isHasilDone: false, hasilUsaha: '', evaluasi: '', solusi: '',
+        dateReported: today(), isFutureOnly: type === 'minggu_depan', createdAt: Date.now()
     };
-
-    closeModal('modal-proker');
-    e.target.reset();
+    closeModal('modal-proker'); e.target.reset();
     await save('proker', p);
 }
 
 const getProker = id => store.proker.find(x => x.id === id);
 async function toggleAccProker(id) {
-    if (!isMusyrifOrAdmin()) {
-        toast('Hanya Musyrif atau Admin yang dapat memberikan ACC.', 'err');
-        return renderProkerPage();
-    }
-    const p = getProker(id);
-    if (!p) return;
-    const acc = !p.accMusyrif;
-    // ACC langsung aktif untuk Musyrif/Admin begitu proker dibuat, tanpa tahap lapor
-    const upd = { ...p, accMusyrif: acc };
-    upd.reported = true; upd.dateReported = p.dateReported || today();
-    await save('proker', upd);
+    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif atau Admin yang dapat memberikan ACC.', 'err');
+    const p = getProker(id); if (!p) return;
+    await save('proker', { ...p, accMusyrif: !p.accMusyrif, reported: true, dateReported: p.dateReported || today() });
 }
 function toggleHasilDone(id) {
     const p = getProker(id); if (!p) return;
     if (p.isHasilDone) return void save('proker', { ...p, isHasilDone: false });
     askText('Capaian hasil usaha: ' + p.title, p.hasilUsaha, v => save('proker', { ...p, isHasilDone: true, hasilUsaha: v || 'Selesai' }));
-    renderProkerPage();
 }
 async function deleteProker(id) { if (confirm('Hapus program kerja ini?')) await remove('proker', id); }
 function editField(id, field) {
     const p = getProker(id); if (!p) return;
-    askText(field === 'evaluasi' ? 'Kendala: ' + p.title : (p.isFutureOnly ? 'Rencana: ' + p.title : 'Solusi: ' + p.title), p[field] || p.desc, v => save('proker', { ...p, [field]: v }));
+    askText(field === 'evaluasi' ? 'Kendala: ' + p.title : 'Solusi: ' + p.title, p[field] || p.desc, v => save('proker', { ...p, [field]: v }));
 }
+
 async function importLastWeek() {
     const bag = $('proker-bagian-filter').value;
     const last = [...activeReports()].pop();
-    if (!last) return toast('Belum ada arsip rapat untuk dijadikan acuan.');
+    if (!last) return toast('Belum ada arsip rapat.');
     const exist = new Set(store.proker.filter(p => p.bagian === bag && !p.isFutureOnly).map(p => p.title.toLowerCase()));
     const src = (last.prokerData || []).filter(p => p.bagian === bag && (p.isFutureOnly || !p.isHasilDone || !p.accMusyrif) && !exist.has(p.title.toLowerCase()));
-    if (!src.length) return toast('Tidak ada proker belum selesai dari arsip terakhir untuk bagian ini.');
-    if (!confirm(`Salin ${src.length} proker belum selesai dari arsip “${last.title}” ke minggu ini?`)) return;
+    if (!src.length) return toast('Tidak ada proker belum selesai dari arsip terakhir.');
+    if (!confirm(`Salin ${src.length} proker belum selesai dari arsip “${last.title}”?`)) return;
     
     for (const p of src) {
-        await save('proker', { 
-            ...p, 
-            id: uid('p'), 
-            reported: true,         
-            accMusyrif: true,       
-            isHasilDone: false,     
-            hasilUsaha: p.hasilUsaha || '', 
-            dateReported: today(), 
-            isFutureOnly: false, 
-            createdAt: Date.now() 
-        });
+        await save('proker', { ...p, id: uid('p'), reported: true, accMusyrif: true, isHasilDone: false, hasilUsaha: '', dateReported: today(), isFutureOnly: false, createdAt: Date.now() });
     }
-    toast('Proker minggu lalu berhasil disalin dan siap untuk diceklis usahanya.');
+    toast('Proker minggu lalu berhasil disalin.');
 }
 
 function renderPanitiaPage() {
@@ -1681,110 +1556,67 @@ function renderPanitiaPage() {
     $('panitia-cards-container').innerHTML = events.length ? events.map(k => {
         if (!panitiaFilters[k.id]) panitiaFilters[k.id] = { bagian: 'ALL', sort: 'bagian_asc' };
         const fState = panitiaFilters[k.id];
-
         let jobs = [...(k.joblists || [])];
         const uniqueBagian = Array.from(new Set(jobs.map(j => j.bagian))).sort();
 
-        if (fState.bagian !== 'ALL') {
-            jobs = jobs.filter(j => j.bagian === fState.bagian);
-        }
-
+        if (fState.bagian !== 'ALL') jobs = jobs.filter(j => j.bagian === fState.bagian);
         jobs.sort((a, b) => {
-            if (fState.sort === 'bagian_asc') {
-                return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
-            } else if (fState.sort === 'bagian_desc') {
-                return (b.bagian || '').localeCompare(a.bagian || '') || (b.task || '').localeCompare(a.task || '');
-            } else if (fState.sort === 'status_selesai') {
-                return (b.done === true) - (a.done === true);
-            } else if (fState.sort === 'status_belum') {
-                return (a.done === true) - (b.done === true);
-            }
+            if (fState.sort === 'bagian_asc') return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
+            if (fState.sort === 'bagian_desc') return (b.bagian || '').localeCompare(a.bagian || '') || (b.task || '').localeCompare(a.task || '');
+            if (fState.sort === 'status_selesai') return (b.done === true) - (a.done === true);
+            if (fState.sort === 'status_belum') return (a.done === true) - (b.done === true);
             return 0;
         });
 
-        const totalAll = (k.joblists || []).length;
-        const doneAll = (k.joblists || []).filter(j => j.done).length;
+        const totalAll = (k.joblists || []).length, doneAll = (k.joblists || []).filter(j => j.done).length;
         const percent = totalAll > 0 ? Math.round((doneAll / totalAll) * 100) : 0;
-        
-        const timeStr = k.waktu || '08:00';
-        const targetTs = new Date(k.tanggal + 'T' + timeStr + ':00').getTime();
-        const diffMs = targetTs - Date.now();
-        const daysLeft = Math.ceil(diffMs / 864e5);
+        const targetTs = new Date(k.tanggal + 'T' + (k.waktu || '08:00') + ':00').getTime();
+        const diffMs = targetTs - Date.now(), daysLeft = Math.ceil(diffMs / 864e5);
         const when = diffMs > 0 ? (daysLeft > 1 ? `${daysLeft} hari lagi` : 'Kurang dari 1 hari') : (k.tanggal === today() ? 'Hari ini' : 'Sudah lewat');
-        const isFinished = k.isFinished || false;
 
-        return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border ${isFinished ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/20' : 'border-gray-200 dark:border-gray-700'}">
+        return `<div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border ${k.isFinished ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/20' : 'border-gray-200 dark:border-gray-700'}">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-2">
                             <h4 class="font-bold text-lg">${esc(k.nama)}</h4>
-                            ${isFinished ? '<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Selesai</span>' : ''}
+                            ${k.isFinished ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Selesai</span>' : ''}
                         </div>
-                        
                         <div class="flex items-center gap-2">
                             ${canManageAgenda ? `
-                                <button onclick="openPanitiaModal('${k.id}')" title="Edit Agenda" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${isFinished ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent'}">
-                                    <i class="fa-solid ${isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i> ${isFinished ? 'Batalkan Selesai' : 'Selesai Acara'}
-                                </button>
+                                <button onclick="openPanitiaModal('${k.id}')" class="bg-blue-600 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="togglePanitiaFinished('${k.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition ${k.isFinished ? 'bg-gray-200 text-gray-700' : 'bg-emerald-600 text-white'}"><i class="fa-solid ${k.isFinished ? 'fa-rotate-left' : 'fa-check'} mr-1"></i>${k.isFinished ? 'Batal Selesai' : 'Selesai Acara'}</button>
                             ` : ''}
-                            <button onclick="downloadPanitiaExcel('${k.id}')" title="Unduh Excel" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-excel"></i></button>
-                            <button onclick="downloadPanitiaPDF('${k.id}')" title="Unduh PDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-pdf"></i></button>
+                            <button onclick="downloadPanitiaExcel('${k.id}')" class="bg-teal-600 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-excel"></i></button>
+                            <button onclick="downloadPanitiaPDF('${k.id}')" class="bg-rose-600 text-white text-xs px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-file-pdf"></i></button>
                         </div>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${esc(k.deskripsi)}</p>
                     <div class="mt-2 text-xs font-semibold text-blue-600">Pelaksanaan: ${esc(k.tanggal)} pukul ${esc(k.waktu || '08:00')} (${when})</div>
-                    
-                    <div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden mt-3">
-                        <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
-                    </div>
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden mt-3"><div class="bg-amber-500 h-full" style="width: ${percent}%"></div></div>
                 </div>
-                ${canManageAgenda ? `<button onclick="deletePanitia('${k.id}')" aria-label="Hapus agenda" class="text-rose-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                ${canManageAgenda ? `<button onclick="deletePanitia('${k.id}')" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
-
-            <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-bold"><i class="fa-solid fa-filter text-blue-500 mr-1"></i> Filter Bagian:</span>
-                    <select onchange="updatePanitiaFilter('${k.id}', 'bagian', this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 font-medium">
-                        <option value="ALL">Semua Bagian</option>
-                        ${uniqueBagian.map(b => `<option value="${esc(b)}" ${fState.bagian === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="font-bold"><i class="fa-solid fa-arrow-sort text-indigo-500 mr-1"></i> Urutkan:</span>
-                    <select onchange="updatePanitiaFilter('${k.id}', 'sort', this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 font-medium">
-                        <option value="bagian_asc" ${fState.sort === 'bagian_asc' ? 'selected' : ''}>Bagian (A-Z)</option>
-                        <option value="bagian_desc" ${fState.sort === 'bagian_desc' ? 'selected' : ''}>Bagian (Z-A)</option>
-                        <option value="status_selesai" ${fState.sort === 'status_selesai' ? 'selected' : ''}>Status (Selesai Dulu)</option>
-                        <option value="status_belum" ${fState.sort === 'status_belum' ? 'selected' : ''}>Status (Belum Dulu)</option>
-                    </select>
-                </div>
+            <div class="mt-4 flex items-center justify-between gap-3 bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg text-xs">
+                <select onchange="updatePanitiaFilter('${k.id}', 'bagian', this.value)" class="bg-white dark:bg-gray-800 border rounded px-2 py-1"><option value="ALL">Semua Bagian</option>${uniqueBagian.map(b => `<option value="${esc(b)}" ${fState.bagian === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>
+                <select onchange="updatePanitiaFilter('${k.id}', 'sort', this.value)" class="bg-white dark:bg-gray-800 border rounded px-2 py-1"><option value="bagian_asc">Bagian (A-Z)</option><option value="status_selesai">Status (Selesai Dulu)</option></select>
             </div>
-
-            <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
-                <div class="flex items-center justify-between mb-2">
-                    <h5 class="text-sm font-semibold">Pembagian tugas (${doneAll}/${totalAll} selesai)</h5>
-                    <button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Tambah tugas</button>
-                </div>
+            <div class="mt-4 pt-3 border-t">
+                <div class="flex justify-between mb-2"><h5 class="text-sm font-semibold">Tugas (${doneAll}/${totalAll})</h5><button onclick="openJobModal('${k.id}')" class="text-xs text-amber-600 font-semibold"><i class="fa-solid fa-plus"></i> Tambah</button></div>
                 <ul class="space-y-1.5">${jobs.length ? jobs.map(j => `
                     <li class="flex items-center gap-2 text-xs">
-                        <input type="checkbox" aria-label="Tugas selesai" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600 cursor-pointer">
+                        <input type="checkbox" ${j.done ? 'checked' : ''} onchange="toggleJob('${k.id}','${j.id}')" class="w-4 h-4 accent-amber-600 cursor-pointer">
                         <span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-semibold">${esc(j.bagian)}</span>
                         <span class="flex-1 ${j.done ? 'line-through text-gray-400' : ''}">${esc(j.task)}</span>
-                        <button onclick="openJobModal('${k.id}', '${j.id}')" aria-label="Edit tugas" class="text-blue-500 hover:text-blue-700 p-1"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteJob('${k.id}','${j.id}')" aria-label="Hapus tugas" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark"></i></button>
-                    </li>`).join('') : '<li class="text-xs text-gray-400">Tidak ada tugas yang sesuai filter.</li>'}</ul>
+                        <button onclick="openJobModal('${k.id}', '${j.id}')" class="text-blue-500"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteJob('${k.id}','${j.id}')" class="text-rose-400"><i class="fa-solid fa-xmark"></i></button>
+                    </li>`).join('') : '<li class="text-xs text-gray-400">Tidak ada tugas.</li>'}</ul>
             </div>
-
-            <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1" for="eval-${k.id}">
-                    <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i> Catatan &amp; Evaluasi Pelaksanaan Acara:
-                </label>
-                <textarea id="eval-${k.id}" onblur="savePanitiaEvaluation('${k.id}', this.value)" rows="3" placeholder="Ketik catatan atau evaluasi kegiatan ini di sini..." class="w-full text-xs p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500">${esc(k.evaluation || '')}</textarea>
+            <div class="mt-4 pt-3 border-t">
+                <textarea id="eval-${k.id}" onblur="savePanitiaEvaluation('${k.id}', this.value)" rows="2" placeholder="Catatan evaluasi..." class="w-full text-xs p-2 rounded border bg-gray-50 dark:bg-gray-900">${esc(k.evaluation || '')}</textarea>
             </div>
         </div>`;
-    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada agenda.</div>';
+    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border">Belum ada agenda.</div>';
 }
 
 function updatePanitiaFilter(id, type, val) {
@@ -1794,26 +1626,20 @@ function updatePanitiaFilter(id, type, val) {
 }
 
 function openPanitiaModal(id = null) {
-    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat mengelola agenda.', 'err');
-    
+    if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
     $('panitia-edit-id').value = id || '';
     if (id) {
         const k = store.panitia.find(x => x.id === id);
         if (k) {
-            $('modal-panitia-title').textContent = 'Edit agenda kegiatan';
+            $('modal-panitia-title').textContent = 'Edit agenda';
             $('panitia-input-nama').value = k.nama || '';
             $('panitia-input-deskripsi').value = k.deskripsi || '';
             $('panitia-input-tanggal').value = k.tanggal || '';
             $('panitia-input-waktu').value = k.waktu || '08:00';
-            $('panitia-submit-btn').textContent = 'Perbarui agenda';
         }
     } else {
-        $('modal-panitia-title').textContent = 'Buat agenda kegiatan baru';
-        $('panitia-input-nama').value = '';
-        $('panitia-input-deskripsi').value = '';
-        $('panitia-input-tanggal').value = '';
-        $('panitia-input-waktu').value = '08:00';
-        $('panitia-submit-btn').textContent = 'Simpan agenda';
+        $('modal-panitia-title').textContent = 'Buat agenda baru';
+        $('panitia-input-nama').value = ''; $('panitia-input-deskripsi').value = ''; $('panitia-input-tanggal').value = '';
     }
     openModal('modal-panitia');
 }
@@ -1821,196 +1647,72 @@ function openPanitiaModal(id = null) {
 async function savePanitia(e) {
     e.preventDefault();
     if (!isMusyrifOrAdmin()) return toast('Akses ditolak.', 'err');
-    
     const editId = $('panitia-edit-id').value;
-    const nama = $('panitia-input-nama').value.trim();
-    const deskripsi = $('panitia-input-deskripsi').value.trim();
-    const tanggal = $('panitia-input-tanggal').value;
-    const waktu = $('panitia-input-waktu').value || '08:00';
+    const nama = $('panitia-input-nama').value.trim(), deskripsi = $('panitia-input-deskripsi').value.trim();
+    const tanggal = $('panitia-input-tanggal').value, waktu = $('panitia-input-waktu').value || '08:00';
 
     if (editId) {
         const k = store.panitia.find(x => x.id === editId);
-        if (k) {
-            await save('panitia', { ...k, nama, deskripsi, tanggal, waktu });
-            toast('Agenda kegiatan berhasil diperbarui!');
-        }
+        if (k) await save('panitia', { ...k, nama, deskripsi, tanggal, waktu });
+        toast('Agenda diperbarui!');
     } else {
-        const k = { 
-            id: uid('k'), 
-            nama, 
-            deskripsi, 
-            tanggal, 
-            waktu,
-            joblists: [], 
-            evaluation: '', 
-            isFinished: false, 
-            createdAt: Date.now() 
-        };
-        await save('panitia', k);
-        toast('Agenda kegiatan baru berhasil dibuat!');
+        await save('panitia', { id: uid('k'), nama, deskripsi, tanggal, waktu, joblists: [], evaluation: '', isFinished: false, createdAt: Date.now() });
+        toast('Agenda baru dibuat!');
     }
-    closeModal('modal-panitia'); 
-    e.target.reset();
+    closeModal('modal-panitia'); e.target.reset();
 }
 
-async function deletePanitia(id) {
-    if (!isMusyrifOrAdmin()) return toast('Hanya Musyrif dan Admin yang dapat menghapus agenda.', 'err');
-    if (confirm('Hapus agenda kegiatan ini beserta pembagian tugasnya?')) await remove('panitia', id);
-}
-
+async function deletePanitia(id) { if (confirm('Hapus agenda ini?')) await remove('panitia', id); }
 async function togglePanitiaFinished(id) {
-    if (!isMusyrifOrAdmin()) {
-        return toast('Hanya Musyrif atau Admin yang dapat mengubah status selesai kegiatan.', 'err');
-    }
     const k = store.panitia.find(x => x.id === id); if (!k) return;
-    const newStatus = !k.isFinished;
-    await save('panitia', { ...k, isFinished: newStatus });
-    toast(newStatus ? 'Kegiatan ditandai selesai. Countdown otomatis disembunyikan dari beranda.' : 'Status selesai dibatalkan.');
+    await save('panitia', { ...k, isFinished: !k.isFinished });
 }
-
 async function savePanitiaEvaluation(id, text) {
-    const k = store.panitia.find(x => x.id === id); if (!k) return;
-    if (k.evaluation !== text) {
-        await save('panitia', { ...k, evaluation: text });
-        toast('Evaluasi berhasil disimpan otomatis.');
-    }
+    const k = store.panitia.find(x => x.id === id); if (!k || k.evaluation === text) return;
+    await save('panitia', { ...k, evaluation: text });
 }
 
 function getSortedAndFilteredJobs(k) {
     let jobs = [...(k.joblists || [])];
     const fState = panitiaFilters[k.id] || { bagian: 'ALL', sort: 'bagian_asc' };
-
-    if (fState.bagian !== 'ALL') {
-        jobs = jobs.filter(j => j.bagian === fState.bagian);
-    }
-
-    jobs.sort((a, b) => {
-        if (fState.sort === 'bagian_asc') {
-            return (a.bagian || '').localeCompare(b.bagian || '') || (a.task || '').localeCompare(b.task || '');
-        } else if (fState.sort === 'bagian_desc') {
-            return (b.bagian || '').localeCompare(a.bagian || '') || (b.task || '').localeCompare(a.task || '');
-        } else if (fState.sort === 'status_selesai') {
-            return (b.done === true) - (a.done === true);
-        } else if (fState.sort === 'status_belum') {
-            return (a.done === true) - (b.done === true);
-        }
-        return 0;
-    });
-
+    if (fState.bagian !== 'ALL') jobs = jobs.filter(j => j.bagian === fState.bagian);
     return jobs;
 }
 
 function downloadPanitiaExcel(id) {
     const k = store.panitia.find(x => x.id === id); if (!k) return;
-    const jobs = getSortedAndFilteredJobs(k);
     const wb = XLSX.utils.book_new();
-    const tasksData = jobs.map((j, idx) => ({ No: idx + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum Selesai' }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tasksData), 'Pembagian Tugas');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 'Nama Kegiatan': k.nama, 'Deskripsi': k.deskripsi, 'Tanggal': k.tanggal, 'Waktu': k.waktu || '08:00', 'Status Selesai': k.isFinished ? 'Ya' : 'Belum', 'Evaluasi / Catatan': k.evaluation }]), 'Detail Kegiatan');
-    XLSX.writeFile(wb, `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getSortedAndFilteredJobs(k).map((j, i) => ({ No: i + 1, Bagian: j.bagian, Tugas: j.task, Status: j.done ? 'Selesai' : 'Belum' }))), 'Tugas');
+    XLSX.writeFile(wb, `Kepanitiaan_${k.nama}.xlsx`);
 }
 
 function downloadPanitiaPDF(id) {
     const k = store.panitia.find(x => x.id === id); if (!k) return;
-    const jobs = getSortedAndFilteredJobs(k);
-
     const container = document.createElement('div');
-    container.style.padding = '20px';
-    container.style.fontFamily = 'Inter, sans-serif';
-    container.style.color = '#1f2937';
-    container.style.backgroundColor = '#ffffff';
-
-    const rowsHtml = jobs.length ? jobs.map((j, idx) => `
-        <tr>
-            <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px;">${idx + 1}</td>
-            <td style="border: 1px solid #d1d5db; padding: 8px; font-weight: bold; font-size: 11px;">${esc(j.bagian)}</td>
-            <td style="border: 1px solid #d1d5db; padding: 8px; font-size: 11px;">${esc(j.task)}</td>
-            <td style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; color: ${j.done ? '#059669' : '#d97706'};">${j.done ? 'Selesai' : 'Belum'}</td>
-        </tr>
-    `).join('') : `<tr><td colspan="4" style="border: 1px solid #d1d5db; padding: 12px; text-align: center; font-size: 11px; color: #9ca3af;">Tidak ada data tugas</td></tr>`;
-
-    container.innerHTML = `
-        <div style="margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            <h2 style="margin: 0; font-size: 18px; color: #1e3a8a;">Laporan Kegiatan Kepanitiaan</h2>
-            <h3 style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">${esc(k.nama)}</h3>
-        </div>
-        <div style="margin-bottom: 15px; font-size: 12px;">
-            <p style="margin: 3px 0;"><strong>Deskripsi:</strong> ${esc(k.deskripsi)}</p>
-            <p style="margin: 3px 0;"><strong>Waktu Pelaksanaan:</strong> ${esc(k.tanggal)} pukul ${esc(k.waktu || '08:00')}</p>
-            <p style="margin: 3px 0;"><strong>Status Acara:</strong> ${k.isFinished ? 'Selesai' : 'Aktif / Berjalan'}</p>
-        </div>
-        <h4 style="margin: 15px 0 8px 0; font-size: 13px; font-weight: bold; color: #374151;">Tabel Pembagian Tugas</h4>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <thead>
-                <tr style="background-color: #f3f4f6;">
-                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; width: 40px;">No</th>
-                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px; width: 130px;">Bagian</th>
-                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px;">Tugas</th>
-                    <th style="border: 1px solid #d1d5db; padding: 8px; text-align: center; font-size: 11px; width: 90px;">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rowsHtml}
-            </tbody>
-        </table>
-        <h4 style="margin: 15px 0 8px 0; font-size: 13px; font-weight: bold; color: #374151;">Catatan & Evaluasi</h4>
-        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 10px; border-radius: 6px; font-size: 11px; white-space: pre-wrap; line-height: 1.4;">${esc(k.evaluation || 'Belum ada catatan evaluasi.')}</div>
-    `;
-
-    const opt = {
-        margin:       10,
-        filename:     `Kepanitiaan_${k.nama.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    toast('Memproses unduhan PDF...');
-    html2pdf().from(container).set(opt).save().then(() => {
-        toast('PDF berhasil diunduh!');
-    });
+    container.style.cssText = 'padding:20px;font-family:Inter;color:#1f2937;background:#fff';
+    container.innerHTML = `<h2>${esc(k.nama)}</h2><p>${esc(k.deskripsi)}</p><p>Pelaksanaan: ${esc(k.tanggal)}</p>`;
+    html2pdf().from(container).save(`Kepanitiaan_${k.nama}.pdf`);
 }
 
 function openJobModal(kid, jid = null) {
-    $('job-panitia-id').value = kid;
-    $('job-edit-id').value = jid || '';
-    
+    $('job-panitia-id').value = kid; $('job-edit-id').value = jid || '';
     if (jid) {
-        const k = store.panitia.find(x => x.id === kid);
-        const j = k?.joblists?.find(x => x.id === jid);
-        if (j) {
-            $('modal-job-title').textContent = 'Edit pembagian tugas';
-            $('job-input-bagian').value = j.bagian;
-            $('job-input-task').value = j.task;
-        }
-    } else {
-        $('modal-job-title').textContent = 'Tambah pembagian tugas';
-        $('job-input-bagian').value = '';
-        $('job-input-task').value = '';
-    }
+        const j = store.panitia.find(x => x.id === kid)?.joblists?.find(x => x.id === jid);
+        if (j) { $('job-input-bagian').value = j.bagian; $('job-input-task').value = j.task; }
+    } else { $('job-input-bagian').value = ''; $('job-input-task').value = ''; }
     openModal('modal-job');
 }
 
 async function saveJob(e) {
     e.preventDefault();
-    const kid = $('job-panitia-id').value;
-    const jid = $('job-edit-id').value;
+    const kid = $('job-panitia-id').value, jid = $('job-edit-id').value;
     const k = store.panitia.find(x => x.id === kid); if (!k) return;
-
-    const bagian = $('job-input-bagian').value.trim();
-    const task = $('job-input-task').value.trim();
-
-    let updatedJobs = [...(k.joblists || [])];
-
-    if (jid) {
-        updatedJobs = updatedJobs.map(j => j.id === jid ? { ...j, bagian, task } : j);
-    } else {
-        const job = { id: uid('j'), bagian, task, done: false };
-        updatedJobs.push(job);
-    }
-
+    const bagian = $('job-input-bagian').value.trim(), task = $('job-input-task').value.trim();
+    let jobs = [...(k.joblists || [])];
+    if (jid) jobs = jobs.map(j => j.id === jid ? { ...j, bagian, task } : j);
+    else jobs.push({ id: uid('j'), bagian, task, done: false });
     closeModal('modal-job'); e.target.reset();
-    await save('panitia', { ...k, joblists: updatedJobs });
+    await save('panitia', { ...k, joblists: jobs });
 }
 
 async function toggleJob(kid, jid) {
@@ -2019,7 +1721,7 @@ async function toggleJob(kid, jid) {
 }
 
 async function deleteJob(kid, jid) {
-    if (confirm('Hapus tugas ini?')) {
+    if (confirm('Hapus tugas?')) {
         const k = store.panitia.find(x => x.id === kid); if (!k) return;
         await save('panitia', { ...k, joblists: k.joblists.filter(j => j.id !== jid) });
     }
@@ -2037,6 +1739,7 @@ function renderRapatPage() {
     fill('rapat-table-3', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-rose-500">${esc(p.evaluasi) || '-'}</td></tr>`);
     fill('rapat-table-4', open, 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3 text-amber-600">${esc(p.solusi) || '-'}</td></tr>`);
     fill('rapat-table-5', items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif), 3, p => `<tr><td class="p-3 font-bold">${esc(p.bagian)}</td><td class="p-3">${esc(p.title)}</td><td class="p-3">${esc(p.solusi || p.desc) || '-'}</td></tr>`);
+    
     const bp = $('btn-pulihkan-rapat'); if (bp) bp.style.display = isAdmin() ? 'inline-flex' : 'none';
     renderNotulensiFileList();
 }
@@ -2070,30 +1773,25 @@ async function submitArsip(e) {
 
     const currentProker = list('proker');
     const r = buildReport({ title, date, prokerData: currentProker });
-    const saved = await save('reports', r);
-    if (!saved) return;
+    if (!await save('reports', r)) return;
 
-    // "Program kerja yang akan datang" (poin 5) otomatis menjadi proker minggu ini
     const carry = currentProker.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
     for (const p of currentProker) await remove('proker', p.id);
     let i = 0;
     for (const p of carry) {
         await save('proker', {
-            id: uid('p'), bagian: p.bagian, title: p.title,
-            desc: p.solusi || p.desc || '',
-            reported: true,
-            accMusyrif: p.isFutureOnly ? false : !!p.accMusyrif,
+            id: uid('p'), bagian: p.bagian, title: p.title, desc: p.solusi || p.desc || '',
+            reported: true, accMusyrif: p.isFutureOnly ? false : !!p.accMusyrif,
             isHasilDone: false, hasilUsaha: '', evaluasi: '', solusi: '',
-            dateReported: today(), isFutureOnly: false, carriedFrom: r.id,
-            createdAt: Date.now() + (i++)
+            dateReported: today(), isFutureOnly: false, carriedFrom: r.id, createdAt: Date.now() + (i++)
         });
     }
-    toast(carry.length
-        ? `Hasil rapat diarsipkan. ${carry.length} proker yang akan datang otomatis mengisi Program Kerja minggu ini.`
-        : 'Hasil rapat diarsipkan. Tidak ada proker mendatang untuk dipindahkan.');
+    toast('Hasil rapat diarsipkan.');
 }
 
-/* ---------- Pulihkan (khusus Admin) ---------- */
+/* =====================================================================
+   FITUR PEMULIHAN & SELECT ARSIP RAPAT MINGGUAN
+   ===================================================================== */
 function openPulihkanModal() {
     if (!isAdmin()) return toast('Hanya Admin yang dapat memulihkan hasil rapat.', 'err');
     $('pulih-date').value = today();
@@ -2103,103 +1801,110 @@ function openPulihkanModal() {
     renderPulihkanModal();
     openModal('modal-pulihkan');
 }
+
 function renderPulihkanModal() {
     if ($('modal-pulihkan').classList.contains('hidden')) return;
     const reps = [...activeReports()].reverse();
+    
+    // Fitur Select Arsip Rapat guna memilih data riwayat rapat dari database
     $('pulih-archive-select').innerHTML = reps.length
         ? reps.map(r => `<option value="${esc(r.id)}">${esc(r.date)} — ${esc(r.title)} (${(r.prokerData || []).length} proker)</option>`).join('')
-        : '<option value="">Belum ada arsip</option>';
+        : '<option value="">Belum ada arsip rapat tersimpan</option>';
+
     const del = store.reports.filter(r => r.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
     $('pulih-deleted-list').innerHTML = del.length ? del.map(r => `
         <div class="flex items-center justify-between gap-2 p-2 border rounded-lg border-gray-200 dark:border-gray-700">
             <div class="min-w-0"><div class="font-semibold truncate">${esc(r.title)}</div>
-            <div class="text-[10px] text-gray-400">Rapat ${esc(r.date)} · dihapus ${esc(new Date(r.deletedAt).toLocaleDateString('sv-SE'))}</div></div>
+            <div class="text-[10px] text-gray-400">Rapat ${esc(r.date)}</div></div>
             <div class="flex gap-1 shrink-0">
                 <button type="button" onclick="restoreDeletedReport('${r.id}')" class="bg-emerald-600 text-white text-xs px-2.5 py-1 rounded">Pulihkan</button>
-                <button type="button" onclick="purgeReport('${r.id}')" class="bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 text-xs px-2.5 py-1 rounded">Hapus permanen</button>
+                <button type="button" onclick="purgeReport('${r.id}')" class="bg-rose-50 text-rose-700 text-xs px-2.5 py-1 rounded">Hapus Permanen</button>
             </div>
         </div>`).join('') : '<p class="text-xs text-gray-400">Tidak ada arsip terhapus.</p>';
 }
+
 async function catatRapatTerlewat(e) {
     e.preventDefault();
     if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
     const date = $('pulih-date').value, title = $('pulih-title').value.trim();
     if (!date || !title) return toast('Tanggal dan judul wajib diisi.', 'err');
     const cur = list('proker');
-    if (!cur.length) return toast('Halaman Program Kerja sedang kosong. Gunakan opsi 2 untuk mengembalikan proker dari arsip dahulu.', 'err');
-    if (activeReports().some(r => r.date === date) && !confirm(`Sudah ada arsip bertanggal ${date}. Tetap buat arsip baru?`)) return;
+    if (!cur.length) return toast('Program Kerja sedang kosong.', 'err');
     const r = buildReport({ title, date, prokerData: cur, includeFiles: $('pulih-files').checked, restored: true });
-    if (await save('reports', r)) { closeModal('modal-pulihkan'); toast(`Rapat tanggal ${date} berhasil dicatat ke arsip.`); }
+    if (await save('reports', r)) { closeModal('modal-pulihkan'); toast(`Rapat tanggal ${date} berhasil dicatat.`); }
 }
+
 async function kembalikanDariArsip() {
     if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
-    const r = activeReports().find(x => x.id === $('pulih-archive-select').value);
-    if (!r) return toast('Pilih arsip terlebih dahulu.', 'err');
+    const archiveId = $('pulih-archive-select').value;
+    if (!archiveId) return toast('Pilih arsip rapat terlebih dahulu melalui opsi Select.', 'err');
+    const r = activeReports().find(x => x.id === archiveId);
+    if (!r) return toast('Arsip tidak ditemukan.', 'err');
+
     const key = p => (p.bagian + '|' + p.title).trim().toLowerCase();
     const exist = new Set(store.proker.map(key));
     const src = (r.prokerData || []).filter(p => !exist.has(key(p)));
     if (!src.length) return toast('Semua proker dari arsip ini sudah ada di halaman Program Kerja.');
     if (!confirm(`Kembalikan ${src.length} proker dari arsip “${r.title}” ke halaman Program Kerja?`)) return;
+
     let i = 0;
     for (const p of src) await save('proker', { ...p, id: uid('p'), restoredFrom: r.id, createdAt: Date.now() + (i++) });
     closeModal('modal-pulihkan');
-    toast(`${src.length} proker berhasil dikembalikan ke halaman Program Kerja.`);
+    toast(`${src.length} proker berhasil dipulihkan ke halaman Program Kerja.`);
 }
+
 async function restoreDeletedReport(id) {
     if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
     const r = store.reports.find(x => x.id === id); if (!r) return;
     const { deletedAt, deletedBy, ...rest } = r;
     if (await save('reports', rest)) { toast('Arsip berhasil dipulihkan.'); renderPulihkanModal(); }
 }
+
 async function purgeReport(id) {
     if (!isAdmin()) return toast('Akses khusus Admin.', 'err');
-    if (!confirm('Hapus permanen arsip ini? Tindakan ini tidak bisa dibatalkan.')) return;
+    if (!confirm('Hapus permanen arsip ini?')) return;
     await remove('reports', id); renderPulihkanModal();
 }
 
 async function uploadNotulensiFile() {
     const input = $('notulensi-file-input'), file = input.files[0];
     if (!file) return toast('Pilih file notulensi terlebih dahulu.', 'err');
-    if (file.size > MAX_FILE_MB * 1048576) return toast(`Ukuran file maksimal ${MAX_FILE_MB} MB.`, 'err');
     const btn = $('btn-upload-notulensi'); btn.disabled = true; btn.textContent = 'Mengunggah…';
     const path = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, '_')}`;
-    const { error } = await sb.storage.from(BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' });
+    const { error } = await sb.storage.from(BUCKET).upload(path, file);
     if (error) toast('Gagal mengunggah: ' + error.message, 'err');
     else if (await save('notulensi', { id: uid('f'), name: file.name, path, date: today(), by: userName(), createdAt: Date.now() })) { input.value = ''; toast('File berhasil diunggah.'); }
     btn.disabled = false; btn.textContent = 'Unggah file';
 }
+
 function renderNotulensiFileList() {
     const files = list('notulensi');
     $('notulensi-file-list').innerHTML = files.length ? files.map(f => `
-        <div class="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded border border-purple-200 dark:border-purple-800 flex items-center gap-2">
-            <span>${esc(f.name)}</span><span class="text-[10px] text-purple-400">${esc(f.date)}</span>
-            <button data-dl="${esc(f.path)}" data-name="${esc(f.name)}" aria-label="Unduh" class="text-emerald-600 font-bold"><i class="fa-solid fa-download"></i></button>
-            <button onclick="deleteNotulensi('${f.id}')" aria-label="Hapus file" class="text-rose-500 font-bold">×</button>
+        <div class="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded border flex items-center gap-2">
+            <span>${esc(f.name)}</span>
+            <button data-dl="${esc(f.path)}" data-name="${esc(f.name)}" class="text-emerald-600 font-bold"><i class="fa-solid fa-download"></i></button>
+            <button onclick="deleteNotulensi('${f.id}')" class="text-rose-500 font-bold">×</button>
         </div>`).join('') : '<span class="text-xs text-gray-400">Belum ada file notulensi.</span>';
 }
+
 async function deleteNotulensi(id) {
     const f = store.notulensi.find(x => x.id === id); if (!f || !confirm(`Hapus file “${f.name}”?`)) return;
-    const archived = store.reports.some(r => (r.notulensiFiles || []).some(x => x.path === f.path));
-    if (!archived && f.path) await sb.storage.from(BUCKET).remove([f.path]);
     await remove('notulensi', id);
 }
 
-/* Rekap menggabungkan pekan berjalan + seluruh arsip rapat mingguan (bukan hanya pekan ini) */
 function rekapItems() {
     const fb = $('rekap-filter-bagian').value || 'ALL';
     const seen = new Set(), all = [];
     const add = (p, pekan, order) => {
         if (!p || seen.has(p.id)) return;
-        seen.add(p.id);
-        all.push({ ...p, _pekan: pekan, _order: order });
+        seen.add(p.id); all.push({ ...p, _pekan: pekan, _order: order });
     };
     list('proker').forEach(p => { if (!p.isFutureOnly) add(p, 'Pekan berjalan', Infinity); });
     [...activeReports()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(r =>
-        (r.prokerData || []).forEach(p => { if (!p.isFutureOnly) add(p, r.date || r.title || 'Arsip', r.createdAt || 0); }));
-    return all.filter(p => fb === 'ALL' || p.bagian === fb)
-              .sort((a, b) => b._order - a._order);
+        (r.prokerData || []).forEach(p => { if (!p.isFutureOnly) add(p, r.date || r.title, r.createdAt || 0); }));
+    return all.filter(p => fb === 'ALL' || p.bagian === fb).sort((a, b) => b._order - a._order);
 }
-// Proker Di-ACC dari semua pekan; proker yang sama (hasil salin antar pekan) hanya dihitung sekali
+
 function rekapProkerAcc(items) {
     const seen = new Set();
     return items.filter(p => p.accMusyrif === true).filter(p => {
@@ -2208,41 +1913,24 @@ function rekapProkerAcc(items) {
         seen.add(k); return true;
     });
 }
+
 function renderRekapPage() {
     const items = rekapItems();
-
     const validProker = rekapProkerAcc(items);
     $('rekap-table-proker').innerHTML = validProker.length ? validProker.map(p => `
-        <tr>
-            <td class="p-2.5 font-bold">${esc(p.bagian)}</td>
-            <td class="p-2.5">${esc(p.title)}</td>
-            <td class="p-2.5 text-gray-500">${esc(p._pekan)}</td>
-            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Di-ACC</span></td>
-        </tr>`).join('') : emptyRow(4, 'Belum ada program kerja yang Di-ACC.');
+        <tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.title)}</td><td class="p-2.5 text-gray-500">${esc(p._pekan)}</td><td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Di-ACC</span></td></tr>
+    `).join('') : emptyRow(4, 'Belum ada program kerja.');
 
     const validHasilUsaha = items.filter(p => p.isHasilDone === true);
     $('rekap-table-hasil').innerHTML = validHasilUsaha.length ? validHasilUsaha.map(p => `
-        <tr>
-            <td class="p-2.5 font-bold">${esc(p.bagian)}</td>
-            <td class="p-2.5">${esc(p.hasilUsaha || p.title)}</td>
-            <td class="p-2.5">${esc(p.dateReported) || '-'}</td>
-        </tr>`).join('') : emptyRow(3, 'Belum ada hasil usaha yang selesai/diceklis.');
+        <tr><td class="p-2.5 font-bold">${esc(p.bagian)}</td><td class="p-2.5">${esc(p.hasilUsaha || p.title)}</td><td class="p-2.5">${esc(p.dateReported) || '-'}</td></tr>
+    `).join('') : emptyRow(3, 'Belum ada hasil usaha.');
 }
 
 function downloadRekapExcel() {
     const items = rekapItems();
-    const validProker = rekapProkerAcc(items);
-    const validHasilUsaha = items.filter(p => p.isHasilDone === true);
-
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validProker.map(p => ({
-        Bagian: p.bagian, 'Program Kerja': p.title, Deskripsi: p.desc, Pekan: p._pekan, 'Status Lapor': 'Di-ACC'
-    }))), 'Rekap Program Kerja');
-
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(validHasilUsaha.map(p => ({
-        Bagian: p.bagian, 'Program Kerja': p.title, 'Hasil Usaha / Capaian': p.hasilUsaha, Pekan: p._pekan, 'Tanggal Lapor': p.dateReported
-    }))), 'Rekap Hasil Usaha');
-
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapProkerAcc(items).map(p => ({ Bagian: p.bagian, 'Program Kerja': p.title }))), 'Rekap Proker');
     XLSX.writeFile(wb, `Rekap_DCC_${today()}.xlsx`);
 }
 
@@ -2251,180 +1939,40 @@ function renderLaporanPage() {
     const reports = [...activeReports()].reverse();
     $('laporan-container').innerHTML = reports.length ? reports.map(r => {
         const rows = (r.prokerData || []).map(p => `<tr><td class="p-2 font-bold">${esc(p.bagian)}</td><td class="p-2">${esc(p.title)}</td>
-            <td class="p-2">${p.accMusyrif ? 'Di-ACC' : 'Belum ACC'}${p.isHasilDone ? ', selesai' : ''}</td><td class="p-2">${esc(p.hasilUsaha) || '-'}</td><td class="p-2">${esc(p.evaluasi) || '-'}</td><td class="p-2">${esc(p.solusi) || '-'}</td></tr>`).join('');
-        const files = (r.notulensiFiles || []).map(f => f.path
-            ? `<button data-dl="${esc(f.path)}" data-name="${esc(f.name)}" class="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs px-3 py-1.5 rounded border border-purple-200 dark:border-purple-800"><i class="fa-solid fa-download mr-1"></i>${esc(f.name)}</button>`
-            : `<span class="text-xs text-gray-400 px-3 py-1.5">${esc(f.name)}</span>`).join('');
-        return `<details class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+            <td class="p-2">${p.accMusyrif ? 'Di-ACC' : 'Belum'}</td><td class="p-2">${esc(p.hasilUsaha) || '-'}</td><td class="p-2">${esc(p.evaluasi) || '-'}</td><td class="p-2">${esc(p.solusi) || '-'}</td></tr>`).join('');
+        return `<details class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-5">
             <summary class="cursor-pointer flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <span class="font-bold text-lg">${esc(r.title)}</span>${r.restored ? ' <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full align-middle">Dipulihkan</span>' : ''}
-                        <span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}${r.by ? ' oleh ' + esc(r.by) : ''}</span>
-                    </div>
+                <div>
+                    <span class="font-bold text-lg">${esc(r.title)}</span>${r.restored ? ' <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Dipulihkan</span>' : ''}
+                    <span class="block text-xs text-gray-500">Diarsipkan ${esc(r.date)}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="event.preventDefault(); downloadLaporanPDF('${r.id}')" title="Unduh Laporan PDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
-                        <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
-                    </button>
-                    ${canDelete ? `<button onclick="event.preventDefault(); deleteReport('${r.id}')" aria-label="Hapus arsip" class="text-rose-500 hover:text-rose-700 text-xs p-1.5 rounded"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    <button onclick="event.preventDefault(); downloadLaporanPDF('${r.id}')" class="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg"><i class="fa-solid fa-file-pdf"></i> Unduh PDF</button>
+                    ${canDelete ? `<button onclick="event.preventDefault(); deleteReport('${r.id}')" class="text-rose-500 text-xs p-1.5"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
             </summary>
             <div class="mt-4 space-y-3">
-                <div class="overflow-x-auto border rounded-lg border-gray-200 dark:border-gray-700"><table class="w-full text-xs text-left min-w-[700px]">
-                    <thead class="bg-gray-100 dark:bg-gray-700/80 font-semibold"><tr><th class="p-2">Bagian</th><th class="p-2">Program kerja</th><th class="p-2">Status</th><th class="p-2">Hasil usaha</th><th class="p-2">Kendala</th><th class="p-2">Solusi</th></tr></thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">${rows || emptyRow(6, 'Tidak ada data proker pada arsip ini.')}</tbody></table></div>
-                <div class="flex flex-wrap gap-2">${files || '<span class="text-xs text-gray-400">Tidak ada lampiran notulensi.</span>'}</div>
+                <div class="overflow-x-auto border rounded-lg"><table class="w-full text-xs text-left min-w-[700px]">
+                    <thead class="bg-gray-100 font-semibold"><tr><th class="p-2">Bagian</th><th class="p-2">Proker</th><th class="p-2">Status</th><th class="p-2">Hasil</th><th class="p-2">Kendala</th><th class="p-2">Solusi</th></tr></thead>
+                    <tbody class="divide-y">${rows}</tbody></table></div>
             </div></details>`;
-    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">Belum ada arsip. Simpan hasil rapat dari menu Rapat Mingguan.</div>';
+    }).join('') : '<div class="p-6 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-xl border">Belum ada arsip laporan.</div>';
 }
 
 function downloadLaporanPDF(id) {
-    const r = store.reports.find(x => x.id === id);
-    if (!r) return toast('Arsip laporan tidak ditemukan.', 'err');
-
-    const items = r.prokerData || [];
-    const current = items.filter(p => !p.isFutureOnly);
-    const open = current.filter(p => !p.isHasilDone || !p.accMusyrif);
-    const hasilUsahaList = current.filter(p => p.accMusyrif && p.isHasilDone);
-    const futureList = items.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
-
-    const makeRows = (arr, fn, cols) => arr.length ? arr.map(fn).join('') : `<tr><td colspan="${cols}" style="border:1px solid #d1d5db; padding:6px; text-align:center; font-size:10px; color:#9ca3af;">Tidak ada data</td></tr>`;
-
-    const table1Rows = makeRows(current, p => `<tr>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.desc)}</td>
-    </tr>`, 3);
-
-    const table2Rows = makeRows(hasilUsahaList, p => `<tr>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px; color:#059669; font-weight:600;">${esc(p.hasilUsaha)}</td>
-    </tr>`, 3);
-
-    const table3Rows = makeRows(open, p => `<tr>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px; color:#dc2626;">${esc(p.title)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.evaluasi) || '-'}</td>
-    </tr>`, 3);
-
-    const table4Rows = makeRows(open, p => `<tr>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px;">${esc(p.title)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px; color:#d97706;">${esc(p.solusi) || '-'}</td>
-    </tr>`, 3);
-
-    const table5Rows = makeRows(futureList, p => `<tr>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:bold; font-size:10px; width:90px;">${esc(p.bagian)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-weight:600; font-size:10px; color:#4f46e5;">${esc(p.title)}</td>
-        <td style="border:1px solid #d1d5db; padding:6px; font-size:10px;">${esc(p.solusi || p.desc) || '-'}</td>
-    </tr>`, 3);
-
+    const r = store.reports.find(x => x.id === id); if (!r) return;
     const container = document.createElement('div');
-    container.style.padding = '20px';
-    container.style.fontFamily = 'Inter, sans-serif';
-    container.style.color = '#1f2937';
-    container.style.backgroundColor = '#ffffff';
-
-    container.innerHTML = `
-        <div style="border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 15px;">
-            <h2 style="margin: 0; font-size: 16px; color: #1e3a8a;">DCC WORKSPACE - ARSIP LAPORAN RAPAT MINGGUAN</h2>
-            <h3 style="margin: 4px 0 0 0; font-size: 14px; color: #374151;">${esc(r.title)}</h3>
-            <p style="margin: 3px 0 0 0; font-size: 10px; color: #6b7280;">Tanggal Arsip: ${esc(r.date)} | Pengarsip: ${esc(r.by || '-')}</p>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #2563eb;">1. PROGRAM KERJA MINGGU LALU</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Deskripsi / Target</th>
-                    </tr>
-                </thead>
-                <tbody>${table1Rows}</tbody>
-            </table>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #059669;">2. HASIL USAHA</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Capaian Hasil Usaha</th>
-                    </tr>
-                </thead>
-                <tbody>${table2Rows}</tbody>
-            </table>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #dc2626;">3. EVALUASI</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Hal Evaluasi</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Penyebab / Kendala</th>
-                    </tr>
-                </thead>
-                <tbody>${table3Rows}</tbody>
-            </table>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #d97706;">4. SOLUSI</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Evaluasi Target</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Rumusan Solusi</th>
-                    </tr>
-                </thead>
-                <tbody>${table4Rows}</tbody>
-            </table>
-        </div>
-
-        <div style="margin-bottom: 10px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 11px; font-weight: bold; color: #4f46e5;">5. PROGRAM KERJA YANG AKAN DATANG</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px; width:90px;">Bagian</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Program Kerja Mendatang</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:left; font-size:10px;">Rencana / Sumber</th>
-                    </tr>
-                </thead>
-                <tbody>${table5Rows}</tbody>
-            </table>
-        </div>
-    `;
-
-    const opt = {
-        margin:       10,
-        filename:     `Laporan_Rapat_${r.title.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    toast('Memproses unduhan PDF...');
-    html2pdf().from(container).set(opt).save().then(() => {
-        toast('Laporan PDF berhasil diunduh!');
-    });
+    container.style.cssText = 'padding:20px;font-family:Inter;color:#1f2937;background:#fff';
+    container.innerHTML = `<h2>${esc(r.title)}</h2><p>Tanggal: ${esc(r.date)}</p>`;
+    html2pdf().from(container).save(`Laporan_${r.title}.pdf`);
 }
 
 async function deleteReport(id) {
-    if (!isAdmin()) return toast('Hanya Admin yang dapat menghapus arsip laporan.', 'err');
+    if (!isAdmin()) return toast('Hanya Admin.', 'err');
     const r = store.reports.find(x => x.id === id); if (!r) return;
-    if (confirm('Hapus arsip laporan ini? Arsip masih bisa dipulihkan lewat tombol Pulihkan di Rapat Mingguan.')) {
+    if (confirm('Hapus arsip laporan ini?')) {
         await save('reports', { ...r, deletedAt: Date.now(), deletedBy: userName() });
-        toast('Arsip dipindahkan ke daftar terhapus (dapat dipulihkan).');
+        toast('Arsip dipindahkan ke daftar terhapus.');
     }
 }
 
@@ -2438,41 +1986,26 @@ function legacyData() {
 }
 function checkLegacy() {
     const d = legacyData();
-    const has = Object.values(d).some(a => a.length);
-    $('import-banner').classList.toggle('hidden', !has || localStorage.getItem('dcc_ws_imported') === '1');
+    $('import-banner').classList.toggle('hidden', !Object.values(d).some(a => a.length) || localStorage.getItem('dcc_ws_imported') === '1');
 }
 function dismissImport() { localStorage.setItem('dcc_ws_imported', '1'); $('import-banner').classList.add('hidden'); }
 
 async function importLegacy() {
-    const d = legacyData(), rows = [], uploaded = {};
-    setSync('syncing');
-    for (const f of d.notulensi) {
-        if (f.dataUrl) {
-            try {
-                const blob = await (await fetch(f.dataUrl)).blob();
-                const path = `${Date.now()}_${(f.name || 'file').replace(/[^\w.\-]+/g, '_')}`;
-                const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
-                if (!error) uploaded[f.id] = path;
-            } catch (e) {}
-        }
-    }
+    const d = legacyData(), rows = [];
     let n = 0;
     for (const col of COLLECTIONS) {
         for (const obj of d[col]) {
             const o = { ...obj, createdAt: obj.createdAt || Date.now() + n++ };
             o.id = o.id || uid(col[0]);
-            if (col === 'notulensi') { o.path = uploaded[o.id] || o.path; delete o.dataUrl; if (!o.path) continue; }
-            if (col === 'reports') o.notulensiFiles = (o.notulensiFiles || []).map(f => ({ name: f.name, path: uploaded[f.id] || f.path || null }));
             rows.push({ collection: col, id: o.id, data: o, updated_by: userName(), updated_at: new Date().toISOString() });
         }
     }
     for (let i = 0; i < rows.length; i += 100) {
-        const { error } = await sb.from(TABLE).upsert(rows.slice(i, i + 100));
-        if (error) { toast('Impor gagal: ' + error.message, 'err'); setSync('offline'); return; }
+        await sb.from(TABLE).upsert(rows.slice(i, i + 100));
     }
     localStorage.setItem('dcc_ws_imported', '1');
     $('import-banner').classList.add('hidden');
-    toast(`${rows.length} data lama berhasil dikirim ke server.`);
+    toast('Data lama berhasil diimpor.');
     await loadAll();
 }
 
