@@ -32,6 +32,42 @@
         .dark ::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
         ::-webkit-scrollbar-thumb { background: rgba(156,163,175,.5); border-radius: 4px; }
         .scroll-y { max-height: 380px; overflow-y: auto; }
+
+        /* ===== Panduan proker ===== */
+        .guide-dim { position: fixed; z-index: 45; background: rgba(15,23,42,.68); backdrop-filter: blur(1.5px); transition: all .35s ease; }
+        .guide-ring { position: fixed; z-index: 46; pointer-events: none; border-radius: 14px; border: 3px solid #fbbf24; transition: all .4s cubic-bezier(.34,1.56,.64,1); animation: guide-pulse 1.5s ease-in-out infinite; }
+        @keyframes guide-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,.65), 0 0 18px rgba(251,191,36,.6); } 50% { box-shadow: 0 0 0 12px rgba(251,191,36,0), 0 0 32px rgba(251,191,36,.95); } }
+        .guide-tip { position: fixed; z-index: 46; pointer-events: none; font-size: 26px; transition: all .4s ease; animation: guide-bounce 1s ease-in-out infinite; filter: drop-shadow(0 3px 6px rgba(0,0,0,.4)); }
+        @keyframes guide-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+        .guide-card { position: fixed; left: 50%; transform: translateX(-50%); z-index: 47; width: min(94vw, 460px); background: #fff; color: #111827; border-radius: 20px; padding: 18px 20px 16px;
+            box-shadow: 0 25px 60px rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.4); }
+        .dark .guide-card { background: #1f2937; color: #f3f4f6; border-color: #374151; }
+        .guide-card.pos-bottom { bottom: 16px; } .guide-card.pos-top { top: 84px; } .guide-card.pos-center { top: 50%; margin-top: -150px; }
+        .guide-card.enter > .guide-in { animation: guide-card-in .5s cubic-bezier(.2,.9,.3,1.25) both; }
+        @keyframes guide-card-in { 0% { opacity: 0; transform: translateY(26px) scale(.94); } 100% { opacity: 1; transform: none; } }
+        .guide-mascot { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; background: linear-gradient(135deg,#6366f1,#a855f7); animation: guide-wiggle 2.4s ease-in-out infinite; flex-shrink: 0; }
+        @keyframes guide-wiggle { 0%,100% { transform: rotate(0); } 10% { transform: rotate(-10deg); } 20% { transform: rotate(10deg); } 30% { transform: rotate(0); } }
+        .guide-dots { display: flex; gap: 6px; align-items: center; }
+        .guide-dot { height: 6px; width: 6px; border-radius: 9999px; background: #d1d5db; transition: all .4s cubic-bezier(.34,1.56,.64,1); }
+        .dark .guide-dot { background: #4b5563; }
+        .guide-dot.on { width: 22px; background: #6366f1; } .guide-dot.past { background: #10b981; }
+        .guide-btn { padding: .55rem 1rem; border-radius: .75rem; font-weight: 700; font-size: .8rem; transition: transform .2s ease, box-shadow .2s ease, opacity .2s; }
+        .guide-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.2); } .guide-btn:active:not(:disabled) { transform: scale(.96); }
+        .guide-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .guide-btn.primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; }
+        .guide-btn.ghost { background: rgba(107,114,128,.12); } .dark .guide-btn.ghost { background: rgba(255,255,255,.08); }
+        .guide-opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 14px; border: 2px solid transparent; transition: transform .25s cubic-bezier(.34,1.56,.64,1), border-color .25s, box-shadow .25s; }
+        .guide-opt:hover { transform: translateY(-3px) scale(1.015); box-shadow: 0 10px 24px rgba(0,0,0,.15); }
+        .guide-opt.a { background: rgba(16,185,129,.12); } .guide-opt.a:hover { border-color: #10b981; }
+        .guide-opt.b { background: rgba(99,102,241,.12); } .guide-opt.b:hover { border-color: #6366f1; }
+        .guide-ready { animation: fx-pop .5s cubic-bezier(.34,1.56,.64,1); }
+        .guide-conf { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: 20px; }
+        .guide-conf i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; animation: guide-fall 2.4s linear infinite; }
+        @keyframes guide-fall { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(340px) rotate(540deg); opacity: .2; } }
+        .lock-card { animation: guide-card-in .5s cubic-bezier(.2,.9,.3,1.25) both; }
+        .lock-plane { animation: lock-fly 2.2s ease-in-out infinite; display: inline-block; }
+        @keyframes lock-fly { 0%,100% { transform: translate(0,0) rotate(-8deg); } 50% { transform: translate(8px,-8px) rotate(6deg); } }
+        @media (prefers-reduced-motion: reduce) { .guide-ring, .guide-tip, .guide-mascot, .guide-conf i, .lock-plane, .guide-card.enter > .guide-in, .lock-card { animation: none !important; } }
         /* ===== Animasi fitur aktif / nonaktif ===== */
         .fx-switch { position: relative; width: 50px; height: 28px; border-radius: 9999px; background: #9ca3af; flex-shrink: 0; cursor: pointer; border: 0; padding: 0;
             transition: background .35s ease, box-shadow .35s ease; box-shadow: inset 0 1px 3px rgba(0,0,0,.25); }
@@ -266,10 +302,10 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Status pelaporan proker per bagian</h4>
-                        <span class="text-xs text-gray-500">Indikator: sudah di-ACC Musyrif/Admin</span>
+                        <span class="text-xs text-gray-500">Sama dengan halaman Program Kerja (proker mendatang tidak dihitung)</span>
                     </div>
                     <div class="overflow-x-auto"><table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Bagian</th><th class="p-3 text-center">Total proker</th><th class="p-3 text-center">Belum ACC</th><th class="p-3 text-center">Status</th></tr></thead>
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500"><tr><th class="p-3">Bagian</th><th class="p-3 text-center">Proker minggu ini</th><th class="p-3 text-center">Belum dilapor</th><th class="p-3 text-center">Belum ACC</th><th class="p-3 text-center">Status</th></tr></thead>
                         <tbody id="home-unreported-table" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
                     </table></div>
                 </div>
@@ -384,9 +420,10 @@
                         <select id="proker-bagian-filter" onchange="renderProkerPage()" class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm rounded-lg p-2 font-medium"></select>
                     </label>
                     <div class="flex flex-wrap items-center gap-2">
-                        <button data-feature="proker_import" onclick="importLastWeek()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-file-arrow-down"></i> Isi proker minggu lalu</button>
+                        <button id="btn-import-proker" data-feature="proker_import" onclick="importLastWeek()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-file-arrow-down"></i> Isi proker minggu lalu</button>
                         <button data-feature="proker_add_next" id="btn-add-proker-depan" onclick="openProkerModal('minggu_depan')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-calendar-plus"></i> Tambah proker minggu depan</button>
                         <button data-feature="proker_add" id="btn-add-proker" onclick="openProkerModal('minggu_ini')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah proker</button>
+                        <button type="button" onclick="guideOpen(true)" class="bg-white dark:bg-gray-700 border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-300 font-semibold text-xs sm:text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition"><i class="fa-solid fa-circle-question"></i> Panduan</button>
                         <div id="proker-lapor-container"></div>
                         <div id="proker-admin-toggle"></div>
                     </div>
@@ -727,6 +764,25 @@
     </div>
 </div>
 
+<div id="guide-layer" class="hidden" style="visibility:visible">
+    <div class="guide-dim" id="gd-t"></div><div class="guide-dim" id="gd-b"></div><div class="guide-dim" id="gd-l"></div><div class="guide-dim" id="gd-r"></div>
+    <div id="guide-ring" class="guide-ring" style="display:none"></div>
+    <div id="guide-tip" class="guide-tip" style="display:none">👆</div>
+    <div id="guide-card" class="guide-card pos-bottom"></div>
+</div>
+
+<div id="lapor-lock" class="fixed inset-0 z-[55] hidden items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm">
+    <div class="lock-card bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 text-sm">
+        <div class="flex items-center gap-3">
+            <div class="guide-mascot"><span class="lock-plane"><i class="fa-solid fa-paper-plane"></i></span></div>
+            <div><h3 class="font-extrabold text-lg leading-tight">Satu langkah lagi: lapor ke Musyrif</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Menu lain terkunci sampai proker di bawah ini dilaporkan.</p></div>
+        </div>
+        <ul id="lapor-lock-list" class="space-y-1.5 max-h-52 overflow-y-auto"></ul>
+        <button id="lapor-lock-btn" type="button" onclick="laporMusyrif()" class="guide-btn primary w-full py-3 text-sm"><i class="fa-solid fa-paper-plane mr-1.5"></i> Lapor ke Musyrif</button>
+    </div>
+</div>
+
 <div id="toast-box" class="fixed bottom-4 right-4 z-[60] space-y-2 max-w-xs"></div>
 
 <script>
@@ -777,6 +833,206 @@ const isAdmin = () => userRole() === 'admin';
 const APP_SETTINGS_ID = 'app_settings';
 const getSettings = () => store.users_meta.find(u => u.id === APP_SETTINGS_ID) || {};
 const activeReports = () => list('reports').filter(r => !r.deletedAt);
+
+
+/* ---------- Status proker & Lapor Musyrif ---------- */
+function prokerStatusHtml(p) {
+    if (p.reported === false) return '<span class="text-rose-600 font-bold">Belum dilapor</span>';
+    return p.accMusyrif ? '<span class="text-emerald-600 font-bold">Di-ACC</span>' : '<span class="text-amber-600">Menunggu ACC</span>';
+}
+const myUnreported = () => (currentUser && userRole() === 'member')
+    ? store.proker.filter(p => p.addedBy === currentUser.id && !p.isFutureOnly && p.reported === false) : [];
+function evalLaporLock() {
+    const box = $('lapor-lock'); if (!box) return;
+    const items = myUnreported();
+    if (!items.length) { box.classList.add('hidden'); box.classList.remove('flex'); return; }
+    $('lapor-lock-list').innerHTML = items.map(p => `
+        <li class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900">
+            <span class="min-w-0"><span class="text-[10px] font-bold bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded mr-1">${esc(p.bagian)}</span><span class="font-semibold">${esc(p.title)}</span></span>
+            <button type="button" onclick="hapusProkerSendiri('${p.id}')" aria-label="Hapus proker ini" class="text-rose-500 text-xs shrink-0"><i class="fa-solid fa-trash"></i></button>
+        </li>`).join('');
+    box.classList.remove('hidden'); box.classList.add('flex');
+}
+async function laporMusyrif() {
+    const items = myUnreported(); if (!items.length) return;
+    const btn = $('lapor-lock-btn'); btn.disabled = true;
+    for (const p of items) await save('proker', { ...p, reported: true, dateReported: today(), reportedAt: Date.now() });
+    btn.disabled = false;
+    toast('Berhasil dilaporkan ke Musyrif. Terima kasih!');
+}
+async function hapusProkerSendiri(id) {
+    if (confirm('Hapus proker ini? Gunakan hanya jika salah ketik.')) await remove('proker', id);
+}
+
+/* ---------- Panduan pengisian proker (step-by-step) ---------- */
+const G = { open: false, st: null, cyc: null, suppressed: false, sig: '', target: null, timer: null };
+const GUIDE_DOT = { welcome: 0, import: 1, choose: 2, this: 3, next: 3, done: 4 };
+function guideCycle() {
+    const reps = activeReports().filter(r => !r.restored).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    return reps.length ? reps[reps.length - 1] : null;
+}
+const guideKey = cyc => `dcc_guide_v1_${currentUser ? currentUser.id : 'x'}_${cyc}`;
+function guideLoad(cyc) { try { return JSON.parse(localStorage.getItem(guideKey(cyc)) || 'null') || {}; } catch (e) { return {}; } }
+function guideSaveState() { try { localStorage.setItem(guideKey(G.cyc), JSON.stringify(G.st)); } catch (e) {} }
+function guideLeftovers(bag, rep) {
+    rep = rep || guideCycle(); if (!rep) return [];
+    const exist = new Set(store.proker.filter(p => p.bagian === bag).map(p => (p.title || '').toLowerCase()));
+    return (rep.prokerData || []).filter(p => p.bagian === bag && !p.isFutureOnly && (!p.isHasilDone || !p.accMusyrif) && !exist.has((p.title || '').toLowerCase()));
+}
+function guideShouldAutoStart() {
+    if (!currentUser || userRole() !== 'member') return false;
+    const rep = guideCycle(); if (!rep) return false;
+    const st = guideLoad(rep.id);
+    if (st.done || st.dismissed) return false;
+    if (st.started) return true;
+    // Belum dimulai: tidak aktif lagi bila fitur "Isi proker minggu lalu" sudah dipakai pada siklus ini
+    return !store.proker.some(p => p.importedFrom === rep.id && p.importedBy === currentUser.id);
+}
+function guideFresh() { return { step: 'welcome', hist: [], bagian: '', started: false, t0: 0 }; }
+function guideOpen(manual) {
+    if (!currentUser) return;
+    const rep = guideCycle();
+    G.cyc = rep ? rep.id : 'manual';
+    G.st = guideLoad(G.cyc);
+    if (!G.st.step || (manual && (G.st.done || G.st.dismissed))) G.st = guideFresh();
+    G.st.dismissed = false;
+    if (manual && !G.st.started) G.st.bagian = $('proker-bagian-filter').value;
+    G.open = true; G.suppressed = false; G.sig = '';
+    if (activeTab !== 'proker') switchTab('proker');
+    $('guide-layer').classList.remove('hidden');
+    clearInterval(G.timer); G.timer = setInterval(guidePosition, 160);
+    guideRender(true);
+}
+function guideHide() {
+    G.open = false; clearInterval(G.timer);
+    const l = $('guide-layer'); if (l) l.classList.add('hidden');
+    const sel = $('proker-bagian-filter'); if (sel) sel.disabled = false;
+}
+function guideSync() {
+    if (!currentUser) return;
+    if (activeTab !== 'proker') { if (G.open) guideHide(); return; }
+    if (!G.open && !G.suppressed && guideShouldAutoStart()) guideOpen(false);
+    else if (G.open) guideRender();
+}
+function guidePosition() {
+    if (!G.open) return;
+    if (activeTab !== 'proker') return guideHide();
+    const layer = $('guide-layer');
+    const anyModal = [...document.querySelectorAll('.fixed[id^="modal-"]')].some(m => !m.classList.contains('hidden'));
+    const locked = !$('lapor-lock').classList.contains('hidden');
+    layer.style.visibility = (anyModal || locked) ? 'hidden' : 'visible';
+    const set = (id, l, t, w, h) => { const e = $(id); e.style.left = l + 'px'; e.style.top = t + 'px'; e.style.width = Math.max(0, w) + 'px'; e.style.height = Math.max(0, h) + 'px'; };
+    const W = innerWidth, H = innerHeight, t = G.target ? $(G.target) : null;
+    const ring = $('guide-ring'), tip = $('guide-tip'), card = $('guide-card');
+    if (t && t.offsetParent !== null) {
+        const r = t.getBoundingClientRect(), pad = 6;
+        const L = r.left - pad, T = r.top - pad, R = r.right + pad, B = r.bottom + pad;
+        set('gd-t', 0, 0, W, T); set('gd-b', 0, B, W, H - B); set('gd-l', 0, T, L, B - T); set('gd-r', R, T, W - R, B - T);
+        ring.style.display = 'block'; ring.style.left = L + 'px'; ring.style.top = T + 'px'; ring.style.width = (R - L) + 'px'; ring.style.height = (B - T) + 'px';
+        tip.style.display = 'block'; tip.style.left = (r.left + r.width / 2 - 13) + 'px'; tip.style.top = (r.bottom + 10) + 'px';
+        card.className = card.className.replace(/pos-\w+/, r.top > H * 0.5 ? 'pos-top' : 'pos-bottom');
+    } else {
+        set('gd-t', 0, 0, W, H); set('gd-b', 0, 0, 0, 0); set('gd-l', 0, 0, 0, 0); set('gd-r', 0, 0, 0, 0);
+        ring.style.display = 'none'; tip.style.display = 'none';
+        card.className = card.className.replace(/pos-\w+/, 'pos-center');
+    }
+}
+function guideGo(step, isBack) {
+    if (!isBack) G.st.hist.push(G.st.step);
+    G.st.step = step; guideSaveState(); G.sig = ''; guideRender(true);
+}
+function guideBack() { const prev = G.st.hist.pop(); G.st.step = prev || 'welcome'; guideSaveState(); G.sig = ''; guideRender(true); }
+function guideStart() {
+    const v = $('guide-bagian').value;
+    G.st.bagian = v; G.st.started = true; G.st.t0 = Date.now();
+    $('proker-bagian-filter').value = v; renderProkerPage();
+    const used = store.proker.some(p => p.bagian === v && p.importedFrom === G.cyc);
+    guideGo(used || !guideLeftovers(v).length ? 'choose' : 'import');
+}
+function guideChoose(which) { guideGo(which); }
+function guideFinishChoose() { guideGo('done'); }
+function guideSelesaiNext() { toast('Proker yang akan datang tersimpan. Mau menambah yang lain?'); guideGo('choose'); }
+function guideClose() { G.st.done = true; guideSaveState(); guideHide(); toast('Panduan selesai. Selamat bekerja! 🎉'); }
+function guideTemp() { G.suppressed = true; guideHide(); }
+function guideSkip() { if (!confirm('Lewati panduan untuk minggu ini? Anda tetap bisa membukanya lewat tombol “Panduan”.')) return; G.st.dismissed = true; guideSaveState(); guideHide(); }
+
+function guideRender(force) {
+    if (!G.open || !G.st) return;
+    const st = G.st, me = currentUser.id, bag = st.bagian, cyc = G.cyc;
+    const used = !!bag && store.proker.some(p => p.bagian === bag && p.importedFrom === cyc);
+    const left = bag ? guideLeftovers(bag).length : 0;
+    const ownThis = store.proker.filter(p => p.addedBy === me && !p.isFutureOnly && !p.importedFrom && !p.carriedFrom && (p.createdAt || 0) >= (st.t0 || 0));
+    const ownNext = store.proker.filter(p => p.addedBy === me && p.isFutureOnly && (p.createdAt || 0) >= (st.t0 || 0));
+    const anyBag = bag && store.proker.some(p => p.bagian === bag);
+
+    // Otomatis lanjut: proker minggu ini sudah diisi DAN sudah dilaporkan
+    if (st.step === 'this' && ownThis.length && !myUnreported().length) {
+        toast('Proker minggu ini tersimpan & sudah dilaporkan ke Musyrif ✅');
+        st.step = 'choose'; guideSaveState(); G.sig = '';
+    }
+    const importReady = used || !left;
+    const sig = JSON.stringify([st.step, bag, importReady, ownThis.length, ownNext.length, !!anyBag, featureLocked('proker_add'), featureLocked('proker_add_next'), featureLocked('proker_import')]);
+    G.target = { import: 'btn-import-proker', this: 'btn-add-proker', next: 'btn-add-proker-depan' }[st.step] || null;
+    const sel = $('proker-bagian-filter'); if (sel) sel.disabled = st.started && st.step !== 'welcome' && st.step !== 'done';
+    if (sig === G.sig && !force) { guidePosition(); return; }
+    const fresh = G.sig === '' || sig.split(',')[0] !== G.sig.split(',')[0];
+    G.sig = sig;
+
+    const dots = [0, 1, 2, 3, 4].map(i => `<span class="guide-dot ${i === GUIDE_DOT[st.step] ? 'on' : (i < GUIDE_DOT[st.step] ? 'past' : '')}"></span>`).join('');
+    const head = (icon, title, sub) => `<div class="flex items-center gap-3 mb-3"><div class="guide-mascot"><i class="fa-solid ${icon}"></i></div><div class="min-w-0"><div class="text-[11px] font-bold text-indigo-500 uppercase tracking-wide">${sub}</div><h3 class="font-extrabold text-base leading-tight">${title}</h3></div></div>`;
+    const foot = (btns) => `<div class="flex items-center justify-between gap-2 mt-4"><div class="guide-dots">${dots}</div><div class="flex gap-2">${btns}</div></div>
+        <div class="flex justify-between mt-3 text-[11px] text-gray-400"><button type="button" onclick="guideTemp()" class="hover:text-gray-600">Tutup sementara</button><button type="button" onclick="guideSkip()" class="hover:text-rose-500">Lewati panduan</button></div>`;
+    const note = (txt, cls = 'bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200') => `<div class="mt-3 p-2.5 rounded-lg text-xs ${cls}">${txt}</div>`;
+    let body = '';
+    if (st.step === 'welcome') {
+        body = head('fa-hand-sparkles', 'Yuk isi program kerja minggu ini!', 'Panduan pengisian proker') +
+            `<p class="text-sm text-gray-600 dark:text-gray-300">Arsip rapat sudah tersimpan, jadi halaman Program Kerja siap diisi lagi. Ikuti langkahnya satu per satu ya — tiap langkah harus selesai dulu sebelum lanjut.</p>
+             <label class="block text-xs font-semibold mt-3 mb-1" for="guide-bagian">Pertama, pilih bagian kamu</label>
+             <select id="guide-bagian" class="w-full p-2.5 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-sm">${BAGIAN_LIST.map(b => `<option ${b === (bag || $('proker-bagian-filter').value) ? 'selected' : ''}>${b}</option>`).join('')}</select>` +
+            foot(`<button type="button" class="guide-btn primary" onclick="guideStart()">Mulai <i class="fa-solid fa-arrow-right ml-1"></i></button>`);
+    } else if (st.step === 'import') {
+        const lk = featureLocked('proker_import');
+        body = head('fa-file-import', 'Isi proker minggu lalu', 'Langkah 1') +
+            `<p class="text-sm text-gray-600 dark:text-gray-300">Tekan tombol ungu <b>“Isi proker minggu lalu”</b> yang sedang menyala. Proker yang belum selesai dari rapat kemarin akan dibawa ke minggu ini.</p>` +
+            (lk ? note('Fitur ini sedang dinonaktifkan Admin. Hubungi Admin, atau tekan Kembali.', 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')
+                : importReady ? note(used ? '✅ Berhasil! Proker minggu lalu sudah terisi.' : '✅ Tidak ada proker lama yang perlu dibawa untuk bagian ini. Langsung lanjut ya.', 'guide-ready bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200')
+                    : note(`⏳ Menunggu kamu menekan tombolnya… (${left} proker siap dibawa)`)) +
+            foot(`<button type="button" class="guide-btn ghost" onclick="guideBack()">Kembali</button><button type="button" class="guide-btn primary" ${importReady ? '' : 'disabled'} onclick="guideGo('choose')">Lanjut <i class="fa-solid fa-arrow-right ml-1"></i></button>`);
+    } else if (st.step === 'choose') {
+        body = head('fa-signs-post', 'Mau tambah proker apa?', 'Langkah 2') +
+            `<div class="space-y-2.5">
+                <button type="button" class="guide-opt a" onclick="guideChoose('this')"><span class="text-2xl">📌</span><span><b class="block text-sm">Tambah proker minggu ini</b><span class="text-[11px] text-gray-500 dark:text-gray-400">Kegiatan yang dikerjakan pekan ini. Wajib lapor ke Musyrif setelah diisi.</span></span></button>
+                <button type="button" class="guide-opt b" onclick="guideChoose('next')"><span class="text-2xl">🗓️</span><span><b class="block text-sm">Tambah proker yang akan datang</b><span class="text-[11px] text-gray-500 dark:text-gray-400">Rencana pekan depan. Tidak perlu ACC, otomatis pindah setelah arsip rapat disimpan.</span></span></button>
+             </div>
+             <div class="flex gap-2 mt-3 text-[11px]"><span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Minggu ini: ${ownThis.length}</span><span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Akan datang: ${ownNext.length}</span></div>` +
+            (anyBag || ownThis.length || ownNext.length ? '' : note('Isi minimal satu proker sebelum menyelesaikan panduan.')) +
+            foot(`<button type="button" class="guide-btn ghost" onclick="guideBack()">Kembali</button><button type="button" class="guide-btn primary" ${(anyBag || ownThis.length || ownNext.length) ? '' : 'disabled'} onclick="guideFinishChoose()"><i class="fa-solid fa-flag-checkered mr-1"></i> Selesai</button>`);
+    } else if (st.step === 'this') {
+        const lk = featureLocked('proker_add');
+        body = head('fa-plus', 'Tambah proker minggu ini', 'Langkah 3') +
+            `<p class="text-sm text-gray-600 dark:text-gray-300">Tekan tombol hijau <b>“Tambah proker”</b>, isi nama dan targetnya, lalu simpan.</p>` +
+            note('📣 Setelah disimpan, kamu <b>wajib lapor ke Musyrif</b>. Menu lain terkunci sampai laporan terkirim.') +
+            (lk ? note('Fitur tambah proker sedang dinonaktifkan Admin.', 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300') : '') +
+            foot(`<button type="button" class="guide-btn ghost" onclick="guideBack()">Kembali</button>`);
+    } else if (st.step === 'next') {
+        const lk = featureLocked('proker_add_next');
+        body = head('fa-calendar-plus', 'Tambah proker yang akan datang', 'Langkah 3') +
+            `<p class="text-sm text-gray-600 dark:text-gray-300">Tekan tombol biru <b>“Tambah proker minggu depan”</b> dan isi rencananya. Bisa lebih dari satu — tekan <b>Selesai</b> kalau sudah semua.</p>
+             <div class="mt-3 flex items-center gap-2"><span class="text-2xl">${ownNext.length ? '✅' : '⏳'}</span><span class="text-sm font-semibold ${ownNext.length ? 'guide-ready' : ''}">${ownNext.length} proker akan datang sudah diisi</span></div>` +
+            (lk ? note('Fitur ini sedang dinonaktifkan Admin.', 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300') : '') +
+            foot(`<button type="button" class="guide-btn ghost" onclick="guideBack()">Kembali</button><button type="button" class="guide-btn primary" ${ownNext.length ? '' : 'disabled'} onclick="guideSelesaiNext()">Selesai <i class="fa-solid fa-check ml-1"></i></button>`);
+    } else {
+        const conf = Array.from({ length: 22 }, (_, i) => `<i style="left:${(i * 4.6) % 100}%;background:${['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#3b82f6'][i % 5]};animation-delay:${(i % 7) * 0.25}s"></i>`).join('');
+        body = `<div class="guide-conf">${conf}</div>` + head('fa-trophy', 'Mantap! Proker sudah terisi', 'Selesai') +
+            `<p class="text-sm text-gray-600 dark:text-gray-300">Proker minggu ini: <b>${ownThis.length}</b> · Proker akan datang: <b>${ownNext.length}</b>. Panduan ini muncul lagi otomatis setelah arsip rapat berikutnya disimpan.</p>` +
+            foot(`<button type="button" class="guide-btn primary" onclick="guideClose()">Tutup panduan 🎉</button>`);
+    }
+    const card = $('guide-card');
+    card.className = card.className.replace(/\benter\b/g, '').trim() + (fresh ? ' enter' : '');
+    card.innerHTML = `<div class="guide-in" style="position:relative">${body}</div>`;
+    guidePosition();
+    if (G.target && fresh) { const t = $(G.target); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+}
 
 /* ---------- Pengaturan fitur (Admin) ---------- */
 const FEATURES = [
@@ -1308,6 +1564,8 @@ function renderCurrentPage() {
         kepanitiaan: renderPanitiaPage, rapat: renderRapatPage, rekap: renderRekapPage, laporan: renderLaporanPage
     }[activeTab] || (() => {}))();
     applyFeatureLocks();
+    evalLaporLock();
+    guideSync();
 }
 
 let cdTimer = null, cdRotate = null, cdIndex = 0;
@@ -1315,12 +1573,18 @@ let cdTimer = null, cdRotate = null, cdIndex = 0;
 function renderBerandaPage() {
     const proker = list('proker');
     $('home-unreported-table').innerHTML = BAGIAN_LIST.map(bag => {
-        const items = proker.filter(p => p.bagian === bag);
+        // Hanya proker minggu ini (sama dengan tabel 1 di halaman Program Kerja); proker mendatang tidak perlu ACC
+        const items = proker.filter(p => p.bagian === bag && !p.isFutureOnly);
+        const unreported = items.filter(p => p.reported === false).length;
         const unapproved = items.filter(p => !p.accMusyrif).length;
-        const badge = unapproved === 0 && items.length > 0
-            ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>'
-            : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`;
-        return `<tr><td class="p-3 font-semibold">${bag}</td><td class="p-3 text-center">${items.length}</td><td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td><td class="p-3 text-center">${badge}</td></tr>`;
+        const badge = !items.length
+            ? '<span class="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ada proker</span>'
+            : unreported > 0
+                ? `<span class="bg-rose-100 text-rose-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum dilapor (${unreported})</span>`
+                : unapproved > 0
+                    ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Belum ACC (${unapproved})</span>`
+                    : '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2.5 py-1 rounded-full font-bold">Lengkap</span>';
+        return `<tr><td class="p-3 font-semibold">${bag}</td><td class="p-3 text-center">${items.length}</td><td class="p-3 text-center text-rose-600 font-bold">${unreported}</td><td class="p-3 text-center text-amber-600 font-bold">${unapproved}</td><td class="p-3 text-center">${badge}</td></tr>`;
     }).join('');
 
     const running = list('tasks').filter(t => t.status !== 'Sudah Selesai').slice(0, 5);
@@ -1682,11 +1946,13 @@ function renderProkerPage() {
     const canAcc = isMusyrifOrAdmin();
 
     // Info: jumlah proker menunggu ACC (Musyrif/Admin) atau pemberitahuan fitur dimatikan (member)
-    const pendingAccCount = store.proker.filter(p => p.bagian === bag && !p.accMusyrif).length;
+    const curAll = store.proker.filter(p => p.bagian === bag && !p.isFutureOnly);
+    const pendingAccCount = curAll.filter(p => !p.accMusyrif).length;
+    const unreportedCount = curAll.filter(p => p.reported === false).length;
     let infoHtml = '';
     if (isMusyrifOrAdmin()) {
         infoHtml = `<div class="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-amber-300 dark:border-amber-700">
-            <i class="fa-solid fa-bell text-amber-600"></i> ${pendingAccCount} Proker Menunggu ACC
+            <i class="fa-solid fa-bell text-amber-600"></i> ${pendingAccCount} Proker Menunggu ACC${unreportedCount ? ` · ${unreportedCount} belum dilapor` : ''}
         </div>`;
     } else if (!featureOn('proker_add')) {
         infoHtml = `<div class="fx-fade-in bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 border border-gray-300 dark:border-gray-600">
@@ -1699,7 +1965,7 @@ function renderProkerPage() {
     $('proker-table-1').innerHTML = current.length ? current.map(p => `
         <tr><td class="p-3 text-center"><input type="checkbox" aria-label="ACC Musyrif" ${p.accMusyrif ? 'checked' : ''} ${canAcc ? '' : 'disabled title="Hanya Musyrif/Admin yang bisa memberi ACC"'} onchange="toggleAccProker('${p.id}')" class="w-4 h-4 accent-emerald-600 ${canAcc ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}"></td>
         <td class="p-3 font-semibold">${esc(p.title)}</td><td class="p-3 text-xs text-gray-500 dark:text-gray-400">${esc(p.desc)}</td>
-        <td class="p-3 text-xs text-center"><span class="${p.accMusyrif ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${p.accMusyrif ? 'Di-ACC' : 'Menunggu ACC'}</span></td>
+        <td class="p-3 text-xs text-center">${prokerStatusHtml(p)}</td>
         <td class="p-3 text-right"><button data-feature="proker_delete" onclick="deleteProker('${p.id}')" aria-label="Hapus proker" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')
         : emptyRow(5, 'Belum ada program kerja untuk bagian ini.');
 
@@ -1749,14 +2015,16 @@ async function saveProker(e) {
         bagian: $('proker-bagian-filter').value,
         title: $('proker-input-title').value.trim(),
         desc: $('proker-input-desc').value.trim(),
-        reported: true,
-        accMusyrif: false,
+        // Proker minggu ini oleh Member wajib dilapor ke Musyrif; proker mendatang tidak perlu lapor/ACC
+        reported: type === 'minggu_depan' ? true : userRole() !== 'member',
+        accMusyrif: type === 'minggu_depan',
         isHasilDone: false,
         hasilUsaha: '',
         evaluasi: '',
         solusi: '',
         dateReported: today(),
         isFutureOnly: type === 'minggu_depan',
+        addedBy: currentUser ? currentUser.id : '',
         createdAt: Date.now()
     };
 
@@ -1793,24 +2061,25 @@ function editField(id, field) {
 async function importLastWeek() {
     if (!guardFeature('proker_import')) return;
     const bag = $('proker-bagian-filter').value;
-    const last = [...activeReports()].pop();
+    const last = guideCycle() || [...activeReports()].pop();
     if (!last) return toast('Belum ada arsip rapat untuk dijadikan acuan.');
-    const exist = new Set(store.proker.filter(p => p.bagian === bag && !p.isFutureOnly).map(p => p.title.toLowerCase()));
-    const src = (last.prokerData || []).filter(p => p.bagian === bag && (p.isFutureOnly || !p.isHasilDone || !p.accMusyrif) && !exist.has(p.title.toLowerCase()));
-    if (!src.length) return toast('Tidak ada proker belum selesai dari arsip terakhir untuk bagian ini.');
-    if (!confirm(`Salin ${src.length} proker belum selesai dari arsip “${last.title}” ke minggu ini?`)) return;
-    
+    const src = guideLeftovers(bag, last);
+    if (!src.length) return toast('Tidak ada proker lama yang perlu dibawa untuk bagian ini.');
+    if (!confirm(`Salin ${src.length} proker yang belum selesai dari arsip “${last.title}” ke minggu ini?`)) return;
+
     for (const p of src) {
-        await save('proker', { 
-            ...p, 
-            id: uid('p'), 
-            reported: true,         
-            accMusyrif: true,       
-            isHasilDone: false,     
-            hasilUsaha: p.hasilUsaha || '', 
-            dateReported: today(), 
-            isFutureOnly: false, 
-            createdAt: Date.now() 
+        await save('proker', {
+            ...p,
+            id: uid('p'),
+            reported: true,
+            accMusyrif: true,
+            isHasilDone: false,
+            hasilUsaha: p.hasilUsaha || '',
+            dateReported: today(),
+            isFutureOnly: false,
+            importedFrom: last.id,
+            importedBy: currentUser ? currentUser.id : '',
+            createdAt: Date.now()
         });
     }
     toast('Proker minggu lalu berhasil disalin dan siap untuk diceklis usahanya.');
@@ -2222,24 +2491,24 @@ async function submitArsip(e) {
     const saved = await save('reports', r);
     if (!saved) return;
 
-    // "Program kerja yang akan datang" (poin 5) otomatis menjadi proker minggu ini
-    const carry = currentProker.filter(p => p.isFutureOnly || !p.isHasilDone || !p.accMusyrif);
+    // Proker yang akan datang sudah dilaporkan saat rapat, jadi otomatis pindah ke proker minggu ini TANPA perlu ACC.
+    // Proker lama yang belum selesai ditarik Member lewat "Isi proker minggu lalu" (dipandu oleh panduan).
+    const carry = currentProker.filter(p => p.isFutureOnly);
     for (const p of currentProker) await remove('proker', p.id);
     let i = 0;
     for (const p of carry) {
         await save('proker', {
             id: uid('p'), bagian: p.bagian, title: p.title,
             desc: p.solusi || p.desc || '',
-            reported: true,
-            accMusyrif: p.isFutureOnly ? false : !!p.accMusyrif,
+            reported: true, accMusyrif: true,
             isHasilDone: false, hasilUsaha: '', evaluasi: '', solusi: '',
-            dateReported: today(), isFutureOnly: false, carriedFrom: r.id,
+            dateReported: today(), isFutureOnly: false, carriedFrom: r.id, addedBy: p.addedBy || '',
             createdAt: Date.now() + (i++)
         });
     }
     toast(carry.length
-        ? `Hasil rapat diarsipkan. ${carry.length} proker yang akan datang otomatis mengisi Program Kerja minggu ini.`
-        : 'Hasil rapat diarsipkan. Tidak ada proker mendatang untuk dipindahkan.');
+        ? `Hasil rapat diarsipkan. ${carry.length} proker yang akan datang otomatis pindah ke Program Kerja minggu ini.`
+        : 'Hasil rapat diarsipkan. Halaman Program Kerja siap diisi (panduan akan membantu Member).');
 }
 
 /* ---------- Pulihkan (khusus Admin, data dari database) ---------- */
